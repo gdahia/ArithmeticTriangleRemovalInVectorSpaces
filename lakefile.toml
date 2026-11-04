@@ -1,0 +1,32 @@
+name = "ArithmeticTriangleRemovalInVectorSpaces"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["ArithmeticTriangleRemovalInVectorSpaces", "Solution"]
+lintDriver = "batteries/runLinter"
+lintDriverArgs = ["ArithmeticTriangleRemovalInVectorSpaces"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0"
+
+# The proof development; `Solution.lean` imports it.
+[[lean_lib]]
+name = "ArithmeticTriangleRemovalInVectorSpaces"
+
+# The statement-only surface a reader audits. Not a default target, so that `lake build` does not
+# build its `sorry`s; the comparator job builds it by name.
+[[lean_lib]]
+name = "Challenge"
+roots = ["ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"]
+
+# Proves the declarations stated in `Challenge.lean`; Comparator checks the two agree.
+[[lean_lib]]
+name = "Solution"
+roots = ["ArithmeticTriangleRemovalInVectorSpacesPalomar.Solution"]
