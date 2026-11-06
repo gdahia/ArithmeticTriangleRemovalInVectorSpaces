@@ -80,14 +80,4 @@ theorem exists_pos_forall_le_rpow_C_sub' {η : ℝ} (hη : 0 < η) :
       δ ≤ ε ^ (C p - η) := by
   sorry
 
-/-- **The exponent `c 2`.** `c 2 = 5 / 3 - logb 2 3`. -/
-theorem c_two' : c 2 = 5 / 3 - Real.logb 2 3 := by
-  sorry
-
-/-- **The exponent `c 3`.** With `a = (√33 - 1) / 8` and
-`b = a ^ (-2 / 3) + a ^ (1 / 3) + a ^ (4 / 3)`, `c 3 = 1 - log b / log 3`. -/
-theorem c_three' {a : ℝ} (ha : a = (√33 - 1) / 8) :
-    c 3 = 1 - Real.log (a ^ (-2 / 3 : ℝ) + a ^ (1 / 3 : ℝ) + a ^ (4 / 3 : ℝ)) / Real.log 3 := by
-  sorry
-
 end ArithmeticTriangleRemovalInVectorSpaces

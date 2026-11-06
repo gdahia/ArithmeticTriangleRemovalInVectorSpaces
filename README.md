@@ -1,13 +1,11 @@
 # A tight bound for Green's arithmetic triangle removal lemma in vector spaces
 
-Lean 4 formalization of the main results of Jacob Fox and László Miklós Lovász,
+Lean 4 formalisation of the main results of Jacob Fox and László Miklós Lovász,
 [*A tight bound for Green's arithmetic triangle removal lemma in vector
 spaces*](https://arxiv.org/abs/1606.01230): the arithmetic triangle removal lemma in
 $\mathbb{F}_p^n$ with a polynomial bound (Theorem 1), the Kleinberg–Sawin–Speyer bound on
 multicolored sum-free families (Theorem 2), the count of triangles spanned by vertex-disjoint
-triangles (Theorem 3), the tightness of the exponent in Theorem 1 (Theorem 4), and the values of
-the exponents $c_2$ and $c_3$. The Lean names below are in the namespace
-`ArithmeticTriangleRemovalInVectorSpaces`.
+triangles (Theorem 3), the tightness of the exponent in Theorem 1 (Theorem 4).
 
 ## Results
 
@@ -37,7 +35,7 @@ vertex-disjoint triangles, then it contains at least
 
 $$\left(\frac{m}{N}\right)^{C_p} N^2$$
 
-triangles, where triangles and $C_p$ are as in Theorem 1.
+triangles, where $C_p$ is as in Theorem 1.
 
 **Theorem 4** (`exists_pos_forall_le_rpow_C_sub`, the second part of Theorem 1 of the paper). Let
 $p$ be a prime and $\eta > 0$. There is $\varepsilon_0 > 0$ such that the following holds for
@@ -50,22 +48,6 @@ $X' \times Y' \times Z'$ contains no triangle, then
 $$\delta \le \varepsilon^{C_p - \eta},$$
 
 where triangles and $C_p$ are as in Theorem 1.
-
-**Theorem 5** (`c_two`). With $c_p$ as in Theorem 1,
-
-$$c_2 = \frac{5}{3} - \log_2 3.$$
-
-**Theorem 6** (`c_three`). With $c_p$ as in Theorem 1,
-
-$$c_3 = 1 - \frac{\log b}{\log 3},$$
-
-where $b = a^{-2/3} + a^{1/3} + a^{4/3}$ and $a = (\sqrt{33} - 1) / 8$.
-
-[`ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean`](ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean)
-states Theorems 1 to 6 with `sorry`. It defines $c_p$ and $C_p$ and writes the other notions in
-terms of Mathlib definitions.
-[`ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean`](ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean)
-restates them and proves each one by the library theorem of the same name without the prime.
 
 ## Files
 
