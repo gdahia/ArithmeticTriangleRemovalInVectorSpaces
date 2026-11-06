@@ -6,14 +6,14 @@ Authors: Gabriel Dahia
 module
 
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
-public import Mathlib.Combinatorics.Additive.AP.Three.Defs
-public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Basic.Real.Basic
+public import Mathlib.Combinatorics.Additive.AP.Three.Defs
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Combinatorics.Enumerative.DoubleCounting
+import Mathlib.Data.Matrix.Mul
 import Mathlib.Data.Rat.Cast.Order
-import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith.Frontend
+import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.NormNum.Abs
 import Mathlib.Tactic.NormNum.DivMod
 import Mathlib.Tactic.NormNum.OfScientific
@@ -73,20 +73,20 @@ instance : DecidableRel (Shares (n := n)) :=
 
 /-- The triples `(a, b, c)` of `V` whose hashes `β + h ⬝ᵥ a` and `α + h ⬝ᵥ c` under `(h, α, β)`
 agree and lie in `S`. -/
-def hashedTriples (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)))
+private def hashedTriples (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)))
     (S : Finset (ZMod P)) :
     (Fin n → ZMod P) × ZMod P × ZMod P → Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))
   | (h, α, β) => V.filter fun (a, _, c) ↦ β + h ⬝ᵥ (fun r ↦ (a r : ZMod P)) ∈ S ∧
       α + h ⬝ᵥ (fun r ↦ (c r : ZMod P)) = β + h ⬝ᵥ (fun r ↦ (a r : ZMod P))
 
 /-- The hashed triples that share no vector with another hashed triple. -/
-def isolatedTriples (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)))
+private def isolatedTriples (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)))
     (S : Finset (ZMod P)) (θ : (Fin n → ZMod P) × ZMod P × ZMod P) :
     Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) :=
   {v ∈ hashedTriples V S θ | ∀ v' ∈ hashedTriples V S θ, Shares v v' → v' = v}
 
 /-- The pairs of distinct triples of `V` sharing a vector. -/
-def sharingPairs (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))) :
+private def sharingPairs (V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))) :
     Finset (((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) ×
       ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))) :=
   (V ×ˢ V).filter fun (v, v') ↦ v ≠ v' ∧ Shares v v'
@@ -108,33 +108,34 @@ lemma shares_mk : Shares (a, b, c) (a', b', c') ↔ a = a' ∨ b = b' ∨ c = c'
   Iff.rfl
 
 @[simp]
-lemma mk_mem_hashedTriples {h : Fin n → ZMod P} {α β : ZMod P} :
+private lemma mk_mem_hashedTriples {h : Fin n → ZMod P} {α β : ZMod P} :
     (a, b, c) ∈ hashedTriples V S (h, α, β) ↔ (a, b, c) ∈ V ∧
       β + h ⬝ᵥ (fun r ↦ (a r : ZMod P)) ∈ S ∧
       α + h ⬝ᵥ (fun r ↦ (c r : ZMod P)) = β + h ⬝ᵥ (fun r ↦ (a r : ZMod P)) :=
   mem_filter
 
-lemma hashedTriples_subset : hashedTriples V S θ ⊆ V := by
+private lemma hashedTriples_subset : hashedTriples V S θ ⊆ V := by
   obtain ⟨h, α, β⟩ := θ
   exact filter_subset _ _
 
-lemma mem_isolatedTriples :
+private lemma mem_isolatedTriples :
     v ∈ isolatedTriples V S θ ↔
       v ∈ hashedTriples V S θ ∧ ∀ v' ∈ hashedTriples V S θ, Shares v v' → v' = v :=
   mem_filter
 
 @[simp]
-lemma mk_mem_sharingPairs : (v, v') ∈ sharingPairs V ↔ (v ∈ V ∧ v' ∈ V) ∧ v ≠ v' ∧ Shares v v' := by
+private lemma mk_mem_sharingPairs :
+    (v, v') ∈ sharingPairs V ↔ (v ∈ V ∧ v' ∈ V) ∧ v ≠ v' ∧ Shares v v' := by
   simp [sharingPairs]
 
-lemma dotProduct_add_eq_of_add_eq (h : ∀ r, a r + c r = a' r + c' r) (u : Fin n → ZMod P) :
+private lemma dotProduct_add_eq_of_add_eq (h : ∀ r, a r + c r = a' r + c' r) (u : Fin n → ZMod P) :
     u ⬝ᵥ (fun r ↦ (a r : ZMod P)) + u ⬝ᵥ (fun r ↦ (c r : ZMod P)) =
       u ⬝ᵥ (fun r ↦ (a' r : ZMod P)) + u ⬝ᵥ (fun r ↦ (c' r : ZMod P)) := by
   rw [← dotProduct_add, ← dotProduct_add]
   congr 1 with r
   simpa using congr_arg (Nat.cast : ℕ → ZMod P) (h r)
 
-lemma eq_of_natCast_eq_natCast (ha : ∀ r, a r < P) (ha' : ∀ r, a' r < P)
+private lemma eq_of_natCast_eq_natCast (ha : ∀ r, a r < P) (ha' : ∀ r, a' r < P)
     (h : (fun r ↦ (a r : ZMod P)) = fun r ↦ (a' r : ZMod P)) : a = a' := by
   ext r
   have := (ZMod.natCast_eq_natCast_iff' _ _ _).1 (congr_fun h r)
@@ -142,7 +143,8 @@ lemma eq_of_natCast_eq_natCast (ha : ∀ r, a r < P) (ha' : ∀ r, a' r < P)
 
 /-- If `∑ r, (a r + b r + c r) = n * (p - 1)`, then `a + b + c + 1` vanishes in `Fin n → ZMod p` if
 and only if `a r + b r + c r = p - 1` for every `r`. -/
-lemma add_add_add_one_eq_zero_iff (hp : 0 < p) (hsum : ∑ r, (a r + b r + c r) = n * (p - 1)) :
+private lemma add_add_add_one_eq_zero_iff (hp : 0 < p)
+    (hsum : ∑ r, (a r + b r + c r) = n * (p - 1)) :
     (fun r ↦ (a r : ZMod p)) + (fun r ↦ (b r : ZMod p)) + (fun r ↦ (c r : ZMod p) + 1) = 0 ↔
       ∀ r, a r + b r + c r = p - 1 := by
   have hcast (r : Fin n) :
@@ -161,7 +163,7 @@ lemma add_add_add_one_eq_zero_iff (hp : 0 < p) (hsum : ∑ r, (a r + b r + c r) 
 /-- If the hashed triples `(a₁, b₁, c₁)`, `(a₂, b₂, c₂)` and `(a₃, b₃, c₃)` satisfy
 `a₁ + c₃ = a₂ + c₂`, then the hashes of `a₁` and `c₃` agree, since `S` has no three-term arithmetic
 progressions. -/
-lemma mk_mem_hashedTriples_of_add_eq_add (hS : ThreeAPFree (S : Set (ZMod P)))
+private lemma mk_mem_hashedTriples_of_add_eq_add (hS : ThreeAPFree (S : Set (ZMod P)))
     {a₁ b₁ c₁ a₂ b₂ c₂ a₃ b₃ c₃ : Fin n → ℕ} (h₁ : (a₁, b₁, c₁) ∈ hashedTriples V S θ)
     (h₂ : (a₂, b₂, c₂) ∈ hashedTriples V S θ) (h₃ : (a₃, b₃, c₃) ∈ hashedTriples V S θ)
     (hac : ∀ r, a₁ r + c₃ r = a₂ r + c₂ r) (hV : (a₁, b, c₃) ∈ V) :
@@ -178,7 +180,7 @@ lemma mk_mem_hashedTriples_of_add_eq_add (hS : ThreeAPFree (S : Set (ZMod P)))
 
 /-- **Lemma 4.3 of Kleinberg, Sawin and Speyer.** The isolated triples form a multicolored sum-free
 family in `Fin n → ZMod p`, after shifting the third vectors by one. -/
-lemma isMulticoloredSumFree_isolatedTriples (hp : 0 < p)
+private lemma isMulticoloredSumFree_isolatedTriples (hp : 0 < p)
     (hsum : ∀ a ∈ A, ∀ b ∈ B, ∀ c ∈ C, ∑ r, (a r + b r + c r) = n * (p - 1))
     (hS : ThreeAPFree (S : Set (ZMod P))) (θ : (Fin n → ZMod P) × ZMod P × ZMod P) :
     IsMulticoloredSumFree (ι := isolatedTriples (vecSumTriples p A B C) S θ)
@@ -203,7 +205,7 @@ lemma isMulticoloredSumFree_isolatedTriples (hp : 0 < p)
 
 /-- There are `#H * #S` hashes `(h, α, β)` with `h ∈ H` under which `a` and `c` have the same hash
 in `S`. -/
-lemma card_filter_hash [NeZero P] (a c : Fin n → ZMod P) (H : Finset (Fin n → ZMod P)) :
+private lemma card_filter_hash [NeZero P] (a c : Fin n → ZMod P) (H : Finset (Fin n → ZMod P)) :
     #(univ.filter fun ((h, α, β) : (Fin n → ZMod P) × ZMod P × ZMod P) ↦
       h ∈ H ∧ β + h ⬝ᵥ a ∈ S ∧ α + h ⬝ᵥ c = β + h ⬝ᵥ a) = #H * #S := by
   rw [← card_product]
@@ -221,7 +223,7 @@ lemma card_filter_hash [NeZero P] (a c : Fin n → ZMod P) (H : Finset (Fin n �
     simp
 
 /-- A nonzero vector `u` is orthogonal to `P ^ n / P` vectors. -/
-lemma card_filter_dotProduct_eq_zero_mul [Fact P.Prime] {u : Fin n → ZMod P} (hu : u ≠ 0) :
+private lemma card_filter_dotProduct_eq_zero_mul [Fact P.Prime] {u : Fin n → ZMod P} (hu : u ≠ 0) :
     #{h : Fin n → ZMod P | h ⬝ᵥ u = 0} * P = P ^ n := by
   obtain ⟨r, hr⟩ := Function.ne_iff.1 hu
   let f : (Fin n → ZMod P) →+ ZMod P := AddMonoidHom.mk' (· ⬝ᵥ u) fun a b ↦ add_dotProduct a b u
@@ -234,7 +236,7 @@ lemma card_filter_dotProduct_eq_zero_mul [Fact P.Prime] {u : Fin n → ZMod P} (
   simpa [Fintype.card_subtype, f] using this
 
 /-- A triple of `V` is hashed by `P ^ n * #S` hashes. -/
-lemma card_filter_mem_hashedTriples [NeZero P] (hv : v ∈ V) :
+private lemma card_filter_mem_hashedTriples [NeZero P] (hv : v ∈ V) :
     #{θ | v ∈ hashedTriples V S θ} = P ^ n * #S := by
   obtain ⟨a, b, c⟩ := v
   convert card_filter_hash (S := S) (fun r ↦ (a r : ZMod P)) (fun r ↦ (c r : ZMod P)) univ
@@ -245,8 +247,8 @@ lemma card_filter_mem_hashedTriples [NeZero P] (hv : v ∈ V) :
 
 /-- A triple of `V` is hashed by `P ^ n * #S / P` hashes `(h, α, β)` with `h ⬝ᵥ u = 0`, for a
 nonzero `u`. -/
-lemma card_filter_mem_hashedTriples_dotProduct_eq_zero_mul [Fact P.Prime] {u : Fin n → ZMod P}
-    (hu : u ≠ 0) (hv : v ∈ V) :
+private lemma card_filter_mem_hashedTriples_dotProduct_eq_zero_mul [Fact P.Prime]
+    {u : Fin n → ZMod P} (hu : u ≠ 0) (hv : v ∈ V) :
     #(univ.filter fun ((h, α, β) : (Fin n → ZMod P) × ZMod P × ZMod P) ↦
       v ∈ hashedTriples V S (h, α, β) ∧ h ⬝ᵥ u = 0) * P = P ^ n * #S := by
   obtain ⟨a, b, c⟩ := v
@@ -259,7 +261,7 @@ lemma card_filter_mem_hashedTriples_dotProduct_eq_zero_mul [Fact P.Prime] {u : F
 
 /-- Two distinct triples of `vecSumTriples p A B C` with entries less than `P` differ, after
 casting to `ZMod P`, in their first or in their third vector. -/
-lemma natCast_ne_or_natCast_ne (hpP : p < P) (hv : (a, b, c) ∈ vecSumTriples p A B C)
+private lemma natCast_ne_or_natCast_ne (hpP : p < P) (hv : (a, b, c) ∈ vecSumTriples p A B C)
     (hv' : (a', b', c') ∈ vecSumTriples p A B C) (hne : (a, b, c) ≠ (a', b', c')) :
     (fun r ↦ (a r : ZMod P)) ≠ (fun r ↦ (a' r : ZMod P)) ∨
       (fun r ↦ (c r : ZMod P)) ≠ (fun r ↦ (c' r : ZMod P)) := by
@@ -275,7 +277,7 @@ lemma natCast_ne_or_natCast_ne (hpP : p < P) (hv : (a, b, c) ∈ vecSumTriples p
 /-- If a hash `(h, α, β)` hashes two triples of `vecSumTriples p A B C` that share a vector, and
 `2 ≠ 0` in `ZMod P`, then the hashes `h ⬝ᵥ a` of their first vectors agree, and so do those of their
 third vectors. -/
-lemma dotProduct_eq_and_dotProduct_eq_of_shares [Fact P.Prime] (h2 : (2 : ZMod P) ≠ 0)
+private lemma dotProduct_eq_and_dotProduct_eq_of_shares [Fact P.Prime] (h2 : (2 : ZMod P) ≠ 0)
     {h : Fin n → ZMod P} {α β : ZMod P}
     (hv : (a, b, c) ∈ hashedTriples (vecSumTriples p A B C) S (h, α, β))
     (hv' : (a', b', c') ∈ hashedTriples (vecSumTriples p A B C) S (h, α, β))
@@ -296,7 +298,7 @@ lemma dotProduct_eq_and_dotProduct_eq_of_shares [Fact P.Prime] (h2 : (2 : ZMod P
 
 /-- For two distinct triples of `vecSumTriples p A B C` sharing a vector, there is a nonzero `u`
 with `h ⬝ᵥ u = 0` for every hash `(h, α, β)` that hashes both. -/
-lemma exists_ne_zero_dotProduct_eq_zero [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
+private lemma exists_ne_zero_dotProduct_eq_zero [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
     (hv : v ∈ vecSumTriples p A B C) (hv' : v' ∈ vecSumTriples p A B C) (hne : v ≠ v')
     (hsh : Shares v v') :
     ∃ u : Fin n → ZMod P, u ≠ 0 ∧ ∀ (h : Fin n → ZMod P) (α β : ZMod P),
@@ -319,7 +321,7 @@ lemma exists_ne_zero_dotProduct_eq_zero [Fact P.Prime] (hp : 2 ≤ p) (hpP : p <
 
 /-- Two distinct triples of `vecSumTriples p A B C` sharing a vector are both hashed by at most
 `P ^ n * #S / P` hashes. -/
-lemma card_filter_mem_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
+private lemma card_filter_mem_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
     (hv : v ∈ vecSumTriples p A B C) (hv' : v' ∈ vecSumTriples p A B C) (hne : v ≠ v')
     (hsh : Shares v v') :
     #{θ | v ∈ hashedTriples (vecSumTriples p A B C) S θ ∧
@@ -333,7 +335,7 @@ lemma card_filter_mem_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (hpP : 
   rintro ⟨h₁, h₂⟩
   exact ⟨h₁, hθ h α β h₁ h₂⟩
 
-lemma sum_card_hashedTriples [NeZero P] :
+private lemma sum_card_hashedTriples [NeZero P] :
     ∑ θ, #(hashedTriples V S θ) = #V * (P ^ n * #S) := by
   have h := sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow (s := univ) (t := V)
     (fun θ v ↦ v ∈ hashedTriples V S θ)
@@ -343,7 +345,7 @@ lemma sum_card_hashedTriples [NeZero P] :
   intro v hv
   exact card_filter_mem_hashedTriples hv
 
-lemma card_sharingPairs_le (hF : ∀ v ∈ V, #{v' ∈ V | Shares v v'} ≤ F) :
+private lemma card_sharingPairs_le (hF : ∀ v ∈ V, #{v' ∈ V | Shares v v'} ≤ F) :
     #(sharingPairs V) ≤ #V * F := by
   rw [mul_comm]
   refine card_le_mul_card_image_of_maps_to (f := Prod.fst) ?_ F ?_
@@ -359,15 +361,15 @@ lemma card_sharingPairs_le (hF : ∀ v ∈ V, #{v' ∈ V | Shares v v'} ≤ F) :
     simp only [coe_filter, Set.mem_ofPred_eq] at h₁ h₂
     grind
 
-lemma sharingPairs_eq_filter {W : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))} (hW : W ⊆ V) :
-    sharingPairs W = (sharingPairs V).filter fun (v, v') ↦ v ∈ W ∧ v' ∈ W := by
+private lemma sharingPairs_eq_filter {W : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))}
+    (hW : W ⊆ V) : sharingPairs W = (sharingPairs V).filter fun (v, v') ↦ v ∈ W ∧ v' ∈ W := by
   ext ⟨v, v'⟩
   simp only [mk_mem_sharingPairs, mem_filter]
   grind
 
 /-- Summed over all hashes, the pairs of distinct hashed triples sharing a vector number at most
 `#V * F * P ^ n * #S / P`. -/
-lemma sum_card_sharingPairs_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
+private lemma sum_card_sharingPairs_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
     (hF : ∀ v ∈ vecSumTriples p A B C, #{v' ∈ vecSumTriples p A B C | Shares v v'} ≤ F) :
     (∑ θ, #(sharingPairs (hashedTriples (vecSumTriples p A B C) S θ))) * P ≤
       #(vecSumTriples p A B C) * F * (P ^ n * #S) := by
@@ -381,7 +383,7 @@ lemma sum_card_sharingPairs_hashedTriples_mul_le [Fact P.Prime] (hp : 2 ≤ p) (
 
 /-- A hashed triple is isolated unless it is the first member of a pair of hashed triples sharing
 a vector. -/
-lemma card_hashedTriples_le (θ : (Fin n → ZMod P) × ZMod P × ZMod P) :
+private lemma card_hashedTriples_le (θ : (Fin n → ZMod P) × ZMod P × ZMod P) :
     #(hashedTriples V S θ) ≤
       #(isolatedTriples V S θ) + #(sharingPairs (hashedTriples V S θ)) := by
   grw [← card_image_le (s := sharingPairs (hashedTriples V S θ)) (f := Prod.fst), ← card_union_le]
@@ -395,7 +397,7 @@ lemma card_hashedTriples_le (θ : (Fin n → ZMod P) × ZMod P × ZMod P) :
 
 /-- Summed over all hashes, the isolated triples number at least
 `#V * P ^ n * #S * (P - F) / P`. -/
-lemma mul_le_mul_sum_card_isolatedTriples_add [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
+private lemma mul_le_mul_sum_card_isolatedTriples_add [Fact P.Prime] (hp : 2 ≤ p) (hpP : p < P)
     (hF : ∀ v ∈ vecSumTriples p A B C, #{v' ∈ vecSumTriples p A B C | Shares v v'} ≤ F) :
     #(vecSumTriples p A B C) * (P ^ n * #S) * P ≤
       P * ∑ θ, #(isolatedTriples (vecSumTriples p A B C) S θ) +

@@ -30,7 +30,7 @@ namespace ArithmeticTriangleRemovalInVectorSpaces
 
 /-- If the function defining `c p` attains its infimum over `Set.Ioo 0 1` at `a`, then `c p` is
 `1 - logb p` of its value at `a`. -/
-lemma c_eq_one_sub_logb {p : ℕ} (hp : 2 ≤ p) {a : ℝ} (ha₀ : 0 < a) (ha₁ : a < 1)
+private lemma c_eq_one_sub_logb {p : ℕ} (hp : 2 ≤ p) {a : ℝ} (ha₀ : 0 < a) (ha₁ : a < 1)
     (h : ∀ x : ℝ, 0 < x → x < 1 → a ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, a ^ j ≤
       x ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, x ^ j) :
     c p = 1 - Real.logb p (a ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, a ^ j) := by
@@ -40,7 +40,7 @@ lemma c_eq_one_sub_logb {p : ℕ} (hp : 2 ≤ p) {a : ℝ} (ha₀ : 0 < a) (ha�
 
 /-- The weighted arithmetic-geometric mean inequality with weights `2 / 3` and `1 / 3`:
 `(1 / 2) ^ (-1 / 3) * (3 / 2) ≤ x ^ (-1 / 3) * (1 + x)`. -/
-lemma rpow_mul_one_add_le {x : ℝ} (hx : 0 < x) :
+private lemma rpow_mul_one_add_le {x : ℝ} (hx : 0 < x) :
     (1 / 2 : ℝ) ^ (-(1 / 3) : ℝ) * (3 / 2) ≤ x ^ (-(1 / 3) : ℝ) * (1 + x) := by
   have h := Real.geom_mean_le_arith_mean2_weighted (w₁ := 2 / 3) (w₂ := 1 / 3)
     (p₁ := 3 / 2) (p₂ := 3 / 2 * (x / (1 / 2))) (by norm_num) (by norm_num) (by norm_num)
@@ -56,7 +56,7 @@ lemma rpow_mul_one_add_le {x : ℝ} (hx : 0 < x) :
 /-- The weighted arithmetic-geometric mean inequality for `1`, `x / a` and `(x / a) ^ 2` with
 weights proportional to `1`, `a` and `a ^ 2`, where `4 * a ^ 2 + a - 2 = 0`:
 `(x / a) ^ (2 / 3) ≤ (1 + x + x ^ 2) / (1 + a + a ^ 2)`. -/
-lemma div_rpow_two_div_three_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
+private lemma div_rpow_two_div_three_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
     (hw : 4 * a ^ 2 + a - 2 = 0) :
     (x / a) ^ (2 / 3 : ℝ) ≤ (1 + x + x ^ 2) / (1 + a + a ^ 2) := by
   have h := Real.geom_mean_le_arith_mean3_weighted (w₁ := 1 / (1 + a + a ^ 2))
@@ -74,7 +74,7 @@ lemma div_rpow_two_div_three_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
 /-- The weighted arithmetic-geometric mean inequality with weights proportional to `1`, `a` and
 `a ^ 2`, where `4 * a ^ 2 + a - 2 = 0`:
 `a ^ (-2 / 3) * (1 + a + a ^ 2) ≤ x ^ (-2 / 3) * (1 + x + x ^ 2)`. -/
-lemma rpow_mul_one_add_add_sq_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
+private lemma rpow_mul_one_add_add_sq_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
     (hw : 4 * a ^ 2 + a - 2 = 0) :
     a ^ (-(2 / 3) : ℝ) * (1 + a + a ^ 2) ≤ x ^ (-(2 / 3) : ℝ) * (1 + x + x ^ 2) := by
   have h := div_rpow_two_div_three_le ha hx hw

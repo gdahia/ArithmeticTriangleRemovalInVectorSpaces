@@ -45,7 +45,7 @@ variable {n N : ℕ} {a b b' : Fin n → ℕ}
 @[expose] def typeClass (a : Fin n → ℕ) : Finset (Fin n → ℕ) :=
   univ.image fun σ : Equiv.Perm (Fin n) ↦ a ∘ σ
 
-lemma mem_typeClass : b ∈ typeClass a ↔ ∃ σ : Equiv.Perm (Fin n), a ∘ σ = b := by
+private lemma mem_typeClass : b ∈ typeClass a ↔ ∃ σ : Equiv.Perm (Fin n), a ∘ σ = b := by
   simp [typeClass]
 
 lemma self_mem_typeClass (a : Fin n → ℕ) : a ∈ typeClass a :=
@@ -86,7 +86,7 @@ lemma sum_card_filter_eq (ha : ∀ r, a r ≤ N) : ∑ k ∈ range (N + 1), #{r 
     Fintype.card_fin]
 
 /-- The permutations `σ` with `a ∘ σ = a ∘ τ` are as many as those with `a ∘ σ = a`. -/
-lemma card_filter_comp_eq_comp (a : Fin n → ℕ) (τ : Equiv.Perm (Fin n)) :
+private lemma card_filter_comp_eq_comp (a : Fin n → ℕ) (τ : Equiv.Perm (Fin n)) :
     #{σ : Equiv.Perm (Fin n) | a ∘ σ = a ∘ τ} =
       Fintype.card {σ : Equiv.Perm (Fin n) // a ∘ σ = a} := by
   rw [← Fintype.card_subtype]
@@ -96,7 +96,7 @@ lemma card_filter_comp_eq_comp (a : Fin n → ℕ) (τ : Equiv.Perm (Fin n)) :
 
 /-- **Orbit-stabilizer for type classes.** The type class of `a` times `∏ k, (D k).factorial` is
 `n.factorial`. -/
-lemma card_typeClass_mul_prod_factorial (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) :
+private lemma card_typeClass_mul_prod_factorial (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) :
     #(typeClass a) * ∏ k ∈ range (N + 1), (#{r | a r = k}).factorial = n.factorial := by
   have hprod : ∏ k ∈ range (N + 1), (#{r | a r = k}).factorial =
       ∏ k ∈ univ.image a, (Fintype.card {r // a r = k}).factorial := by
@@ -114,7 +114,7 @@ lemma card_typeClass_mul_prod_factorial (a : Fin n → ℕ) (ha : ∀ r, a r ≤
   rintro _ ⟨τ, rfl⟩
   exact card_filter_comp_eq_comp a τ
 
-lemma log_card_typeClass (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) :
+private lemma log_card_typeClass (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) :
     log #(typeClass a) =
       log n.factorial - ∑ k ∈ range (N + 1), log (#{r | a r = k}).factorial := by
   rw [eq_sub_iff_add_eq, ← log_prod fun k _ ↦ by positivity,
@@ -125,7 +125,7 @@ lemma log_card_typeClass (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) :
 
 /-- For `D ≤ n`, `D * log (n / D) - (1 + log (n + 1)) ≤ D * log n - D - log D.factorial`, from the
 bound `log D.factorial ≤ D * log D - D + log D + 1`. -/
-lemma mul_log_div_sub_le {D : ℕ} (hD : D ≤ n) :
+private lemma mul_log_div_sub_le {D : ℕ} (hD : D ≤ n) :
     D * log (n / D) - (1 + log (n + 1)) ≤ D * log n - D - log D.factorial := by
   rcases D.eq_zero_or_pos with rfl | hD₀
   · simpa using (by linarith [log_nonneg (by simp : (1 : ℝ) ≤ n + 1)] : -log (n + 1 : ℝ) ≤ 1)
@@ -136,7 +136,7 @@ lemma mul_log_div_sub_le {D : ℕ} (hD : D ≤ n) :
 
 /-- The logarithm of a multinomial coefficient is at least the entropy term
 `∑ k, D k * log (n / D k)` minus `#s * (1 + log (n + 1))`. -/
-lemma sum_mul_log_div_sub_le_log {s : Finset ℕ} (D : ℕ → ℕ) (hD : ∑ k ∈ s, D k = n) :
+private lemma sum_mul_log_div_sub_le_log {s : Finset ℕ} (D : ℕ → ℕ) (hD : ∑ k ∈ s, D k = n) :
     ∑ k ∈ s, D k * log (n / D k) - #s * (1 + log (n + 1)) ≤
       log n.factorial - ∑ k ∈ s, log (D k).factorial := by
   have h : ∑ k ∈ s, (D k * log (n / D k) - (1 + log (n + 1))) ≤
@@ -151,7 +151,7 @@ lemma sum_mul_log_div_sub_le_log {s : Finset ℕ} (D : ℕ → ℕ) (hD : ∑ k 
 /-- For `0 ≤ D ≤ x` and `ψ > 0`,
 `D * log ψ⁻¹ - (D - x * ψ) ^ 2 / (x * ψ) - (D - x * ψ) ≤ D * log (x / D)`, from the bound
 `1 - y⁻¹ ≤ log y`. -/
-lemma mul_log_inv_sub_sq_div_sub_le {D x ψ : ℝ} (hD : 0 ≤ D) (hDx : D ≤ x) (hψ : 0 < ψ) :
+private lemma mul_log_inv_sub_sq_div_sub_le {D x ψ : ℝ} (hD : 0 ≤ D) (hDx : D ≤ x) (hψ : 0 < ψ) :
     D * log ψ⁻¹ - (D - x * ψ) ^ 2 / (x * ψ) - (D - x * ψ) ≤ D * log (x / D) := by
   rcases hD.eq_or_lt with rfl | hD
   · simp [sq]
@@ -168,7 +168,7 @@ lemma mul_log_inv_sub_sq_div_sub_le {D x ψ : ℝ} (hD : 0 ≤ D) (hDx : D ≤ x
 /-- **Entropy and cross entropy.** For a positive probability vector `ψ` and counts `D` summing to
 `n`, `∑ k, D k * log (n / D k)` is at least
 `∑ k, D k * log (ψ k)⁻¹ - ∑ k, (D k - n * ψ k) ^ 2 / (n * ψ k)`. -/
-lemma sum_mul_log_inv_sub_le {s : Finset ℕ} (D : ℕ → ℕ) (hD : ∑ k ∈ s, D k = n) {ψ : ℕ → ℝ}
+private lemma sum_mul_log_inv_sub_le {s : Finset ℕ} (D : ℕ → ℕ) (hD : ∑ k ∈ s, D k = n) {ψ : ℕ → ℝ}
     (hψ : ∀ k ∈ s, 0 < ψ k) (hψ₁ : ∑ k ∈ s, ψ k = 1) :
     ∑ k ∈ s, D k * log (ψ k)⁻¹ - ∑ k ∈ s, (D k - n * ψ k) ^ 2 / (n * ψ k) ≤
       ∑ k ∈ s, D k * log (n / D k) := by

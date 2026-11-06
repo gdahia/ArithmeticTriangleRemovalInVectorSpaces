@@ -96,7 +96,7 @@ lemma three_div_two_le_rpow_mul_sum (hp : 2 ≤ p) {x : ℝ} (hx₀ : 0 < x) (hx
   linarith
 
 /-- The value of the infimum defining `c p`. -/
-lemma rpow_one_sub_c (hp : 2 ≤ p) :
+private lemma rpow_one_sub_c (hp : 2 ≤ p) :
     (p : ℝ) ^ (1 - c p) =
       ⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, (x : ℝ) ^ j := by
   have : Nonempty (Set.Ioo (0 : ℝ) 1) := ⟨⟨1 / 2, by norm_num, by norm_num⟩⟩
@@ -128,7 +128,7 @@ lemma le_rpow_one_sub_c (hp : 2 ≤ p) {b : ℝ}
 /-- The function `fun x ↦ x ^ (-(p - 1) / 3) * ∑ j ∈ range p, x ^ j` takes a value smaller than
 `p` on `Set.Ioo 0 1`: its value at `1` is `p` and its derivative there is `p * (p - 1) / 6`, which
 is positive. -/
-lemma exists_rpow_mul_sum_lt (hp : 2 ≤ p) :
+private lemma exists_rpow_mul_sum_lt (hp : 2 ≤ p) :
     ∃ x : ℝ, 0 < x ∧ x < 1 ∧ x ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, x ^ j < p := by
   have hderiv : HasDerivAt (fun x : ℝ ↦ x ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, x ^ j)
       (p * (p - 1) / 6) 1 := by

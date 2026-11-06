@@ -49,36 +49,36 @@ mass. -/
     mass N w₃ = mass N w₁ ∧ moment N w₁ + moment N w₂ + moment N w₃ = 2 * N * mass N w₁
 
 /-- `σ` is a weight of mass one and first moment `μ` whose support lies in the support of `w`. -/
-@[expose] def IsUnitBelow (N : ℕ) (w σ : ℕ → ℝ) (μ : ℝ) : Prop :=
+private def IsUnitBelow (N : ℕ) (w σ : ℕ → ℝ) (μ : ℝ) : Prop :=
   IsWeight N σ ∧ mass N σ = 1 ∧ moment N σ = μ ∧ support σ ⊆ support w
 
 /-- The number of points of `[0, N]` where `w` does not vanish. -/
-noncomputable def supportCard (N : ℕ) (w : ℕ → ℝ) : ℕ :=
+private noncomputable def supportCard (N : ℕ) (w : ℕ → ℝ) : ℕ :=
   #{k ∈ range (N + 1) | w k ≠ 0}
 
 variable {N : ℕ} {w w₁ w₂ w₃ σ σ₁ σ₂ σ₃ : ℕ → ℝ} {μ μ₁ μ₂ μ₃ p : ℝ}
 
-lemma IsWeight.mass_nonneg (hw : IsWeight N w) : 0 ≤ mass N w := by
+private lemma IsWeight.mass_nonneg (hw : IsWeight N w) : 0 ≤ mass N w := by
   obtain ⟨hw₀, -⟩ := hw
   apply sum_nonneg
   intro k _
   exact hw₀ k
 
-lemma IsWeight.hat_eq_zero (hw : IsWeight N w) (h0 : mass N w = 0) : hat N w = 0 := by
+private lemma IsWeight.hat_eq_zero (hw : IsWeight N w) (h0 : mass N w = 0) : hat N w = 0 := by
   obtain ⟨hw₀, -⟩ := hw
   ext j
   apply sum_eq_zero
   intro k hk
   rw [(sum_eq_zero_iff_of_nonneg fun k _ ↦ hw₀ k).1 h0 k hk, zero_mul]
 
-lemma IsWeight.sub (hw : IsWeight N w) (hσ : IsWeight N σ) (hle : ∀ k, p * σ k ≤ w k) :
+private lemma IsWeight.sub (hw : IsWeight N w) (hσ : IsWeight N σ) (hle : ∀ k, p * σ k ≤ w k) :
     IsWeight N (w - p • σ) := by
   obtain ⟨-, hwN⟩ := hw
   obtain ⟨-, hσN⟩ := hσ
   exact ⟨fun k ↦ sub_nonneg.2 (hle k), fun k hk ↦ by simp [hwN k hk, hσN k hk]⟩
 
 /-- A weight of positive mass has points of its support on both sides of its mean. -/
-lemma IsWeight.exists_le_moment_le (hw : IsWeight N w) (hM : mass N w ≠ 0) :
+private lemma IsWeight.exists_le_moment_le (hw : IsWeight N w) (hM : mass N w ≠ 0) :
     (∃ a ≤ N, w a ≠ 0 ∧ a * mass N w ≤ moment N w) ∧
       ∃ b ≤ N, w b ≠ 0 ∧ moment N w ≤ b * mass N w := by
   obtain ⟨hw₀, -⟩ := hw
@@ -99,15 +99,15 @@ lemma IsWeight.exists_le_moment_le (hw : IsWeight N w) (hM : mass N w ≠ 0) :
   exact ⟨⟨a, by grind, hwa, le_of_mul_le_mul_left hle ((hw₀ a).lt_of_ne' hwa)⟩,
     ⟨b, by grind, hwb, le_of_mul_le_mul_left hge ((hw₀ b).lt_of_ne' hwb)⟩⟩
 
-lemma isUnitBelow_single {c : ℕ} (hc : c ≤ N) (hw : w c ≠ 0) :
+private lemma isUnitBelow_single {c : ℕ} (hc : c ≤ N) (hw : w c ≠ 0) :
     IsUnitBelow N w (Pi.single c 1) c := by
   refine ⟨⟨Pi.single_nonneg.2 zero_le_one, fun _ hk ↦ Pi.single_eq_of_ne (by grind) _⟩,
     by simp [mass, Nat.lt_succ_of_le hc], by simp [moment, Pi.single_apply, Nat.lt_succ_of_le hc],
     ?_⟩
   exact Pi.support_single_subset.trans (Set.singleton_subset_iff.2 hw)
 
-lemma isUnitBelow_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1)
-    (hwy : w y ≠ 0) (hwz : w z ≠ 0) :
+private lemma isUnitBelow_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α)
+    (hα₁ : α ≤ 1) (hwy : w y ≠ 0) (hwz : w z ≠ 0) :
     IsUnitBelow N w (α • (Pi.single y 1 : ℕ → ℝ) + (1 - α) • (Pi.single z 1 : ℕ → ℝ))
       (α * y + (1 - α) * z) := by
   obtain ⟨⟨hy₀, hyN⟩, hy₁, hyμ, hys⟩ := isUnitBelow_single hy hwy
@@ -123,18 +123,18 @@ lemma isUnitBelow_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα�
   · exact (support_add _ _).trans (Set.union_subset ((support_const_smul_subset _ _).trans hys)
       ((support_const_smul_subset _ _).trans hzs))
 
-lemma IsUnitBelow.mass_sub_smul (hσ : IsUnitBelow N w σ μ) :
+private lemma IsUnitBelow.mass_sub_smul (hσ : IsUnitBelow N w σ μ) :
     mass N (w - p • σ) = mass N w - p := by
   obtain ⟨-, hσ₁, -, -⟩ := hσ
   rw [mass_sub, mass_smul, hσ₁, mul_one]
 
-lemma IsUnitBelow.moment_sub_smul (hσ : IsUnitBelow N w σ μ) :
+private lemma IsUnitBelow.moment_sub_smul (hσ : IsUnitBelow N w σ μ) :
     moment N (w - p • σ) = moment N w - p * μ := by
   obtain ⟨-, -, hσμ, -⟩ := hσ
   rw [moment_sub, moment_smul, hσμ]
 
 /-- The largest multiple of `σ` below `w` touches `w` at a point of the support of `σ`. -/
-lemma IsUnitBelow.exists_ratio (hσ : IsUnitBelow N w σ μ) (hw : IsWeight N w) :
+private lemma IsUnitBelow.exists_ratio (hσ : IsUnitBelow N w σ μ) (hw : IsWeight N w) :
     ∃ r > 0, (∀ k, r * σ k ≤ w k) ∧ ∃ k ≤ N, σ k ≠ 0 ∧ r * σ k = w k := by
   obtain ⟨⟨hσ₀, hσN⟩, hσ₁, -, hσs⟩ := hσ
   obtain ⟨hw₀, -⟩ := hw
@@ -161,14 +161,14 @@ lemma IsUnitBelow.exists_ratio (hσ : IsUnitBelow N w σ μ) (hw : IsWeight N w)
   · rw [heq]
     field_simp [hσk₀]
 
-lemma IsUnitBelow.mul_le (hσ : IsUnitBelow N w σ μ) {r : ℝ} (hpr : p ≤ r) (hr : ∀ k, r * σ k ≤ w k)
-    (k : ℕ) : p * σ k ≤ w k := by
+private lemma IsUnitBelow.mul_le (hσ : IsUnitBelow N w σ μ) {r : ℝ} (hpr : p ≤ r)
+    (hr : ∀ k, r * σ k ≤ w k) (k : ℕ) : p * σ k ≤ w k := by
   obtain ⟨⟨hσ₀, -⟩, -⟩ := hσ
   grw [hpr]
   · exact hr k
   · exact hσ₀ k
 
-lemma IsUnitBelow.support_sub_subset (hσ : IsUnitBelow N w σ μ) :
+private lemma IsUnitBelow.support_sub_subset (hσ : IsUnitBelow N w σ μ) :
     {k ∈ range (N + 1) | (w - p • σ) k ≠ 0} ⊆ {k ∈ range (N + 1) | w k ≠ 0} := by
   obtain ⟨-, -, -, hσs⟩ := hσ
   have hsub : support (w - p • σ) ⊆ support w :=
@@ -179,19 +179,19 @@ lemma IsUnitBelow.support_sub_subset (hσ : IsUnitBelow N w σ μ) :
   rintro ⟨hk, hne⟩
   exact ⟨hk, hsub hne⟩
 
-lemma IsUnitBelow.supportCard_sub_le (hσ : IsUnitBelow N w σ μ) :
+private lemma IsUnitBelow.supportCard_sub_le (hσ : IsUnitBelow N w σ μ) :
     supportCard N (w - p • σ) ≤ supportCard N w :=
   card_le_card hσ.support_sub_subset
 
-lemma IsUnitBelow.supportCard_sub_lt (hσ : IsUnitBelow N w σ μ) {k : ℕ} (hk : k ≤ N) (hσk : σ k ≠ 0)
-    (hpk : p * σ k = w k) : supportCard N (w - p • σ) < supportCard N w := by
+private lemma IsUnitBelow.supportCard_sub_lt (hσ : IsUnitBelow N w σ μ) {k : ℕ} (hk : k ≤ N)
+    (hσk : σ k ≠ 0) (hpk : p * σ k = w k) : supportCard N (w - p • σ) < supportCard N w := by
   have ⟨_, _, _, hσs⟩ := hσ
   refine card_lt_card ((ssubset_iff_of_subset hσ.support_sub_subset).2 ⟨k, ?_, ?_⟩)
   · simp only [mem_filter, mem_range]
     exact ⟨by grind, hσs hσk⟩
   · simp [hpk]
 
-lemma IsBalanced.sub (hb : IsBalanced N w₁ w₂ w₃) (h₁ : IsUnitBelow N w₁ σ₁ μ₁)
+private lemma IsBalanced.sub (hb : IsBalanced N w₁ w₂ w₃) (h₁ : IsUnitBelow N w₁ σ₁ μ₁)
     (h₂ : IsUnitBelow N w₂ σ₂ μ₂) (h₃ : IsUnitBelow N w₃ σ₃ μ₃) (hμ : μ₁ + μ₂ + μ₃ = 2 * N)
     (hle₁ : ∀ k, p * σ₁ k ≤ w₁ k) (hle₂ : ∀ k, p * σ₂ k ≤ w₂ k) (hle₃ : ∀ k, p * σ₃ k ≤ w₃ k) :
     IsBalanced N (w₁ - p • σ₁) (w₂ - p • σ₂) (w₃ - p • σ₃) := by
@@ -217,7 +217,7 @@ lemma IsBalanced.comm₁₃ (hb : IsBalanced N w₁ w₂ w₃) : IsBalanced N w�
 
 /-- Subtracting the largest multiple of a compatible triple of unit weights lowers the total support
 size, so the induction hypothesis applies to what is left. -/
-lemma IsBalanced.compatible_hat_of_isUnitBelow (hb : IsBalanced N w₁ w₂ w₃)
+private lemma IsBalanced.compatible_hat_of_isUnitBelow (hb : IsBalanced N w₁ w₂ w₃)
     (h₁ : IsUnitBelow N w₁ σ₁ μ₁) (h₂ : IsUnitBelow N w₂ σ₂ μ₂) (h₃ : IsUnitBelow N w₃ σ₃ μ₃)
     (hμ : μ₁ + μ₂ + μ₃ = 2 * N) (hs : Compatible N (hat N σ₁) (hat N σ₂) (hat N σ₃))
     (IH : ∀ v₁ v₂ v₃, IsBalanced N v₁ v₂ v₃ →
@@ -243,7 +243,7 @@ lemma IsBalanced.compatible_hat_of_isUnitBelow (hb : IsBalanced N w₁ w₂ w₃
   · grind [h₁.supportCard_sub_le (p := p), h₂.supportCard_sub_le (p := p),
       h₃.supportCard_sub_lt hk₃ hσk₃ (hp ▸ heq₃)]
 
-lemma exists_mix {c d y z : ℕ} (h₁ : c + d + y ≤ 2 * N) (h₂ : 2 * N ≤ c + d + z) :
+private lemma exists_mix {c d y z : ℕ} (h₁ : c + d + y ≤ 2 * N) (h₂ : 2 * N ≤ c + d + z) :
     ∃ α : ℝ, 0 ≤ α ∧ α ≤ 1 ∧ (c + d + α * y + (1 - α) * z : ℝ) = 2 * N := by
   have h₁' : (c + d + y : ℝ) ≤ 2 * N := by exact_mod_cast h₁
   have h₂' : (2 * N : ℝ) ≤ c + d + z := by exact_mod_cast h₂
@@ -253,7 +253,7 @@ lemma exists_mix {c d y z : ℕ} (h₁ : c + d + y ≤ 2 * N) (h₂ : 2 * N ≤ 
   exact ⟨α, hα₀, hα₁, hα⟩
 
 /-- The step of the decomposition where the mixed point masses sit in the third weight. -/
-lemma IsBalanced.compatible_hat_of_mix (ih : ∀ m < N, DecreasingCompatible m)
+private lemma IsBalanced.compatible_hat_of_mix (ih : ∀ m < N, DecreasingCompatible m)
     (hb : IsBalanced N w₁ w₂ w₃) {n : ℕ}
     (hn : supportCard N w₁ + supportCard N w₂ + supportCard N w₃ ≤ n)
     (IH : ∀ m < n, ∀ v₁ v₂ v₃, IsBalanced N v₁ v₂ v₃ →
@@ -270,7 +270,7 @@ lemma IsBalanced.compatible_hat_of_mix (ih : ∀ m < N, DecreasingCompatible m)
   · intro v₁ v₂ v₃ hv hlt
     exact IH _ (by grind) _ _ _ hv le_rfl
 
-lemma IsBalanced.compatible_hat_of_le (ih : ∀ m < N, DecreasingCompatible m)
+private lemma IsBalanced.compatible_hat_of_le (ih : ∀ m < N, DecreasingCompatible m)
     (hb : IsBalanced N w₁ w₂ w₃) (n : ℕ)
     (hn : supportCard N w₁ + supportCard N w₂ + supportCard N w₃ ≤ n) :
     Compatible N (hat N w₁) (hat N w₂) (hat N w₃) := by

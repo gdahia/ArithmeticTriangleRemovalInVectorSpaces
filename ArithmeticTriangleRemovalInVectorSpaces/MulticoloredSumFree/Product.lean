@@ -7,7 +7,6 @@ module
 
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.Triangle.Basic
-public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Tactic.Abel
@@ -134,7 +133,7 @@ lemma IsMulticoloredSumFree.card_triangles_prod (h : IsMulticoloredSumFree x y z
 
 /-- If the complements of `A`, `B` and `C` in `W` have fewer than `#W` elements in total, then
 there are `a ∈ A`, `b ∈ B` and `c ∈ C` with `a + b + c = 0`. -/
-lemma exists_add_add_eq_zero_of_card_compl_add_lt {A B C : Finset W}
+private lemma exists_add_add_eq_zero_of_card_compl_add_lt {A B C : Finset W}
     (h : #Aᶜ + #Bᶜ + #Cᶜ < Fintype.card W) : ∃ a ∈ A, ∃ b ∈ B, ∃ c ∈ C, a + b + c = 0 := by
   rw [card_compl, card_compl, card_compl] at h
   obtain ⟨c, hc⟩ : C.Nonempty := card_pos.1 (by grind [card_le_univ A, card_le_univ B])
@@ -149,7 +148,7 @@ lemma exists_add_add_eq_zero_of_card_compl_add_lt {A B C : Finset W}
 omit [AddCommGroup G] [AddCommGroup W] in
 /-- For injective `f`, the fibers of `(univ.image f ×ˢ univ) \ S` over the points `f i` have total
 size at most `#((univ.image f ×ˢ univ) \ S)`. -/
-lemma sum_card_filter_notMem_le {f : ι → G} (hf : Injective f) (S : Finset (G × W)) :
+private lemma sum_card_filter_notMem_le {f : ι → G} (hf : Injective f) (S : Finset (G × W)) :
     ∑ i, #{a | (f i, a) ∉ S} ≤ #((univ.image f ×ˢ univ) \ S) := by
   have hdisj : ((univ : Finset ι) : Set ι).PairwiseDisjoint
       fun i ↦ ({a | (f i, a) ∉ S} : Finset W).image (f i, ·) := by

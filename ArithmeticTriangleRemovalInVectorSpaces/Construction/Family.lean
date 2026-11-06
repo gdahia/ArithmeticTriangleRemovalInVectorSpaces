@@ -5,9 +5,10 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import ArithmeticTriangleRemovalInVectorSpaces.Construction.Hash
 public import ArithmeticTriangleRemovalInVectorSpaces.Construction.TypeClass
+public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 import ArithmeticTriangleRemovalInVectorSpaces.Construction.Behrend
+import ArithmeticTriangleRemovalInVectorSpaces.Construction.Hash
 import Mathlib.NumberTheory.Bertrand
 
 /-!
@@ -46,21 +47,22 @@ namespace ArithmeticTriangleRemovalInVectorSpaces
 variable {n p : ℕ}
 
 /-- Permuting the entries of the three vectors of a triple simultaneously. -/
-@[expose] def permTriple (σ : Equiv.Perm (Fin n)) :
+private def permTriple (σ : Equiv.Perm (Fin n)) :
     (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)
   | (a, b, c) => (a ∘ σ, b ∘ σ, c ∘ σ)
 
-lemma permTriple_permTriple (σ τ : Equiv.Perm (Fin n))
+private lemma permTriple_permTriple (σ τ : Equiv.Perm (Fin n))
     (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) :
     permTriple σ (permTriple τ v) = permTriple (τ * σ) v :=
   rfl
 
-lemma permTriple_one (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) : permTriple 1 v = v :=
+private lemma permTriple_one (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) : permTriple 1 v = v :=
   rfl
 
 /-- **Equal fibers.** If permutations act on `V` compatibly with a map `g` into the type class of
 `w₀`, then every fiber of `g` over the type class has `#V / #(typeClass w₀)` elements. -/
-lemma card_filter_mul_card_typeClass_eq {V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))}
+private lemma card_filter_mul_card_typeClass_eq
+    {V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))}
     {w₀ : Fin n → ℕ} (g : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → Fin n → ℕ)
     (hg : ∀ σ v, g (permTriple σ v) = g v ∘ σ) (hgV : ∀ v ∈ V, g v ∈ typeClass w₀)
     (hV : ∀ σ, ∀ v ∈ V, permTriple σ v ∈ V) {w : Fin n → ℕ} (hw : w ∈ typeClass w₀) :
@@ -87,7 +89,7 @@ lemma card_filter_mul_card_typeClass_eq {V : Finset ((Fin n → ℕ) × (Fin n �
 
 variable {a₀ b₀ c₀ : Fin n → ℕ}
 
-lemma permTriple_mem_vecSumTriples (σ : Equiv.Perm (Fin n))
+private lemma permTriple_mem_vecSumTriples (σ : Equiv.Perm (Fin n))
     {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
     (hv : v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) :
     permTriple σ v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) := by
@@ -96,14 +98,14 @@ lemma permTriple_mem_vecSumTriples (σ : Equiv.Perm (Fin n))
   exact mk_mem_vecSumTriples.2 ⟨comp_mem_typeClass ha σ, comp_mem_typeClass hb σ,
     comp_mem_typeClass hc σ, fun r ↦ hsum (σ r)⟩
 
-lemma sum_add_add_eq (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) {a b c : Fin n → ℕ}
+private lemma sum_add_add_eq (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) {a b c : Fin n → ℕ}
     (ha : a ∈ typeClass a₀) (hb : b ∈ typeClass b₀) (hc : c ∈ typeClass c₀) :
     ∑ r, (a r + b r + c r) = n * (p - 1) := by
   rw [sum_add_distrib, sum_add_distrib, sum_eq_of_mem_typeClass ha, sum_eq_of_mem_typeClass hb,
     sum_eq_of_mem_typeClass hc, ← sum_add_distrib, ← sum_add_distrib]
   simp [h₀]
 
-lemma card_typeClass_le_card_vecSumTriples (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) :
+private lemma card_typeClass_le_card_vecSumTriples (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) :
     #(typeClass a₀) ≤ #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) := by
   rw [← card_filter_mul_card_typeClass_eq (fun (a, _, _) ↦ a) (fun _ _ ↦ rfl)
     (by simp +contextual) (fun σ _ ↦ permTriple_mem_vecSumTriples σ) (self_mem_typeClass a₀)]
@@ -113,7 +115,7 @@ lemma card_typeClass_le_card_vecSumTriples (h₀ : ∀ r, a₀ r + b₀ r + c₀
 /-- If `0 < w` is at most the size of each type class, then at most
 `3 * (#V / w)` triples of `V = vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)` share
 a vector with a given one. -/
-lemma card_filter_shares_le {w : ℝ} (hw : 0 < w) (hwa : w ≤ #(typeClass a₀))
+private lemma card_filter_shares_le {w : ℝ} (hw : 0 < w) (hwa : w ≤ #(typeClass a₀))
     (hwb : w ≤ #(typeClass b₀)) (hwc : w ≤ #(typeClass c₀))
     {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
     (hv : v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) :
@@ -153,7 +155,7 @@ lemma card_filter_shares_le {w : ℝ} (hw : 0 < w) (hwa : w ≤ #(typeClass a₀
 into a set from Behrend's construction gives a multicolored sum-free family with at least
 `#V * exp (-4 * √(log P)) / (4 * P)` members, if at most `F` triples share a vector with a given
 one. -/
-lemma exists_isMulticoloredSumFree_mul_exp_le {A B C : Finset (Fin n → ℕ)} (hp : 2 ≤ p)
+private lemma exists_isMulticoloredSumFree_mul_exp_le {A B C : Finset (Fin n → ℕ)} (hp : 2 ≤ p)
     (hsum : ∀ a ∈ A, ∀ b ∈ B, ∀ c ∈ C, ∑ r, (a r + b r + c r) = n * (p - 1)) {F : ℝ}
     (hF₀ : 0 ≤ F)
     (hF : ∀ v ∈ vecSumTriples p A B C, #{v' ∈ vecSumTriples p A B C | Shares v v'} ≤ F) :

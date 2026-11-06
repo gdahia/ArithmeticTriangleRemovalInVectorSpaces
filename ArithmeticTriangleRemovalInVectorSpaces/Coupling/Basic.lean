@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 public import Mathlib.Basic.Real.Basic
-public import Mathlib.Tactic.Continuity
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
@@ -66,7 +65,7 @@ nonnegative function on the triples with sum `N`. -/
 
 variable {N : ℕ} {J J' : ℕ × ℕ × ℕ → ℝ} {g : ℕ × ℕ × ℕ → ℕ} {π₁ π₂ π₃ π₁' π₂' π₃' : ℕ → ℝ}
 
-lemma marginal_add : marginal N (J + J') g = marginal N J g + marginal N J' g := by
+private lemma marginal_add : marginal N (J + J') g = marginal N J g + marginal N J' g := by
   ext k
   simp [marginal, sum_add_distrib]
 
@@ -76,7 +75,7 @@ lemma marginal_smul (r : ℝ) : marginal N (r • J) g = r • marginal N J g :=
 
 /-- Precomposing `J` with an involution of the triples that preserves `sumTriples N` amounts to
 precomposing `g` with it. -/
-lemma marginal_comp {e : ℕ × ℕ × ℕ → ℕ × ℕ × ℕ} (he : ∀ x, e (e x) = x)
+private lemma marginal_comp {e : ℕ × ℕ × ℕ → ℕ × ℕ × ℕ} (he : ∀ x, e (e x) = x)
     (hs : ∀ x, e x ∈ sumTriples N ↔ x ∈ sumTriples N) :
     marginal N (J ∘ e) g = marginal N J (g ∘ e) := by
   ext k
@@ -115,10 +114,10 @@ lemma Compatible.comm₁₃ (h : Compatible N π₁ π₂ π₃) : Compatible N 
   h.comm₁₂.comm₂₃.comm₁₂
 
 /-- The function `J` with `d` added to the third variable. -/
-def shiftThird (d : ℕ) (J : ℕ × ℕ × ℕ → ℝ) : ℕ × ℕ × ℕ → ℝ :=
+private def shiftThird (d : ℕ) (J : ℕ × ℕ × ℕ → ℝ) : ℕ × ℕ × ℕ → ℝ :=
   fun (a, b, c) ↦ if d ≤ c then J (a, b, c - d) else 0
 
-lemma marginal_shiftThird (d k : ℕ) :
+private lemma marginal_shiftThird (d k : ℕ) :
     marginal (N + d) (shiftThird d J) g k =
       ∑ x ∈ sumTriples N with g (x + (0, 0, d)) = k, J x := by
   rw [marginal, ← sum_filter_of_ne (p := fun (_, _, c) ↦ d ≤ c), filter_filter]

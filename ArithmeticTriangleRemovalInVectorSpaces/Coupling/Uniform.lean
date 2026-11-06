@@ -59,7 +59,7 @@ lemma IsDecreasingOn.smul (h : IsDecreasingOn N π) {r : ℝ} (hr : 0 ≤ r) :
   exact ⟨fun k ↦ mul_nonneg hr (hπ₀ k), fun _ _ hab ↦ mul_le_mul_of_nonneg_left (hπ hab) hr,
     by simp [hπN]⟩
 
-lemma isDecreasingOn_unif (hk : k ≤ N) : IsDecreasingOn N (unif k) := by
+private lemma isDecreasingOn_unif (hk : k ≤ N) : IsDecreasingOn N (unif k) := by
   refine ⟨?_, ?_, ?_⟩
   · intro j
     unfold unif
@@ -70,11 +70,11 @@ lemma isDecreasingOn_unif (hk : k ≤ N) : IsDecreasingOn N (unif k) := by
   · simp only [unif, ite_eq_right_iff]
     grind
 
-lemma unif_eq_zero (hk : k < N) : unif k N = 0 := by
+private lemma unif_eq_zero (hk : k < N) : unif k N = 0 := by
   simp only [unif, ite_eq_right_iff]
   grind
 
-lemma sum_mul_unif (hk : k ≤ N) (f : ℕ → ℝ) :
+private lemma sum_mul_unif (hk : k ≤ N) (f : ℕ → ℝ) :
     ∑ j ∈ range (N + 1), f j * unif k j = (∑ j ∈ range (k + 1), f j) / (k + 1) := by
   rw [← sum_range_add_sum_Ico _ (by grind : k + 1 ≤ N + 1), sum_eq_zero (s := Ico _ _),
     add_zero, div_eq_mul_inv, sum_mul]
@@ -85,7 +85,7 @@ lemma sum_mul_unif (hk : k ≤ N) (f : ℕ → ℝ) :
     simp only [mem_Ico] at hj
     simp [unif, (by grind : ¬j ≤ k)]
 
-lemma mass_unif (hk : k ≤ N) : mass N (unif k) = 1 := by
+private lemma mass_unif (hk : k ≤ N) : mass N (unif k) = 1 := by
   have h := sum_mul_unif hk fun _ ↦ 1
   simp only [one_mul, sum_const, card_range, nsmul_eq_mul, mul_one] at h
   rw [mass, h]
@@ -100,31 +100,31 @@ lemma sum_range_succ_cast (k : ℕ) : ∑ j ∈ range (k + 1), (j : ℝ) = k * (
     push_cast
     ring
 
-lemma moment_unif (hk : k ≤ N) : moment N (unif k) = k / 2 := by
+private lemma moment_unif (hk : k ≤ N) : moment N (unif k) = k / 2 := by
   rw [moment, sum_mul_unif hk, sum_range_succ_cast]
   field_simp
 
-lemma isDecreasingOn_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1) :
-    IsDecreasingOn N (α • unif y + (1 - α) • unif z) :=
+private lemma isDecreasingOn_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α)
+    (hα₁ : α ≤ 1) : IsDecreasingOn N (α • unif y + (1 - α) • unif z) :=
   ((isDecreasingOn_unif hy).smul hα₀).add ((isDecreasingOn_unif hz).smul (by linarith))
 
-lemma mass_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) (α : ℝ) :
+private lemma mass_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) (α : ℝ) :
     mass N (α • unif y + (1 - α) • unif z) = 1 := by
   rw [mass_add, mass_smul, mass_smul, mass_unif hy, mass_unif hz]
   ring
 
-lemma moment_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) (α : ℝ) :
+private lemma moment_mix {y z : ℕ} (hy : y ≤ N) (hz : z ≤ N) (α : ℝ) :
     moment N (α • unif y + (1 - α) • unif z) = (α * y + (1 - α) * z) / 2 := by
   rw [moment_add, moment_smul, moment_smul, moment_unif hy, moment_unif hz]
   ring
 
-lemma mix_eq_zero {y z : ℕ} {α : ℝ} (hy : y < N ∨ α = 0) (hz : z < N ∨ α = 1) :
+private lemma mix_eq_zero {y z : ℕ} {α : ℝ} (hy : y < N ∨ α = 0) (hz : z < N ∨ α = 1) :
     (α • unif y + (1 - α) • unif z) N = 0 := by
   rcases hy with hy | rfl <;> rcases hz with hz | hz <;> simp_all [unif_eq_zero]
 
 /-- A mixture of uniform distributions with mean `0` is the point mass at `0`. -/
-lemma mix_eq_unif_zero {y z : ℕ} {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1) (h : α * y + (1 - α) * z = 0) :
-    α • unif y + (1 - α) • unif z = unif 0 := by
+private lemma mix_eq_unif_zero {y z : ℕ} {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1)
+    (h : α * y + (1 - α) * z = 0) : α • unif y + (1 - α) • unif z = unif 0 := by
   obtain ⟨hy, hz⟩ := (add_eq_zero_iff_of_nonneg (by positivity)
     (mul_nonneg (sub_nonneg.2 hα₁) z.cast_nonneg)).1 h
   rcases mul_eq_zero.1 hy with rfl | hy <;> rcases mul_eq_zero.1 hz with hz | hz
@@ -142,7 +142,7 @@ lemma hat_smul (r : ℝ) (w : ℕ → ℝ) : hat N (r • w) = r • hat N w := 
   ext j
   simp [hat, mul_sum, mul_assoc]
 
-lemma hat_zero : hat N 0 = 0 := by
+private lemma hat_zero : hat N 0 = 0 := by
   ext j
   simp [hat]
 
@@ -198,7 +198,7 @@ lemma IsDecreasingOn.weight_eq_zero (h : IsDecreasingOn N π) {k : ℕ} (hk : N 
   rw [h.eq_zero_of_lt hk, h.eq_zero_of_lt (by grind), sub_zero, mul_zero]
 
 /-- The triples `(0, b, N - b)` with `b` uniform on `[0, N]`. -/
-lemma compatible_unif_zero : Compatible N (unif 0) (unif N) (unif N) := by
+private lemma compatible_unif_zero : Compatible N (unif 0) (unif N) (unif N) := by
   convert compatible_layer (N := N) (f := fun _ ↦ ((N : ℝ) + 1)⁻¹) (fun _ ↦ by positivity)
     using 1
   · ext a
@@ -213,7 +213,7 @@ lemma compatible_unif_zero : Compatible N (unif 0) (unif N) (unif N) := by
 
 /-- Three uniform distributions whose means sum to the level `a + b` are compatible, given Pebody's
 theorem at that level. -/
-lemma compatible_unif_triple {a b : ℕ} (h : DecreasingCompatible (a + b)) :
+private lemma compatible_unif_triple {a b : ℕ} (h : DecreasingCompatible (a + b)) :
     Compatible (a + b) (unif a) (unif b) (unif (a + b)) := by
   refine h _ _ _ (isDecreasingOn_unif (by grind)) (isDecreasingOn_unif (by grind))
     (isDecreasingOn_unif le_rfl) ?_ ?_ ?_
@@ -224,7 +224,7 @@ lemma compatible_unif_triple {a b : ℕ} (h : DecreasingCompatible (a + b)) :
     ring
 
 /-- **Corollary 3.2 of Pebody** for three mass functions of mass one. -/
-lemma compatible_of_eq_zero_of_eq_zero_of_mass_eq_one (ih : ∀ m < N, DecreasingCompatible m)
+private lemma compatible_of_eq_zero_of_eq_zero_of_mass_eq_one (ih : ∀ m < N, DecreasingCompatible m)
     (hN : N ≠ 0) (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂) (h₃ : IsDecreasingOn N π₃)
     (h₂N : π₂ N = 0) (h₃N : π₃ N = 0) (hm₁ : mass N π₁ = 1) (hm₂ : mass N π₂ = 1)
     (hm₃ : mass N π₃ = 1) (hmom : moment N π₁ + moment N π₂ + moment N π₃ = N) :
@@ -236,7 +236,7 @@ lemma compatible_of_eq_zero_of_eq_zero_of_mass_eq_one (ih : ∀ m < N, Decreasin
 
 /-- **Corollary 5.2 of Pebody.** For `i > 0`, the distributions `unif i`, `unif N` and the mixture
 of `unif j` and `unif N` with mean `(N - i) / 2` are compatible, where `N = i + j + r + 1`. -/
-lemma compatible_lastcase {i j r : ℕ} (hij : DecreasingCompatible (i + j))
+private lemma compatible_lastcase {i j r : ℕ} (hij : DecreasingCompatible (i + j))
     (hir : DecreasingCompatible (i + r)) :
     Compatible (i + j + r + 1) (unif i) (unif (i + j + r + 1))
       (((i : ℝ) / (i + r + 1)) • unif j + (1 - (i : ℝ) / (i + r + 1)) • unif (i + j + r + 1)) := by
@@ -261,8 +261,8 @@ lemma compatible_lastcase {i j r : ℕ} (hij : DecreasingCompatible (i + j))
 
 /-- The case of Section 5 of Pebody where the first distribution is `unif N` and the mixture is one
 of `unif j` and `unif N`, with weight `α < 1` on `unif j`. -/
-lemma compatible_top (ih : ∀ m < N, DecreasingCompatible m) {i j : ℕ} (hi : i ≤ N) (hj : j ≤ N)
-    {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α < 1) (hsum : (i : ℝ) + α * j + (1 - α) * N = N) :
+private lemma compatible_top (ih : ∀ m < N, DecreasingCompatible m) {i j : ℕ} (hi : i ≤ N)
+    (hj : j ≤ N) {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α < 1) (hsum : (i : ℝ) + α * j + (1 - α) * N = N) :
     Compatible N (unif N) (unif i) (α • unif j + (1 - α) • unif N) := by
   have hieq : (i : ℝ) = α * (N - j) := by linarith
   obtain rfl | hi₀ := Nat.eq_zero_or_pos i
@@ -284,8 +284,8 @@ lemma compatible_top (ih : ∀ m < N, DecreasingCompatible m) {i j : ℕ} (hi : 
 
 /-- The case of Section 5 of Pebody where the first distribution is `unif N` and the mixture has
 mass at `N`. -/
-lemma compatible_unif_top_mix (ih : ∀ m < N, DecreasingCompatible m) {i y z : ℕ} (hi : i ≤ N)
-    (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1)
+private lemma compatible_unif_top_mix (ih : ∀ m < N, DecreasingCompatible m) {i y z : ℕ}
+    (hi : i ≤ N) (hy : y ≤ N) (hz : z ≤ N) {α : ℝ} (hα₀ : 0 ≤ α) (hα₁ : α ≤ 1)
     (hyz : y = N ∧ α ≠ 0 ∨ z = N ∧ α ≠ 1) (hsum : (i + N + α * y + (1 - α) * z : ℝ) = 2 * N) :
     Compatible N (unif N) (unif i) (α • unif y + (1 - α) • unif z) := by
   rcases hyz with ⟨rfl, hα0⟩ | ⟨rfl, hα1⟩

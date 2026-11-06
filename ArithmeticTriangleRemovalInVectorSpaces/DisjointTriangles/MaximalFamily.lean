@@ -43,12 +43,12 @@ variable {V : Type*}
 
 /-- A family of triangles is vertex-disjoint if no two of its triangles share a first, second or
 third vertex: each of the three projections is injective on it. -/
-def IsVertexDisjoint (S : Finset (V × V × V)) : Prop :=
+private def IsVertexDisjoint (S : Finset (V × V × V)) : Prop :=
   Set.InjOn (fun ((x, _, _) : V × V × V) ↦ x) S ∧
     Set.InjOn (fun ((_, y, _) : V × V × V) ↦ y) S ∧ Set.InjOn (fun ((_, _, z) : V × V × V) ↦ z) S
 
 /-- Removing the vertices of `S` from `X` removes at most `#S` elements. -/
-lemma card_sdiff_sdiff_image_le {α : Type*} [DecidableEq α] (X : Finset α)
+private lemma card_sdiff_sdiff_image_le {α : Type*} [DecidableEq α] (X : Finset α)
     (S : Finset (V × V × V)) (f : V × V × V → α) : #(X \ (X \ S.image f)) ≤ #S := by
   rw [sdiff_sdiff_right_self]
   grw [card_le_card (inf_le_right : X ⊓ S.image f ≤ _), card_image_le]
@@ -57,7 +57,7 @@ variable [DecidableEq V] {S : Finset (V × V × V)} {x y z : V}
 
 /-- Adding a triangle that shares no vertex with the triangles of a vertex-disjoint family keeps
 the family vertex-disjoint. -/
-lemma IsVertexDisjoint.insert (hS : IsVertexDisjoint S)
+private lemma IsVertexDisjoint.insert (hS : IsVertexDisjoint S)
     (hx : x ∉ S.image fun (x, _, _) ↦ x) (hy : y ∉ S.image fun (_, y, _) ↦ y)
     (hz : z ∉ S.image fun (_, _, z) ↦ z) : IsVertexDisjoint (insert (x, y, z) S) := by
   obtain ⟨h₁, h₂, h₃⟩ := hS
@@ -70,7 +70,7 @@ variable [AddCommGroup V] {X Y Z : Finset V}
 
 /-- Removing the vertices of a maximum family `S` of vertex-disjoint triangles leaves no
 triangle. -/
-lemma triangles_sdiff_image_eq_empty (hST : S ⊆ triangles X Y Z) (hS : IsVertexDisjoint S)
+private lemma triangles_sdiff_image_eq_empty (hST : S ⊆ triangles X Y Z) (hS : IsVertexDisjoint S)
     (hmax : ∀ S' ⊆ triangles X Y Z, IsVertexDisjoint S' → #S' ≤ #S) :
     triangles (X \ S.image fun (x, _, _) ↦ x) (Y \ S.image fun (_, y, _) ↦ y)
       (Z \ S.image fun (_, _, z) ↦ z) = ∅ := by
@@ -87,7 +87,7 @@ variable {p : ℕ} [Fact p.Prime] [Module (ZMod p) V] [Fintype V]
 
 /-- **Theorem 3 for a family of triangles.** If `X × Y × Z` contains a family `S` of
 vertex-disjoint triangles, then it contains at least `(#S / #V) ^ C p * #V ^ 2` triangles. -/
-lemma div_rpow_C_mul_sq_le_card_triangles_of_isVertexDisjoint (hST : S ⊆ triangles X Y Z)
+private lemma div_rpow_C_mul_sq_le_card_triangles_of_isVertexDisjoint (hST : S ⊆ triangles X Y Z)
     (hS : IsVertexDisjoint S) :
     ((#S : ℝ) / Fintype.card V) ^ C p * Fintype.card V ^ 2 ≤ #(triangles X Y Z) := by
   obtain ⟨h₁, h₂, h₃⟩ := hS
@@ -101,7 +101,8 @@ lemma div_rpow_C_mul_sq_le_card_triangles_of_isVertexDisjoint (hST : S ⊆ trian
 
 /-- If `X × Y × Z` contains a family `S` of vertex-disjoint triangles and fewer than
 `(ε / 3) ^ C p * #V ^ 2` triangles, then `3 * #S ≤ ε * #V`. -/
-lemma three_mul_card_le_of_card_triangles_lt {ε : ℝ} (hε : 0 ≤ ε) (hST : S ⊆ triangles X Y Z)
+private lemma three_mul_card_le_of_card_triangles_lt {ε : ℝ} (hε : 0 ≤ ε)
+    (hST : S ⊆ triangles X Y Z)
     (hS : IsVertexDisjoint S) (h : #(triangles X Y Z) < (ε / 3) ^ C p * Fintype.card V ^ 2) :
     3 * #S ≤ ε * Fintype.card V := by
   by_contra! hlt

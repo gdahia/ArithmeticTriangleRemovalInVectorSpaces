@@ -6,8 +6,6 @@ Authors: Gabriel Dahia
 module
 
 public import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Basic
-public import Mathlib.Order.Interval.Finset.Nat
-public import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
@@ -84,29 +82,29 @@ lemma moment_smul (r : ℝ) : moment N (r • π) = r * moment N π := by
   congr with k
   ring
 
-lemma mass_succ : mass (N + 1) π = mass N π + π (N + 1) :=
+private lemma mass_succ : mass (N + 1) π = mass N π + π (N + 1) :=
   sum_range_succ _ _
 
-lemma moment_succ : moment (N + 1) π = moment N π + (N + 1) * π (N + 1) := by
+private lemma moment_succ : moment (N + 1) π = moment N π + (N + 1) * π (N + 1) := by
   rw [moment, sum_range_succ, ← moment]
   push_cast
   ring
 
-lemma mass_shift : mass N (fun k ↦ π (k + 1)) = mass (N + 1) π - π 0 := by
+private lemma mass_shift : mass N (fun k ↦ π (k + 1)) = mass (N + 1) π - π 0 := by
   rw [mass, mass, sum_range_succ' _ (N + 1)]
   ring
 
-lemma moment_shift :
+private lemma moment_shift :
     moment N (fun k ↦ π (k + 1)) = moment (N + 1) π - mass (N + 1) π + π 0 := by
   rw [moment, moment, mass, sum_range_succ' _ (N + 1), sum_range_succ' _ (N + 1)]
   push_cast
   simp only [add_mul, one_mul, sum_add_distrib]
   ring
 
-lemma mass_reflect : mass N (fun k ↦ π (N - k)) = mass N π := by
+private lemma mass_reflect : mass N (fun k ↦ π (N - k)) = mass N π := by
   simpa [mass] using sum_range_reflect π (N + 1)
 
-lemma moment_reflect : moment N (fun k ↦ π (N - k)) = N * mass N π - moment N π := by
+private lemma moment_reflect : moment N (fun k ↦ π (N - k)) = N * mass N π - moment N π := by
   rw [moment, ← sum_range_reflect, mass, moment, mul_sum, ← sum_sub_distrib]
   congr! 1 with k hk
   rw [mem_range] at hk
@@ -117,7 +115,7 @@ lemma IsDecreasingOn.eq_zero_of_lt (h : IsDecreasingOn N π) {k : ℕ} (hk : N <
   obtain ⟨hπ₀, hπ, hπN⟩ := h
   exact le_antisymm (hπN ▸ hπ hk) (hπ₀ k)
 
-lemma IsDecreasingOn.le_mass (h : IsDecreasingOn N π) (k : ℕ) : π k ≤ mass N π := by
+private lemma IsDecreasingOn.le_mass (h : IsDecreasingOn N π) (k : ℕ) : π k ≤ mass N π := by
   have ⟨hπ₀, _, _⟩ := h
   by_cases hk : k ≤ N
   · refine single_le_sum ?_ (mem_range.2 (by grind))
@@ -128,7 +126,7 @@ lemma IsDecreasingOn.le_mass (h : IsDecreasingOn N π) (k : ℕ) : π k ≤ mass
     intro i _
     exact hπ₀ i
 
-lemma IsDecreasingOn.of_succ (h : IsDecreasingOn (N + 1) π) (hN : π (N + 1) = 0) :
+private lemma IsDecreasingOn.of_succ (h : IsDecreasingOn (N + 1) π) (hN : π (N + 1) = 0) :
     IsDecreasingOn N π := by
   obtain ⟨hπ₀, hπ, -⟩ := h
   exact ⟨hπ₀, hπ, hN⟩
@@ -140,7 +138,7 @@ lemma IsDecreasingOn.shift (h : IsDecreasingOn (N + 1) π) :
   exact ⟨fun k ↦ hπ₀ _, fun _ _ hab ↦ hπ (by grind), hπN⟩
 
 /-- Decreasing weights on `[s, e]` have mean at most `(s + e) / 2`. -/
-lemma two_mul_sum_Icc_le (hπ : Antitone π) (s e : ℕ) :
+private lemma two_mul_sum_Icc_le (hπ : Antitone π) (s e : ℕ) :
     2 * ∑ k ∈ Icc s e, (k : ℝ) * π k ≤ (s + e) * ∑ k ∈ Icc s e, π k := by
   have hrefl : ∑ k ∈ Icc s e, (s + e - 2 * k : ℝ) * π k =
       ∑ k ∈ Icc s e, (2 * k - (s + e) : ℝ) * π (s + e - k) := by
@@ -163,7 +161,7 @@ lemma two_mul_sum_Icc_le (hπ : Antitone π) (s e : ℕ) :
 
 /-- For a decreasing mass function `π` on `[0, N]` and `t ≤ N`, the bound
 `2 * moment N π ≤ t * mass N π + (N + 1) * (mass N π - ∑ k ∈ range (t + 1), π k)`. -/
-lemma IsDecreasingOn.two_mul_moment_le (h : IsDecreasingOn N π) {t : ℕ} (ht : t ≤ N) :
+private lemma IsDecreasingOn.two_mul_moment_le (h : IsDecreasingOn N π) {t : ℕ} (ht : t ≤ N) :
     2 * moment N π ≤ t * mass N π + (N + 1) * (mass N π - ∑ k ∈ range (t + 1), π k) := by
   obtain ⟨-, hπ, -⟩ := h
   have h₁ := two_mul_sum_Icc_le hπ 0 t
@@ -175,7 +173,7 @@ lemma IsDecreasingOn.two_mul_moment_le (h : IsDecreasingOn N π) {t : ℕ} (ht :
   linarith
 
 /-- **Lemma 3.1 of Pebody**, for a cut after `t + 1 ≤ N` terms. -/
-lemma le_sum_range_add_sum_Ico (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
+private lemma le_sum_range_add_sum_Ico (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
     (h₃ : IsDecreasingOn N π₃) (hm₂ : mass N π₂ = mass N π₁) (hm₃ : mass N π₃ = mass N π₁)
     (hmom : moment N π₁ + moment N π₂ + moment N π₃ = N * mass N π₁) {t : ℕ} (ht : t + 1 ≤ N) :
     π₁ 0 ≤ ∑ k ∈ range (t + 1), π₃ (N - k) + ∑ k ∈ Ico (t + 1) (N + 1), π₂ k := by
@@ -192,7 +190,7 @@ lemma le_sum_range_add_sum_Ico (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreas
 
 /-- If `a` is antitone and `b` is monotone, then `∑ k ∈ range n, min (a k) (b k)` splits at the
 first point where `b` exceeds `a`. -/
-lemma exists_sum_min_eq {a b : ℕ → ℝ} (ha : Antitone a) (hb : Monotone b) (n : ℕ) :
+private lemma exists_sum_min_eq {a b : ℕ → ℝ} (ha : Antitone a) (hb : Monotone b) (n : ℕ) :
     ∃ t ≤ n, ∑ k ∈ range n, min (a k) (b k) = ∑ k ∈ range t, b k + ∑ k ∈ Ico t n, a k := by
   classical
   have hex : ∃ t, n ≤ t ∨ a t < b t := ⟨n, .inl le_rfl⟩
@@ -212,8 +210,8 @@ lemma exists_sum_min_eq {a b : ℕ → ℝ} (ha : Antitone a) (hb : Monotone b) 
 
 /-- **Lemma 3.1 of Pebody.** The mass of `π₁` at `0` is at most the overlap
 `∑ k ∈ range (N + 1), min (π₂ k) (π₃ (N - k))`. -/
-lemma le_sum_min (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂) (h₃ : IsDecreasingOn N π₃)
-    (hm₂ : mass N π₂ = mass N π₁) (hm₃ : mass N π₃ = mass N π₁)
+private lemma le_sum_min (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
+    (h₃ : IsDecreasingOn N π₃) (hm₂ : mass N π₂ = mass N π₁) (hm₃ : mass N π₃ = mass N π₁)
     (hmom : moment N π₁ + moment N π₂ + moment N π₃ = N * mass N π₁) :
     π₁ 0 ≤ ∑ k ∈ range (N + 1), min (π₂ k) (π₃ (N - k)) := by
   have ⟨_, hπ₂, _⟩ := h₂
@@ -232,16 +230,16 @@ lemma le_sum_min (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
 
 /-- The overlap of `π₂` and the reflection of `π₃`, cut at height `x`. Peeling it off removes the
 layer where the first variable vanishes. -/
-noncomputable def peelWeight (N : ℕ) (π₂ π₃ : ℕ → ℝ) (x : ℝ) (k : ℕ) : ℝ :=
+private noncomputable def peelWeight (N : ℕ) (π₂ π₃ : ℕ → ℝ) (x : ℝ) (k : ℕ) : ℝ :=
   min (min (π₂ k) (π₃ (N - k))) x
 
-lemma continuous_mass_peelWeight (N : ℕ) (π₂ π₃ : ℕ → ℝ) :
+private lemma continuous_mass_peelWeight (N : ℕ) (π₂ π₃ : ℕ → ℝ) :
     Continuous fun x ↦ mass N (peelWeight N π₂ π₃ x) := by
   unfold mass peelWeight
   fun_prop
 
 /-- There is a height `x ≥ 0` at which the overlap of `π₂` and `π₃` has mass `π₁ 0`. -/
-lemma exists_mass_peelWeight_eq (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
+private lemma exists_mass_peelWeight_eq (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
     (h₃ : IsDecreasingOn N π₃) (hm₂ : mass N π₂ = mass N π₁) (hm₃ : mass N π₃ = mass N π₁)
     (hmom : moment N π₁ + moment N π₂ + moment N π₃ = N * mass N π₁) :
     ∃ x, 0 ≤ x ∧ mass N (peelWeight N π₂ π₃ x) = π₁ 0 := by
@@ -266,20 +264,21 @@ section Peel
 variable {n : ℕ} {x : ℝ} (hx : 0 ≤ x) (h₂ : IsDecreasingOn n π₂) (h₃ : IsDecreasingOn n π₃)
 include hx h₂ h₃
 
-lemma peelWeight_nonneg (k : ℕ) : 0 ≤ peelWeight (n + 1) π₂ π₃ x k := by
+private lemma peelWeight_nonneg (k : ℕ) : 0 ≤ peelWeight (n + 1) π₂ π₃ x k := by
   obtain ⟨hπ₂, -, -⟩ := h₂
   obtain ⟨hπ₃, -, -⟩ := h₃
   exact le_min (le_min (hπ₂ k) (hπ₃ _)) hx
 
-lemma peelWeight_eq_zero_of_lt {k : ℕ} (hk : n < k) : peelWeight (n + 1) π₂ π₃ x k = 0 := by
+private lemma peelWeight_eq_zero_of_lt {k : ℕ} (hk : n < k) : peelWeight (n + 1) π₂ π₃ x k = 0 := by
   refine le_antisymm ?_ (peelWeight_nonneg hx h₂ h₃ k)
   exact ((min_le_left _ _).trans (min_le_left _ _)).trans (h₂.eq_zero_of_lt hk).le
 
-lemma peelWeight_zero : peelWeight (n + 1) π₂ π₃ x 0 = 0 := by
+private lemma peelWeight_zero : peelWeight (n + 1) π₂ π₃ x 0 = 0 := by
   refine le_antisymm ?_ (peelWeight_nonneg hx h₂ h₃ 0)
   exact ((min_le_left _ _).trans (min_le_right _ _)).trans (h₃.eq_zero_of_lt (by grind)).le
 
-lemma isDecreasingOn_sub_peelWeight : IsDecreasingOn n (π₂ - peelWeight (n + 1) π₂ π₃ x) := by
+private lemma isDecreasingOn_sub_peelWeight :
+    IsDecreasingOn n (π₂ - peelWeight (n + 1) π₂ π₃ x) := by
   have hN := peelWeight_eq_zero_of_lt hx h₂ h₃ (Nat.lt_succ_self n)
   obtain ⟨hπ₂₀, hπ₂, hπ₂N⟩ := h₂
   obtain ⟨-, hπ₃, -⟩ := h₃
@@ -289,7 +288,7 @@ lemma isDecreasingOn_sub_peelWeight : IsDecreasingOn n (π₂ - peelWeight (n + 
   simp only [Pi.sub_apply, peelWeight]
   grind [hπ₂ (Nat.le_succ k), hπ₃ (by grind : n + 1 - (k + 1) ≤ n + 1 - k)]
 
-lemma isDecreasingOn_sub_peelWeight_reflect :
+private lemma isDecreasingOn_sub_peelWeight_reflect :
     IsDecreasingOn n (π₃ - fun c ↦ peelWeight (n + 1) π₂ π₃ x (n + 1 - c)) := by
   have h₀ := peelWeight_zero hx h₂ h₃
   obtain ⟨hπ₂₀, hπ₂, hπ₂N⟩ := h₂

@@ -43,7 +43,7 @@ variable {p : ℕ} [Fact p.Prime]
 
 /-- The indicator function of `u + v + w = 0` on `ZMod p` is a polynomial of degree at most
 `p - 1`. -/
-lemma exists_ite_add_add_eq_zero_eq_sum :
+private lemma exists_ite_add_add_eq_zero_eq_sum :
     ∃ S : Finset (Fin 3 →₀ ℕ), ∃ κ : (Fin 3 →₀ ℕ) → ZMod p, (∀ e ∈ S, e 0 + e 1 + e 2 ≤ p - 1) ∧
       ∀ u v w : ZMod p,
         (if u + v + w = 0 then 1 else 0) = ∑ e ∈ S, κ e * (u ^ e 0 * v ^ e 1 * w ^ e 2) := by
@@ -68,12 +68,11 @@ lemma exists_ite_add_add_eq_zero_eq_sum :
     · simp [h, zero_pow (Nat.sub_ne_zero_of_lt (Fact.out : p.Prime).one_lt)]
     · simp [h, ZMod.pow_card_sub_one_eq_one h]
 
-omit [Fact p.Prime] in
 /-- If the indicator function of `u + v + w = 0` on `ZMod p` is the polynomial with coefficients
 `κ e` and exponent vectors `e ∈ S`, then the indicator function of `x + y + z = 0` on
 `Fin d → ZMod p` is the product of these polynomials over the coordinates, expanded as a sum over
 `σ : Fin d → Fin 3 →₀ ℕ`. -/
-lemma ite_eq_sum_prod {S : Finset (Fin 3 →₀ ℕ)} {κ : (Fin 3 →₀ ℕ) → ZMod p}
+private lemma ite_eq_sum_prod {S : Finset (Fin 3 →₀ ℕ)} {κ : (Fin 3 →₀ ℕ) → ZMod p}
     (hf : ∀ u v w : ZMod p,
       (if u + v + w = 0 then 1 else 0) = ∑ e ∈ S, κ e * (u ^ e 0 * v ^ e 1 * w ^ e 2))
     {d : ℕ} (x y z : Fin d → ZMod p) :
@@ -88,7 +87,8 @@ omit [Fact p.Prime] in
 /-- If every `σ t` is the exponent vector of a monomial of degree at most `p - 1`, then the
 degrees of the monomial `∏ t, x t ^ σ t 0 * y t ^ σ t 1 * z t ^ σ t 2` in `x`, `y` and `z` add up
 to at most `(p - 1) * d`. -/
-lemma sum_add_sum_add_sum_le {S : Finset (Fin 3 →₀ ℕ)} (hS : ∀ e ∈ S, e 0 + e 1 + e 2 ≤ p - 1)
+private lemma sum_add_sum_add_sum_le {S : Finset (Fin 3 →₀ ℕ)}
+    (hS : ∀ e ∈ S, e 0 + e 1 + e 2 ≤ p - 1)
     {d : ℕ} {σ : Fin d → Fin 3 →₀ ℕ} (hσ : σ ∈ Fintype.piFinset fun _ ↦ S) :
     ∑ t, σ t 0 + ∑ t, σ t 1 + ∑ t, σ t 2 ≤ (p - 1) * d := by
   rw [← sum_add_distrib, ← sum_add_distrib]
@@ -101,7 +101,7 @@ lemma sum_add_sum_add_sum_le {S : Finset (Fin 3 →₀ ℕ)} (hS : ∀ e ∈ S, 
 /-- If every `σ t` is the exponent vector of a monomial of degree at most `p - 1` and the degree
 `∑ t, σ t s` in the `s`-th variable is at most `(p - 1) * d / 3`, then `fun t ↦ σ t s` is in
 `lowDegreeExponents p d`. -/
-lemma mem_lowDegreeExponents_of_three_mul_sum_le {S : Finset (Fin 3 →₀ ℕ)}
+private lemma mem_lowDegreeExponents_of_three_mul_sum_le {S : Finset (Fin 3 →₀ ℕ)}
     (hS : ∀ e ∈ S, e 0 + e 1 + e 2 ≤ p - 1) {d : ℕ} {σ : Fin d → Fin 3 →₀ ℕ}
     (hσ : σ ∈ Fintype.piFinset fun _ ↦ S) {s : Fin 3} (hs : 3 * ∑ t, σ t s ≤ (p - 1) * d) :
     (fun t ↦ σ t s) ∈ lowDegreeExponents p d := by
@@ -112,7 +112,7 @@ lemma mem_lowDegreeExponents_of_three_mul_sum_le {S : Finset (Fin 3 →₀ ℕ)}
 
 omit [Fact p.Prime] in
 /-- Grouping a sum according to a map into a finite set. -/
-lemma sum_mul_eq_sum_mul_sum {κ α R : Type*} [CommSemiring R] [DecidableEq α] {s : Finset κ}
+private lemma sum_mul_eq_sum_mul_sum {κ α R : Type*} [CommSemiring R] [DecidableEq α] {s : Finset κ}
     {A : Finset α} (a : κ → α) (ha : ∀ σ ∈ s, a σ ∈ A) (u : α → R) (v : κ → R) :
     ∑ σ ∈ s, u (a σ) * v σ = ∑ α ∈ A, u α * ∑ σ ∈ s with a σ = α, v σ := by
   rw [← sum_fiberwise_of_maps_to ha]
@@ -125,7 +125,7 @@ variable (p) in
 /-- The indicator function of `x + y + z = 0` on `(Fin d → ZMod p) ^ 3` is a sum of
 `3 * #(lowDegreeExponents p d)` slices: products of a monomial `x ^ α`, `y ^ β` or `z ^ γ` of low
 degree and a function of the other two variables. -/
-lemma exists_ite_eq_sum_slices (d : ℕ) :
+private lemma exists_ite_eq_sum_slices (d : ℕ) :
     ∃ F G H : (Fin d → ℕ) → (Fin d → ZMod p) → (Fin d → ZMod p) → ZMod p,
       ∀ x y z : Fin d → ZMod p, (if x + y + z = 0 then 1 else 0) =
         ∑ α ∈ lowDegreeExponents p d, (∏ t, x t ^ α t) * F α y z +

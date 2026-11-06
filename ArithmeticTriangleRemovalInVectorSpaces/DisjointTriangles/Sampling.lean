@@ -5,7 +5,6 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
 public import ArithmeticTriangleRemovalInVectorSpaces.Triangle.Basic
 import ArithmeticTriangleRemovalInVectorSpaces.LinearMap.Card
@@ -57,37 +56,37 @@ section Good
 variable {G : Type*} [AddCommGroup G] [DecidableEq G]
 
 /-- The triangles of `X × Y × Z` other than `(x, y, z)` that share a vertex with it. -/
-def adjacentTriangles (X Y Z : Finset G) (x y z : G) : Finset (G × G × G) :=
+private def adjacentTriangles (X Y Z : Finset G) (x y z : G) : Finset (G × G × G) :=
   (triangles X Y Z).filter fun (x', y', z') ↦ (x' = x ∨ y' = y ∨ z' = z) ∧ (x', y', z') ≠ (x, y, z)
 
 /-- The good triangles of Fox and Lovász: the triangles of `X × Y × Z` that share no vertex with
 another triangle of `X × Y × Z`. -/
-def goodTriangles (X Y Z : Finset G) : Finset (G × G × G) :=
+private def goodTriangles (X Y Z : Finset G) : Finset (G × G × G) :=
   (triangles X Y Z).filter fun (x, y, z) ↦ adjacentTriangles X Y Z x y z = ∅
 
 variable {X Y Z X' Y' Z' : Finset G} {x y z x' y' z' : G}
 
 @[simp]
-lemma mem_adjacentTriangles :
+private lemma mem_adjacentTriangles :
     (x', y', z') ∈ adjacentTriangles X Y Z x y z ↔
       (x', y', z') ∈ triangles X Y Z ∧ (x' = x ∨ y' = y ∨ z' = z) ∧ (x', y', z') ≠ (x, y, z) :=
   mem_filter
 
 @[simp]
-lemma mem_goodTriangles :
+private lemma mem_goodTriangles :
     (x, y, z) ∈ goodTriangles X Y Z ↔
       (x, y, z) ∈ triangles X Y Z ∧ adjacentTriangles X Y Z x y z = ∅ :=
   mem_filter
 
-lemma goodTriangles_subset (X Y Z : Finset G) : goodTriangles X Y Z ⊆ triangles X Y Z :=
+private lemma goodTriangles_subset (X Y Z : Finset G) : goodTriangles X Y Z ⊆ triangles X Y Z :=
   filter_subset _ _
 
-lemma adjacentTriangles_mono (hX : X' ⊆ X) (hY : Y' ⊆ Y) (hZ : Z' ⊆ Z) :
+private lemma adjacentTriangles_mono (hX : X' ⊆ X) (hY : Y' ⊆ Y) (hZ : Z' ⊆ Z) :
     adjacentTriangles X' Y' Z' x y z ⊆ adjacentTriangles X Y Z x y z :=
   filter_subset_filter _ (triangles_mono hX hY hZ)
 
 /-- A triangle that shares a vertex with a good triangle `(x, y, z)` is `(x, y, z)` itself. -/
-lemma eq_of_mem_goodTriangles (ht : (x, y, z) ∈ goodTriangles X Y Z)
+private lemma eq_of_mem_goodTriangles (ht : (x, y, z) ∈ goodTriangles X Y Z)
     (ht' : (x', y', z') ∈ triangles X Y Z) (h : x' = x ∨ y' = y ∨ z' = z) :
     x' = x ∧ y' = y ∧ z' = z := by
   obtain ⟨-, hempty⟩ := mem_goodTriangles.1 ht
@@ -97,7 +96,7 @@ lemma eq_of_mem_goodTriangles (ht : (x, y, z) ∈ goodTriangles X Y Z)
 
 /-- If every vertex lies in at most `R` triangles, then at most `3 * R` triangles share a vertex
 with a given triangle. -/
-lemma card_adjacentTriangles_le {R : ℝ}
+private lemma card_adjacentTriangles_le {R : ℝ}
     (hX : ∀ v, #((triangles X Y Z).filter fun (x, _, _) ↦ x = v) ≤ R)
     (hY : ∀ v, #((triangles X Y Z).filter fun (_, y, _) ↦ y = v) ≤ R)
     (hZ : ∀ v, #((triangles X Y Z).filter fun (_, _, z) ↦ z = v) ≤ R) (x y z : G) :
@@ -114,7 +113,7 @@ lemma card_adjacentTriangles_le {R : ℝ}
 
 /-- The good triangles form a multicolored sum-free family: if `(x, y, z)`, `(x', y', z')` and
 `(x'', y'', z'')` are good, then `x + y' + z'' = 0` only when the three triangles coincide. -/
-lemma isMulticoloredSumFree_goodTriangles :
+private lemma isMulticoloredSumFree_goodTriangles :
     IsMulticoloredSumFree (fun (⟨(x, _, _), _⟩ : goodTriangles X Y Z) ↦ x)
       (fun ⟨(_, y, _), _⟩ ↦ y) fun ⟨(_, _, z), _⟩ ↦ z := by
   rintro ⟨⟨x, y, z⟩, hs⟩ ⟨⟨x', y', z'⟩, ht⟩ ⟨⟨x'', y'', z''⟩, hu⟩
@@ -143,7 +142,7 @@ variable {p : ℕ} [Fact p.Prime] {V W ι : Type*} [AddCommGroup V] [Module (ZMo
 omit [Fintype V] [DecidableEq V] in
 /-- A multicolored sum-free family inside a subspace `U` has at most `Nat.card U ^ (1 - c p)`
 members. -/
-lemma IsMulticoloredSumFree.card_le_natCard_rpow [Finite V] [Fintype ι] {x y z : ι → V}
+private lemma IsMulticoloredSumFree.card_le_natCard_rpow [Finite V] [Fintype ι] {x y z : ι → V}
     (h : IsMulticoloredSumFree x y z) {U : Submodule (ZMod p) V} (hx : ∀ i, x i ∈ U)
     (hy : ∀ i, y i ∈ U) (hz : ∀ i, z i ∈ U) :
     (Fintype.card ι : ℝ) ≤ Nat.card U ^ (1 - c p) := by
@@ -157,7 +156,7 @@ lemma IsMulticoloredSumFree.card_le_natCard_rpow [Finite V] [Fintype ι] {x y z 
 omit [Fintype V] in
 /-- The good triangles of sets inside a subspace `U` form a multicolored sum-free family in `U`,
 so there are at most `Nat.card U ^ (1 - c p)` of them. -/
-lemma card_goodTriangles_le [Finite V] (U : Submodule (ZMod p) V) (hX : ∀ x ∈ X, x ∈ U)
+private lemma card_goodTriangles_le [Finite V] (U : Submodule (ZMod p) V) (hX : ∀ x ∈ X, x ∈ U)
     (hY : ∀ y ∈ Y, y ∈ U) (hZ : ∀ z ∈ Z, z ∈ U) :
     (#(goodTriangles X Y Z) : ℝ) ≤ Nat.card U ^ (1 - c p) := by
   rw [← Fintype.card_coe]
@@ -171,7 +170,7 @@ lemma card_goodTriangles_le [Finite V] (U : Submodule (ZMod p) V) (hX : ∀ x �
 
 /-- The arithmetic of Lemma 5 of Fox and Lovász: if `5 * ρ * N ≤ w ≤ 5 * p * ρ * N` and
 `0 < ρ ≤ 1`, then `w ^ 2 * (1 + N / w) ^ (1 - c) ≤ 30 * p ^ 2 * ρ ^ (1 + c) * N ^ 2`. -/
-lemma sq_mul_one_add_div_rpow_le {p ρ N w c : ℝ} (hρ₀ : 0 < ρ) (hρ₁ : ρ ≤ 1) (hN : 0 < N)
+private lemma sq_mul_one_add_div_rpow_le {p ρ N w c : ℝ} (hρ₀ : 0 < ρ) (hρ₁ : ρ ≤ 1) (hN : 0 < N)
     (hc₀ : 0 ≤ c) (hc₁ : c ≤ 1) (hw₁ : 5 * (ρ * N) ≤ w) (hw₂ : w ≤ p * (5 * (ρ * N))) :
     w ^ 2 * (1 + N / w) ^ (1 - c) ≤ 30 * p ^ 2 * ρ ^ (1 + c) * N ^ 2 := by
   have hw : 0 < w := lt_of_lt_of_le (by positivity) hw₁
@@ -194,8 +193,8 @@ lemma sq_mul_one_add_div_rpow_le {p ρ N w c : ℝ} (hρ₀ : 0 < ρ) (hρ₁ : 
 
 /-- **Jensen's inequality** for `t ↦ t ^ q` with `0 ≤ q ≤ 1`: a sum of `q`-th powers is at most the
 number of terms times the `q`-th power of the mean. -/
-lemma sum_rpow_le_card_mul_rpow {κ : Type*} (s : Finset κ) {f : κ → ℝ} (hf : ∀ i ∈ s, 0 ≤ f i)
-    {q : ℝ} (hq₀ : 0 ≤ q) (hq₁ : q ≤ 1) :
+private lemma sum_rpow_le_card_mul_rpow {κ : Type*} (s : Finset κ) {f : κ → ℝ}
+    (hf : ∀ i ∈ s, 0 ≤ f i) {q : ℝ} (hq₀ : 0 ≤ q) (hq₁ : q ≤ 1) :
     ∑ i ∈ s, f i ^ q ≤ #s * ((∑ i ∈ s, f i) / #s) ^ q := by
   rcases s.eq_empty_or_nonempty with rfl | hs
   · simp
@@ -212,7 +211,7 @@ variable [Fintype (V →ₗ[ZMod p] W)]
 omit [Fintype V] [DecidableEq V] in
 /-- The linear maps vanishing at linearly independent vectors `v 0, …, v (r - 1)` form a
 proportion `#W ^ (-r)` of all linear maps. -/
-lemma card_filter_forall_apply_eq_zero {r : ℕ} {v : Fin r → V}
+private lemma card_filter_forall_apply_eq_zero {r : ℕ} {v : Fin r → V}
     (hv : LinearIndependent (ZMod p) v) :
     (#{A : V →ₗ[ZMod p] W | ∀ i, A (v i) = 0} : ℝ) =
       Fintype.card (V →ₗ[ZMod p] W) / Fintype.card W ^ r := by
@@ -224,7 +223,7 @@ lemma card_filter_forall_apply_eq_zero {r : ℕ} {v : Fin r → V}
 omit [Fintype V] [DecidableEq V] in
 /-- The linear maps vanishing at a nonzero vector `v` form a proportion `1 / #W` of all linear
 maps. -/
-lemma card_filter_apply_eq_zero_of_ne_zero {v : V} (hv : v ≠ 0) :
+private lemma card_filter_apply_eq_zero_of_ne_zero {v : V} (hv : v ≠ 0) :
     (#{A : V →ₗ[ZMod p] W | A v = 0} : ℝ) = Fintype.card (V →ₗ[ZMod p] W) / Fintype.card W := by
   rw [← pow_one (Fintype.card W : ℝ), ← card_filter_forall_apply_eq_zero
     (linearIndependent_unique_iff.2 (by simpa using hv) : LinearIndependent (ZMod p) ![v])]
@@ -233,7 +232,8 @@ lemma card_filter_apply_eq_zero_of_ne_zero {v : V} (hv : v ≠ 0) :
 omit [Fintype V] [DecidableEq V] in
 /-- The linear maps vanishing at linearly independent vectors `x` and `y` form a proportion
 `#W ^ (-2)` of all linear maps. -/
-lemma card_filter_apply_eq_zero_of_linearIndependent (hli : LinearIndependent (ZMod p) ![x, y]) :
+private lemma card_filter_apply_eq_zero_of_linearIndependent
+    (hli : LinearIndependent (ZMod p) ![x, y]) :
     (#{A : V →ₗ[ZMod p] W | A x = 0 ∧ A y = 0} : ℝ) =
       Fintype.card (V →ₗ[ZMod p] W) / Fintype.card W ^ 2 := by
   rw [← card_filter_forall_apply_eq_zero hli]
@@ -242,7 +242,7 @@ lemma card_filter_apply_eq_zero_of_linearIndependent (hli : LinearIndependent (Z
 omit [Fintype V] [DecidableEq V] in
 /-- If `x` and `y` are linearly independent and `u` lies outside their span, then the linear maps
 vanishing at `u`, `x` and `y` form a proportion `#W ^ (-3)` of all linear maps. -/
-lemma card_filter_apply_eq_zero_of_notMem_span {u : V}
+private lemma card_filter_apply_eq_zero_of_notMem_span {u : V}
     (hli : LinearIndependent (ZMod p) ![x, y]) (hu : u ∉ span (ZMod p) {x, y}) :
     (#{A : V →ₗ[ZMod p] W | A u = 0 ∧ A x = 0 ∧ A y = 0} : ℝ) =
       Fintype.card (V →ₗ[ZMod p] W) / Fintype.card W ^ 3 := by
@@ -255,7 +255,8 @@ omit [Fintype V] [DecidableEq V] in
 /-- If `x` and `y` are linearly independent and `x'` or `y'` lies outside their span, then the
 linear maps vanishing at `x`, `y`, `x'` and `y'` form a proportion at most `#W ^ (-3)` of all
 linear maps. -/
-lemma card_filter_apply_eq_zero_le_of_not_and_mem_span (hli : LinearIndependent (ZMod p) ![x, y])
+private lemma card_filter_apply_eq_zero_le_of_not_and_mem_span
+    (hli : LinearIndependent (ZMod p) ![x, y])
     (h : ¬(x' ∈ span (ZMod p) {x, y} ∧ y' ∈ span (ZMod p) {x, y})) :
     (#{A : V →ₗ[ZMod p] W | A x = 0 ∧ A y = 0 ∧ A x' = 0 ∧ A y' = 0} : ℝ) ≤
       Fintype.card (V →ₗ[ZMod p] W) / Fintype.card W ^ 3 := by
@@ -263,11 +264,11 @@ lemma card_filter_apply_eq_zero_le_of_not_and_mem_span (hli : LinearIndependent 
   · rw [← card_filter_apply_eq_zero_of_notMem_span hli h]
     exact_mod_cast card_le_card (monotone_filter_right _ fun A ↦ by tauto)
 
-omit [Fact p.Prime] [Fintype V] [Module (ZMod p) V] in
+omit [Fintype V] [Module (ZMod p) V] in
 /-- If the span of the first two vertices of a triangle `(x, y, z)` contains the first two vertices
 of no other triangle, then each triangle sharing a vertex with `(x, y, z)` has one of its first two
 vertices outside that span. -/
-lemma not_and_mem_span_of_mem_adjacentTriangles [Module (ZMod p) V]
+private lemma not_and_mem_span_of_mem_adjacentTriangles [Module (ZMod p) V]
     (hspan : ∀ x y z, (x, y, z) ∈ triangles X Y Z → ∀ x' y' z', (x', y', z') ∈ triangles X Y Z →
       x' ∈ span (ZMod p) {x, y} → y' ∈ span (ZMod p) {x, y} → x' = x ∧ y' = y)
     (ht : (x, y, z) ∈ triangles X Y Z) (ht' : (x', y', z') ∈ adjacentTriangles X Y Z x y z) :
@@ -278,11 +279,11 @@ lemma not_and_mem_span_of_mem_adjacentTriangles [Module (ZMod p) V]
   simp only [mem_triangles] at ht ht''
   grind
 
-omit [Fact p.Prime] [Fintype V] [Fintype W] in
+omit [Fintype V] [Fintype W] in
 /-- If a linear map `A` vanishes at the first two vertices of a triangle `(x, y, z)` that is not
 good in the kernel of `A`, then `A` vanishes at the first two vertices of a triangle sharing a
 vertex with `(x, y, z)`. -/
-lemma filter_apply_eq_zero_subset [DecidableEq (V →ₗ[ZMod p] W)]
+private lemma filter_apply_eq_zero_subset [DecidableEq (V →ₗ[ZMod p] W)]
     (ht : (x, y, z) ∈ triangles X Y Z) :
     ({A : V →ₗ[ZMod p] W | A x = 0 ∧ A y = 0} : Finset _) ⊆
       ({A : V →ₗ[ZMod p] W | (x, y, z) ∈
@@ -308,7 +309,7 @@ omit [Fintype V] in
 `(1 - 3 * R / #W) / #W ^ 2` of the linear maps `A`: its first two vertices lie in the kernel with
 probability `#W ^ (-2)`, and each of the at most `3 * R` triangles sharing a vertex with it lies in
 the kernel as well with probability at most `#W ^ (-3)`. -/
-lemma card_filter_mem_goodTriangles_ge {R : ℝ}
+private lemma card_filter_mem_goodTriangles_ge {R : ℝ}
     (hli : ∀ x y z, (x, y, z) ∈ triangles X Y Z → LinearIndependent (ZMod p) ![x, y])
     (hspan : ∀ x y z, (x, y, z) ∈ triangles X Y Z → ∀ x' y' z', (x', y', z') ∈ triangles X Y Z →
       x' ∈ span (ZMod p) {x, y} → y' ∈ span (ZMod p) {x, y} → x' = x ∧ y' = y)
@@ -336,7 +337,7 @@ omit [DecidableEq V] in
 /-- The kernels of the linear maps `A : V →ₗ[ZMod p] W` have at most
 `#(V →ₗ[ZMod p] W) * (1 + #V / #W)` elements in total: each nonzero vector lies in a proportion
 `1 / #W` of the kernels. -/
-lemma sum_card_ker_le :
+private lemma sum_card_ker_le :
     ∑ A : V →ₗ[ZMod p] W, (#{v | A v = 0} : ℝ) ≤
       Fintype.card (V →ₗ[ZMod p] W) * (1 + Fintype.card V / Fintype.card W) := by
   classical
@@ -357,7 +358,7 @@ lemma sum_card_ker_le :
 
 omit [Fintype W] [Fintype (V →ₗ[ZMod p] W)] in
 /-- The good triangles in the kernel of `A` number at most `#(ker A) ^ (1 - c p)`. -/
-lemma card_goodTriangles_filter_le (A : V →ₗ[ZMod p] W) :
+private lemma card_goodTriangles_filter_le (A : V →ₗ[ZMod p] W) :
     (#(goodTriangles (X.filter (A · = 0)) (Y.filter (A · = 0)) (Z.filter (A · = 0))) : ℝ) ≤
       (#{v | A v = 0} : ℝ) ^ (1 - c p) := by
   grw [card_goodTriangles_le (LinearMap.ker A) (fun x hx ↦ by simp_all) (fun y hy ↦ by simp_all)
@@ -366,7 +367,7 @@ lemma card_goodTriangles_filter_le (A : V →ₗ[ZMod p] W) :
 
 /-- Summing the bound of `card_goodTriangles_le` over the kernels of all linear maps `A`, with
 Jensen's inequality for the average size of the kernels. -/
-lemma sum_card_goodTriangles_le :
+private lemma sum_card_goodTriangles_le :
     ∑ A : V →ₗ[ZMod p] W,
       (#(goodTriangles (X.filter (A · = 0)) (Y.filter (A · = 0)) (Z.filter (A · = 0))) : ℝ) ≤
       Fintype.card (V →ₗ[ZMod p] W) * (1 + Fintype.card V / Fintype.card W) ^ (1 - c p) := by
@@ -385,9 +386,9 @@ lemma sum_card_goodTriangles_le :
         grw [sum_card_ker_le, mul_div_cancel_left₀ _ (Nat.cast_pos.2 Fintype.card_pos).ne']
         linarith [c_lt_one hp]
 
-omit [Fact p.Prime] [Fintype V] [Fintype W] in
+omit [Fintype V] [Fintype W] in
 /-- Double counting the pairs `(t, A)` such that the triangle `t` is good in the kernel of `A`. -/
-lemma sum_card_filter_mem_goodTriangles_eq :
+private lemma sum_card_filter_mem_goodTriangles_eq :
     ∑ t ∈ triangles X Y Z, #{A : V →ₗ[ZMod p] W |
       t ∈ goodTriangles (X.filter (A · = 0)) (Y.filter (A · = 0)) (Z.filter (A · = 0))} =
       ∑ A : V →ₗ[ZMod p] W,
@@ -402,7 +403,7 @@ lemma sum_card_filter_mem_goodTriangles_eq :
 omit [DecidableEq W] [Fintype (V →ₗ[ZMod p] W)] in
 /-- Double counting the pairs `(t, A)` such that the triangle `t` is good in the kernel of `A`
 bounds the number of triangles. -/
-lemma card_triangles_mul_le {R : ℝ}
+private lemma card_triangles_mul_le {R : ℝ}
     (hli : ∀ x y z, (x, y, z) ∈ triangles X Y Z → LinearIndependent (ZMod p) ![x, y])
     (hspan : ∀ x y z, (x, y, z) ∈ triangles X Y Z → ∀ x' y' z', (x', y', z') ∈ triangles X Y Z →
       x' ∈ span (ZMod p) {x, y} → y' ∈ span (ZMod p) {x, y} → x' = x ∧ y' = y)
@@ -425,7 +426,7 @@ lemma card_triangles_mul_le {R : ℝ}
 omit [DecidableEq W] [Fintype (V →ₗ[ZMod p] W)] in
 /-- If every vertex lies in at most `R` triangles and `5 * R ≤ #W`, then
 `2 * #(triangles X Y Z) ≤ 5 * #W ^ 2 * (1 + #V / #W) ^ (1 - c p)`. -/
-lemma two_mul_card_triangles_le {R : ℝ}
+private lemma two_mul_card_triangles_le {R : ℝ}
     (hli : ∀ x y z, (x, y, z) ∈ triangles X Y Z → LinearIndependent (ZMod p) ![x, y])
     (hspan : ∀ x y z, (x, y, z) ∈ triangles X Y Z → ∀ x' y' z', (x', y', z') ∈ triangles X Y Z →
       x' ∈ span (ZMod p) {x, y} → y' ∈ span (ZMod p) {x, y} → x' = x ∧ y' = y)
@@ -446,7 +447,7 @@ end Count
 
 /-- Lemma 5 of Fox and Lovász for `ρ ≤ 1`, given `p ^ n ≤ 5 * ρ * #V < p ^ (n + 1)`. The proof
 samples linear maps to `Fin (n + 1) → ZMod p`. -/
-lemma card_triangles_le_of_degree_le_of_pow_le {ρ : ℝ} {n : ℕ}
+private lemma card_triangles_le_of_degree_le_of_pow_le {ρ : ℝ} {n : ℕ}
     (hli : ∀ x y z, (x, y, z) ∈ triangles X Y Z → LinearIndependent (ZMod p) ![x, y])
     (hspan : ∀ x y z, (x, y, z) ∈ triangles X Y Z → ∀ x' y' z', (x', y', z') ∈ triangles X Y Z →
       x' ∈ span (ZMod p) {x, y} → y' ∈ span (ZMod p) {x, y} → x' = x ∧ y' = y)

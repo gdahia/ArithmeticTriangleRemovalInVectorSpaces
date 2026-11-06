@@ -5,11 +5,10 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import ArithmeticTriangleRemovalInVectorSpaces.Construction.TypeClass
-public import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Pebody
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
 import ArithmeticTriangleRemovalInVectorSpaces.Construction.Family
+import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Pebody
 import Mathlib.Algebra.BigOperators.Field
 import Mathlib.Algebra.Order.Ring.GeomSum
 
@@ -53,32 +52,32 @@ variable {n N : ℕ} {ρ : ℝ}
 
 /-- The truncated geometric distribution `k ↦ ρ ^ k / ∑ j ∈ range (N + 1), ρ ^ j` on
 `range (N + 1)`. -/
-noncomputable def geomDist (N : ℕ) (ρ : ℝ) (k : ℕ) : ℝ :=
+private noncomputable def geomDist (N : ℕ) (ρ : ℝ) (k : ℕ) : ℝ :=
   ρ ^ k / ∑ j ∈ range (N + 1), ρ ^ j
 
-lemma geomDist_pos (hρ : 0 < ρ) (k : ℕ) : 0 < geomDist N ρ k :=
+private lemma geomDist_pos (hρ : 0 < ρ) (k : ℕ) : 0 < geomDist N ρ k :=
   div_pos (pow_pos hρ k) (geom_sum_pos hρ.le N.succ_ne_zero)
 
-lemma sum_geomDist (hρ : 0 < ρ) : ∑ k ∈ range (N + 1), geomDist N ρ k = 1 := by
+private lemma sum_geomDist (hρ : 0 < ρ) : ∑ k ∈ range (N + 1), geomDist N ρ k = 1 := by
   simp only [geomDist]
   rw [← sum_div, div_self (geom_sum_pos hρ.le N.succ_ne_zero).ne']
 
-lemma geomDist_le_one (hρ : 0 < ρ) {k : ℕ} (hk : k ≤ N) : geomDist N ρ k ≤ 1 := by
+private lemma geomDist_le_one (hρ : 0 < ρ) {k : ℕ} (hk : k ≤ N) : geomDist N ρ k ≤ 1 := by
   rw [geomDist, div_le_one (geom_sum_pos hρ.le N.succ_ne_zero)]
   exact single_le_sum (fun j _ ↦ by positivity) (mem_range_succ_iff.2 hk)
 
-lemma geomDist_le_geomDist (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1) {k : ℕ} (hk : k ≤ N) :
+private lemma geomDist_le_geomDist (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1) {k : ℕ} (hk : k ≤ N) :
     geomDist N ρ N ≤ geomDist N ρ k := by
   rw [geomDist, geomDist, div_le_div_iff_of_pos_right (geom_sum_pos hρ₀.le N.succ_ne_zero)]
   exact pow_le_pow_of_le_one hρ₀.le hρ₁.le hk
 
-lemma log_inv_geomDist (hρ : 0 < ρ) (k : ℕ) :
+private lemma log_inv_geomDist (hρ : 0 < ρ) (k : ℕ) :
     log (geomDist N ρ k)⁻¹ = log (∑ j ∈ range (N + 1), ρ ^ j) - k * log ρ := by
   rw [geomDist, inv_div, log_div (geom_sum_pos hρ.le N.succ_ne_zero).ne' (by positivity),
     log_pow]
 
 /-- `geomDist N ρ` has mean `N / 3` if `3 * ∑ k, k * ρ ^ k = N * ∑ k, ρ ^ k`. -/
-lemma sum_mul_geomDist (hρ : 0 < ρ)
+private lemma sum_mul_geomDist (hρ : 0 < ρ)
     (hmean : 3 * ∑ k ∈ range (N + 1), k * ρ ^ k = N * ∑ k ∈ range (N + 1), ρ ^ k) :
     ∑ k ∈ range (N + 1), k * geomDist N ρ k = N / 3 := by
   simp only [geomDist, mul_div_assoc', ← sum_div]
@@ -87,7 +86,7 @@ lemma sum_mul_geomDist (hρ : 0 < ρ)
 
 /-- If each value `k ≤ N` appears in `a` between `t * μ k - T` and `t * μ k` times, then `n` lies
 between `t * ∑ k, μ k - (N + 1) * T` and `t * ∑ k, μ k`. -/
-lemma natCast_mem_Icc_of_card_filter_mem_Icc {a : Fin n → ℕ} (ha : ∀ r, a r ≤ N) {μ : ℕ → ℝ}
+private lemma natCast_mem_Icc_of_card_filter_mem_Icc {a : Fin n → ℕ} (ha : ∀ r, a r ≤ N) {μ : ℕ → ℝ}
     {t T : ℝ}
     (hD : ∀ k ∈ range (N + 1), (#{r | a r = k} : ℝ) ∈ Set.Icc (t * μ k - T) (t * μ k)) :
     (n : ℝ) ∈
@@ -108,7 +107,8 @@ lemma natCast_mem_Icc_of_card_filter_mem_Icc {a : Fin n → ℕ} (ha : ∀ r, a 
     obtain ⟨-, h⟩ := hD k hk
     exact h
 
-lemma sum_card_filter_mul_log_inv_geomDist {a : Fin n → ℕ} (ha : ∀ r, a r ≤ N) (hρ : 0 < ρ) :
+private lemma sum_card_filter_mul_log_inv_geomDist {a : Fin n → ℕ} (ha : ∀ r, a r ≤ N)
+    (hρ : 0 < ρ) :
     ∑ k ∈ range (N + 1), #{r | a r = k} * log (geomDist N ρ k)⁻¹ =
       n * log (∑ k ∈ range (N + 1), ρ ^ k) -
         (∑ k ∈ range (N + 1), (k : ℝ) * #{r | a r = k}) * log ρ := by
@@ -122,7 +122,7 @@ lemma sum_card_filter_mul_log_inv_geomDist {a : Fin n → ℕ} (ha : ∀ r, a r 
 /-- **The empirical mean.** If `geomDist N ρ` has mean `N / 3`, each value `k ≤ N` appears in `a`
 at least `t * geomDist N ρ k - T` times and `n ≤ t`, then the entries of `a` sum to at least
 `n * N / 3 - T * N * (N + 1)`. -/
-lemma mul_div_sub_le_sum_mul_card_filter {a : Fin n → ℕ} (hρ : 0 < ρ)
+private lemma mul_div_sub_le_sum_mul_card_filter {a : Fin n → ℕ} (hρ : 0 < ρ)
     (hmean : 3 * ∑ k ∈ range (N + 1), k * ρ ^ k = N * ∑ k ∈ range (N + 1), ρ ^ k) {t T : ℝ}
     (hT : 0 ≤ T) (hD : ∀ k ∈ range (N + 1), t * geomDist N ρ k - T ≤ #{r | a r = k})
     (hnt : n ≤ t) :
@@ -140,7 +140,7 @@ lemma mul_div_sub_le_sum_mul_card_filter {a : Fin n → ℕ} (hρ : 0 < ρ)
 
 /-- If `D ∈ [t * ψ - T, t * ψ]` and `n ∈ [t - S, t]` with `0 ≤ T ≤ S`, `1 ≤ n` and
 `0 < y ≤ ψ ≤ 1`, then `(D - n * ψ) ^ 2 / (n * ψ) ≤ S ^ 2 / y`. -/
-lemma sq_sub_mul_div_mul_le {D n t S T ψ y : ℝ} (hy : 0 < y) (hyψ : y ≤ ψ) (hψ : ψ ≤ 1)
+private lemma sq_sub_mul_div_mul_le {D n t S T ψ y : ℝ} (hy : 0 < y) (hyψ : y ≤ ψ) (hψ : ψ ≤ 1)
     (hn : 1 ≤ n) (hT : 0 ≤ T) (hTS : T ≤ S) (hD : D ∈ Set.Icc (t * ψ - T) (t * ψ))
     (hnt : n ∈ Set.Icc (t - S) t) :
     (D - n * ψ) ^ 2 / (n * ψ) ≤ S ^ 2 / y := by
@@ -154,7 +154,7 @@ lemma sq_sub_mul_div_mul_le {D n t S T ψ y : ℝ} (hy : 0 < y) (hyψ : y ≤ ψ
 `N / 3` and each value `k ≤ N` appears in `a` between `t * geomDist N ρ k - T` and
 `t * geomDist N ρ k` times, then `log #(typeClass a)` is at least
 `n * (log (∑ k, ρ ^ k) - N / 3 * log ρ)` minus an error of order `log n`. -/
-lemma le_log_card_typeClass_geomDist (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1)
+private lemma le_log_card_typeClass_geomDist (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1)
     (hmean : 3 * ∑ k ∈ range (N + 1), k * ρ ^ k = N * ∑ k ∈ range (N + 1), ρ ^ k) {T t : ℝ}
     (hT : 0 ≤ T) (a : Fin n → ℕ) (ha : ∀ r, a r ≤ N) (hn : 1 ≤ n)
     (hD : ∀ k ∈ range (N + 1),
@@ -181,7 +181,7 @@ lemma le_log_card_typeClass_geomDist (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1)
 
 /-- `(1 - c (N + 1)) * log (N + 1) ≤ log (∑ k, ρ ^ k) - N / 3 * log ρ` for `ρ ∈ (0, 1)`, by the
 definition of `c`. -/
-lemma one_sub_c_mul_log_le (hN : 0 < N) (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1) :
+private lemma one_sub_c_mul_log_le (hN : 0 < N) (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1) :
     (1 - c (N + 1)) * log (N + 1) ≤ log (∑ k ∈ range (N + 1), ρ ^ k) - N / 3 * log ρ := by
   have h := log_le_log (by positivity) (rpow_one_sub_c_le (p := N + 1) (by grind) hρ₀ hρ₁)
   rw [log_rpow (by positivity),
@@ -191,7 +191,7 @@ lemma one_sub_c_mul_log_le (hN : 0 < N) (hρ₀ : 0 < ρ) (hρ₁ : ρ < 1) :
 
 /-- Listing every `x ∈ s` exactly `C x` times gives a sequence `f` with values in `s` taking the
 value `k` under `g` exactly `∑ x ∈ s with g x = k, C x` times. -/
-lemma exists_card_filter_eq_sum {α β : Type*} [DecidableEq β] (s : Finset α) (C : α → ℕ) :
+private lemma exists_card_filter_eq_sum {α β : Type*} [DecidableEq β] (s : Finset α) (C : α → ℕ) :
     ∃ (n : ℕ) (f : Fin n → α), (∀ r, f r ∈ s) ∧
       ∀ (g : α → β) (k : β), #{r | g (f r) = k} = ∑ x ∈ s with g x = k, C x := by
   classical
@@ -205,8 +205,8 @@ lemma exists_card_filter_eq_sum {α β : Type*} [DecidableEq β] (s : Finset α)
 /-- **Rounding a coupling.** Rounding `t * J` down on the triples with sum `N` gives a sequence
 `f₀` of such triples in which, for every `g`, the value `k` of `g` appears between
 `t * marginal N J g k - #(sumTriples N)` and `t * marginal N J g k` times. -/
-lemma exists_card_filter_mem_Icc {J : ℕ × ℕ × ℕ → ℝ} (hJ : ∀ x, 0 ≤ J x) {t : ℝ} (ht : 0 ≤ t) :
-    ∃ (n : ℕ) (f₀ : Fin n → ℕ × ℕ × ℕ), (∀ r, f₀ r ∈ sumTriples N) ∧
+private lemma exists_card_filter_mem_Icc {J : ℕ × ℕ × ℕ → ℝ} (hJ : ∀ x, 0 ≤ J x) {t : ℝ}
+    (ht : 0 ≤ t) : ∃ (n : ℕ) (f₀ : Fin n → ℕ × ℕ × ℕ), (∀ r, f₀ r ∈ sumTriples N) ∧
       ∀ (g : ℕ × ℕ × ℕ → ℕ) (k : ℕ), (#{r | g (f₀ r) = k} : ℝ) ∈
         Set.Icc (t * marginal N J g k - #(sumTriples N)) (t * marginal N J g k) := by
   obtain ⟨n, f₀, hf₀, hcard⟩ :=
@@ -227,19 +227,20 @@ lemma exists_card_filter_mem_Icc {J : ℕ × ℕ × ℕ → ℝ} (hJ : ∀ x, 0 
     intro x _
     exact Nat.floor_le (mul_nonneg ht (hJ x))
 
-lemma marginal_inv_smul_eq_geomDist {J : ℕ × ℕ × ℕ → ℝ} {g : ℕ × ℕ × ℕ → ℕ}
+private lemma marginal_inv_smul_eq_geomDist {J : ℕ × ℕ × ℕ → ℝ} {g : ℕ × ℕ × ℕ → ℕ}
     (hg : marginal N J g = geom N ρ) {k : ℕ} (hk : k ≤ N) :
     marginal N ((∑ j ∈ range (N + 1), ρ ^ j)⁻¹ • J) g k = geomDist N ρ k := by
   simp [marginal_smul, hg, geom, geomDist, hk, div_eq_inv_mul]
 
-lemma card_sumTriples_le (N : ℕ) : #(sumTriples N) ≤ (N + 1) ^ 3 := by
+private lemma card_sumTriples_le (N : ℕ) : #(sumTriples N) ≤ (N + 1) ^ 3 := by
   grw [card_le_card (t := range (N + 1) ×ˢ range (N + 1) ×ˢ range (N + 1)) ?_]
   · simp [pow_three]
   · rintro ⟨a, b, c⟩ h
     grind [mem_sumTriples]
 
 /-- For `ρ ∈ [1 / 2, 1]`, `(geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N`. -/
-lemma inv_geomDist_le (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ ≤ 1) : (geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N := by
+private lemma inv_geomDist_le (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ ≤ 1) :
+    (geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N := by
   rw [geomDist, inv_div, div_le_iff₀ (pow_pos (by linarith) N), mul_assoc, ← mul_pow]
   grw [sum_le_card_nsmul _ _ 1 fun j _ ↦ pow_le_one₀ (by linarith) hρ₁]
   simp only [card_range, nsmul_one, Nat.cast_add_one]
@@ -247,8 +248,8 @@ lemma inv_geomDist_le (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ ≤ 1) : (geomDist N 
 
 /-- For `N > 0`, `0 ≤ T ≤ (N + 1) ^ 3` and `ρ ∈ [1 / 2, 1)`, the error term of
 `le_log_card_typeClass_geomDist` is at most `2 ^ (N + 1) * (N + 1) ^ 10`. -/
-lemma mul_one_add_sq_div_geomDist_sub_le (hN : 0 < N) (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ < 1) {T : ℝ}
-    (hT₀ : 0 ≤ T) (hT : T ≤ (N + 1) ^ 3) :
+private lemma mul_one_add_sq_div_geomDist_sub_le (hN : 0 < N) (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ < 1)
+    {T : ℝ} (hT₀ : 0 ≤ T) (hT : T ≤ (N + 1) ^ 3) :
     (N + 1) * (1 + ((N + 1) * T) ^ 2 / geomDist N ρ N) - T * N * (N + 1) * log ρ ≤
       2 ^ (N + 1) * (N + 1) ^ 10 := by
   have hsq : ((N + 1) * T) ^ 2 / geomDist N ρ N ≤
@@ -276,7 +277,7 @@ lemma mul_one_add_sq_div_geomDist_sub_le (hN : 0 < N) (hρ₀ : 1 / 2 ≤ ρ) (h
 `n ∈ [d - p ^ 4, d]` and `a₀ b₀ c₀ : Fin n → ℕ` with `a₀ r + b₀ r + c₀ r = p - 1` whose type
 classes all have at least `exp (n * ((1 - c p) * log p) - 2 ^ p * p ^ 10 - p * log (n + 1))`
 elements. -/
-lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 ≤ d) :
+private lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 ≤ d) :
     ∃ (n : ℕ) (a₀ b₀ c₀ : Fin n → ℕ),
       (∀ r, a₀ r + b₀ r + c₀ r = p - 1) ∧ d - (p : ℝ) ^ 4 ≤ n ∧ n ≤ d ∧
       n * ((1 - c p) * log p) - 2 ^ p * p ^ 10 - p * log (n + 1) ≤ log #(typeClass a₀) ∧
@@ -320,7 +321,7 @@ lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 �
 
 /-- Extending the vectors of a multicolored sum-free family by zero coordinates keeps it
 multicolored sum-free. -/
-lemma IsMulticoloredSumFree.extend {ι G : Type*} [AddCommGroup G] {x y z : ι → Fin n → G}
+private lemma IsMulticoloredSumFree.extend {ι G : Type*} [AddCommGroup G] {x y z : ι → Fin n → G}
     (h : IsMulticoloredSumFree x y z) {d : ℕ} (hnd : n ≤ d) :
     IsMulticoloredSumFree (fun i ↦ Function.extend (Fin.castLE hnd) (x i) 0)
       (fun i ↦ Function.extend (Fin.castLE hnd) (y i) 0)
@@ -332,7 +333,7 @@ lemma IsMulticoloredSumFree.extend {ι G : Type*} [AddCommGroup G] {x y z : ι �
 `n ∈ [d - p ^ 4, d]` and a multicolored sum-free family in `Fin d → ZMod p` with at least
 `exp (n * ((1 - c p) * log p) - 2 ^ p * p ^ 10 - p * log (n + 1) -
 4 * √(log ((12 + 2 * p) * p ^ (3 * n)))) / (4 * (12 + 2 * p))` members. -/
-lemma exists_isMulticoloredSumFree_exp_le {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 ≤ d) :
+private lemma exists_isMulticoloredSumFree_exp_le {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 ≤ d) :
     ∃ (n m : ℕ) (x y z : Fin m → Fin d → ZMod p),
       IsMulticoloredSumFree x y z ∧ d - (p : ℝ) ^ 4 ≤ n ∧ n ≤ d ∧
         exp (n * ((1 - c p) * log p) - 2 ^ p * p ^ 10 - p * log (n + 1) -
@@ -353,7 +354,7 @@ lemma exists_isMulticoloredSumFree_exp_le {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4
   exact mul_le_mul_of_nonneg_right (le_max_right _ _) (exp_pos _).le
 
 /-- For `a > 0`, `b * √(d + 1) ≤ a * d` once `2 * b / a ≤ B` and `B ^ 2 + 1 ≤ d`. -/
-lemma mul_sqrt_add_one_le {a b B : ℝ} (ha : 0 < a) (hb : 2 * b / a ≤ B) {d : ℕ}
+private lemma mul_sqrt_add_one_le {a b B : ℝ} (ha : 0 < a) (hb : 2 * b / a ≤ B) {d : ℕ}
     (hd : B ^ 2 + 1 ≤ d) : b * √(d + 1) ≤ a * d := by
   grw [(le_abs_self B).trans (abs_le_sqrt (by linarith : B ^ 2 ≤ d + 1)), div_le_iff₀ ha] at hb
   nlinarith [sq_sqrt (by positivity : (0 : ℝ) ≤ d + 1), sqrt_nonneg (d + 1)]
@@ -362,7 +363,7 @@ lemma mul_sqrt_add_one_le {a b B : ℝ} (ha : 0 < a) (hb : 2 * b / a ≤ B) {d :
 for `0 ≤ A` and `ε > 0`, `A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d`
 for every `n ≤ d` once `2 * b / ε ≤ B` and `B ^ 2 + 1 ≤ d`, where
 `b = A + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)`. -/
-lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε B : ℝ} (hA : 0 ≤ A) (hε : 0 < ε)
+private lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε B : ℝ} (hA : 0 ≤ A) (hε : 0 < ε)
     (hb : 2 * (A + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)) / ε ≤ B) {d : ℕ}
     (hd : B ^ 2 + 1 ≤ d) {n : ℕ} (hn : n ≤ d) :
     A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d := by
@@ -385,7 +386,7 @@ lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε B : ℝ} (hA : 0 �
 
 /-- The constant `b` of `add_mul_log_add_sqrt_le` for the error terms of
 `exists_isMulticoloredSumFree_exp_le` is at most `2 ^ (p + 1) * p ^ 10`. -/
-lemma log_mul_pow_add_le_two_pow_succ_mul {p : ℕ} (hp : 2 ≤ p) :
+private lemma log_mul_pow_add_le_two_pow_succ_mul {p : ℕ} (hp : 2 ≤ p) :
     log p * p ^ 4 + 2 ^ p * p ^ 10 + (48 + 8 * p) + 2 * p +
       4 * √(log (12 + 2 * p) + 3 * log p) ≤ 2 ^ (p + 1) * p ^ 10 := by
   have hp' : (2 : ℝ) ≤ p := by exact_mod_cast hp

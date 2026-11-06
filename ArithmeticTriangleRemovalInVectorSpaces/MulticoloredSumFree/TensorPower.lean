@@ -7,7 +7,6 @@ module
 
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
-public import Mathlib.LinearAlgebra.Dimension.Finrank
 import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.SliceRank
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Data.Sym.Sym2.Init
@@ -54,8 +53,8 @@ variable {p : ℕ} [Fact p.Prime] {G ι : Type*} [AddCommGroup G] [Module (ZMod 
 
 /-- A multicolored sum-free family in a finite vector space `G` over `ZMod p` has at most
 `3 * (t ^ (-(p - 1) / 3) * ∑ j ∈ range p, t ^ j) ^ finrank (ZMod p) G` members, for `0 < t ≤ 1`. -/
-lemma IsMulticoloredSumFree.card_le_three_mul_pow [Finite G] (h : IsMulticoloredSumFree x y z)
-    {t : ℝ} (ht₀ : 0 < t) (ht₁ : t ≤ 1) :
+private lemma IsMulticoloredSumFree.card_le_three_mul_pow [Finite G]
+    (h : IsMulticoloredSumFree x y z) {t : ℝ} (ht₀ : 0 < t) (ht₁ : t ≤ 1) :
     Fintype.card ι ≤
       3 * (t ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, t ^ j) ^ finrank (ZMod p) G := by
   let e := (Module.finBasis (ZMod p) G).equivFun
@@ -65,7 +64,7 @@ lemma IsMulticoloredSumFree.card_le_three_mul_pow [Finite G] (h : IsMulticolored
 /-- The tensor power trick removes the factor `3` of `card_le_three_mul_pow`: a multicolored
 sum-free family in a finite vector space `G` over `ZMod p` has at most
 `(t ^ (-(p - 1) / 3) * ∑ j ∈ range p, t ^ j) ^ finrank (ZMod p) G` members, for `0 < t < 1`. -/
-lemma IsMulticoloredSumFree.card_le_pow [Finite G] (h : IsMulticoloredSumFree x y z) {t : ℝ}
+private lemma IsMulticoloredSumFree.card_le_pow [Finite G] (h : IsMulticoloredSumFree x y z) {t : ℝ}
     (ht₀ : 0 < t) (ht₁ : t < 1) :
     Fintype.card ι ≤ (t ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, t ^ j) ^ finrank (ZMod p) G := by
   refine le_of_forall_pow_le_mul_pow (M := 3) (pow_pos ?_ _) ?_

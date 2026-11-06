@@ -38,8 +38,8 @@ open Finset Function
 namespace ArithmeticTriangleRemovalInVectorSpaces
 
 /-- If `m ^ (1 + c) ≤ N ^ (1 - c) * D ^ c`, then `(m / N) ^ (1 + 1 / c) * N ^ 2 ≤ D`. -/
-lemma div_rpow_one_add_one_div_mul_sq_le {m N D c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (hN : 0 < N)
-    (hD : 0 ≤ D) (h : m ^ (1 + c) ≤ N ^ (1 - c) * D ^ c) :
+private lemma div_rpow_one_add_one_div_mul_sq_le {m N D c : ℝ} (hc : 0 < c) (hm : 0 ≤ m)
+    (hN : 0 < N) (hD : 0 ≤ D) (h : m ^ (1 + c) ≤ N ^ (1 - c) * D ^ c) :
     (m / N) ^ (1 + 1 / c) * N ^ 2 ≤ D := by
   have h' := Real.rpow_le_rpow (by positivity) h (by positivity : 0 ≤ 1 / c)
   rw [← Real.rpow_mul hm, Real.mul_rpow (by positivity) (by positivity), ← Real.rpow_mul hN.le,
@@ -56,7 +56,8 @@ variable {p : ℕ} [Fact p.Prime] {V ι : Type*} [AddCommGroup V] [Module (ZMod 
 /-- The pruning bound for the `k`-th coordinatewise powers of `X`, `Y` and `Z`, which contain the
 `m ^ k` vertex-disjoint triangles `(x ∘ I, y ∘ I, z ∘ I)` and `D ^ k` triangles in a space of size
 `#V ^ k`. -/
-lemma rpow_le_mul_card_pow_rpow_mul_card_triangles_pow_rpow (hx : Injective x) (hy : Injective y)
+private lemma rpow_le_mul_card_pow_rpow_mul_card_triangles_pow_rpow (hx : Injective x)
+    (hy : Injective y)
     (hz : Injective z) (hxX : ∀ i, x i ∈ X) (hyY : ∀ i, y i ∈ Y) (hzZ : ∀ i, z i ∈ Z)
     (hsum : ∀ i, x i + y i + z i = 0) (k : ℕ) :
     (c p / (1 + c p) * Fintype.card ι ^ k / 2) ^ (1 + c p) ≤
@@ -72,7 +73,7 @@ lemma rpow_le_mul_card_pow_rpow_mul_card_triangles_pow_rpow (hx : Injective x) (
 
 /-- If `X × Y × Z` contains `m` vertex-disjoint triangles `(x i, y i, z i)` and `D` triangles in
 total, then `m ^ (1 + c p) ≤ #V ^ (1 - c p) * D ^ c p`. -/
-lemma card_rpow_le_card_rpow_mul_card_triangles_rpow (hx : Injective x) (hy : Injective y)
+private lemma card_rpow_le_card_rpow_mul_card_triangles_rpow (hx : Injective x) (hy : Injective y)
     (hz : Injective z) (hxX : ∀ i, x i ∈ X) (hyY : ∀ i, y i ∈ Y) (hzZ : ∀ i, z i ∈ Z)
     (hsum : ∀ i, x i + y i + z i = 0) :
     (Fintype.card ι : ℝ) ^ (1 + c p) ≤

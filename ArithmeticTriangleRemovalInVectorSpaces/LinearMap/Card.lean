@@ -6,7 +6,6 @@ Authors: Gabriel Dahia
 module
 
 public import Mathlib.LinearAlgebra.LinearIndependent.Defs
-public import Mathlib.LinearAlgebra.Pi
 public import Mathlib.SetTheory.Cardinal.Finite
 import Mathlib.GroupTheory.Index
 import Mathlib.LinearAlgebra.Basis.VectorSpace
@@ -42,15 +41,15 @@ instance LinearMap.finite_of_finite [Finite V] [Finite W] : Finite (V →ₗ[K] 
   Finite.of_injective _ DFunLike.coe_injective
 
 /-- A linear map can take any prescribed values at linearly independent vectors. -/
-lemma LinearIndependent.exists_linearMap_apply_eq (hv : LinearIndependent K v) (w : Fin r → W) :
-    ∃ A : V →ₗ[K] W, ∀ i, A (v i) = w i := by
+private lemma LinearIndependent.exists_linearMap_apply_eq (hv : LinearIndependent K v)
+    (w : Fin r → W) : ∃ A : V →ₗ[K] W, ∀ i, A (v i) = w i := by
   obtain ⟨A, hA⟩ := LinearMap.exists_extend ((Basis.span hv).constr K w)
   use A
   intro i
   simpa [Finsupp.single_apply] using congr($hA (Basis.span hv i))
 
 /-- For linearly independent `v`, the map `A ↦ (A (v i))ᵢ` is surjective. -/
-lemma LinearIndependent.surjective_pi_applyₗ (hv : LinearIndependent K v) :
+private lemma LinearIndependent.surjective_pi_applyₗ (hv : LinearIndependent K v) :
     Function.Surjective
       (LinearMap.pi fun i ↦ LinearMap.applyₗ (v i) : (V →ₗ[K] W) →ₗ[K] Fin r → W) := by
   intro w

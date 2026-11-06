@@ -44,16 +44,16 @@ namespace ArithmeticTriangleRemovalInVectorSpaces
 variable {V : Type*}
 
 /-- The vector `(x, a, b)` of `V × ZMod p × ZMod p`. -/
-def lift (p : ℕ) (a b : ZMod p) (x : V) : V × ZMod p × ZMod p :=
+private def lift (p : ℕ) (a b : ZMod p) (x : V) : V × ZMod p × ZMod p :=
   (x, a, b)
 
-lemma lift_injective (p : ℕ) (a b : ZMod p) : Injective (lift (V := V) p a b) :=
+private lemma lift_injective (p : ℕ) (a b : ZMod p) : Injective (lift (V := V) p a b) :=
   fun _ _ h ↦ congrArg Prod.fst h
 
 variable [AddCommGroup V] {p : ℕ}
 
 /-- Lifting `X`, `Y` and `Z` preserves the number of triangles. -/
-lemma card_triangles_image_lift [DecidableEq V] (X Y Z : Finset V) :
+private lemma card_triangles_image_lift [DecidableEq V] (X Y Z : Finset V) :
     #(triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1)))) =
       #(triangles X Y Z) := by
   symm
@@ -81,7 +81,7 @@ variable [Module (ZMod p) V]
 
 /-- The first two vertices `(x, 1, 0)` and `(y, -1, 1)` of a lifted triangle are linearly
 independent. -/
-lemma linearIndependent_lift (x y : V) :
+private lemma linearIndependent_lift (x y : V) :
     LinearIndependent (ZMod p) ![lift p 1 0 x, lift p (-1) 1 y] := by
   rw [LinearIndependent.pair_iff]
   intro s t h
@@ -90,7 +90,7 @@ lemma linearIndependent_lift (x y : V) :
   grind
 
 /-- If `(x', 1, 0)` lies in the span of `(x, 1, 0)` and `(y, -1, 1)`, then `x' = x`. -/
-lemma eq_of_lift_mem_span_left {x y x' : V}
+private lemma eq_of_lift_mem_span_left {x y x' : V}
     (h : lift p 1 0 x' ∈ span (ZMod p) {lift p 1 0 x, lift p (-1) 1 y}) : x' = x := by
   obtain ⟨s, t, h⟩ := mem_span_pair.1 h
   simp only [lift, Prod.ext_iff, Prod.smul_mk, Prod.fst_add, Prod.snd_add, smul_eq_mul] at h
@@ -100,7 +100,7 @@ lemma eq_of_lift_mem_span_left {x y x' : V}
   simpa using h₁.symm
 
 /-- If `(y', -1, 1)` lies in the span of `(x, 1, 0)` and `(y, -1, 1)`, then `y' = y`. -/
-lemma eq_of_lift_mem_span_right {x y y' : V}
+private lemma eq_of_lift_mem_span_right {x y y' : V}
     (h : lift p (-1) 1 y' ∈ span (ZMod p) {lift p 1 0 x, lift p (-1) 1 y}) : y' = y := by
   obtain ⟨s, t, h⟩ := mem_span_pair.1 h
   simp only [lift, Prod.ext_iff, Prod.smul_mk, Prod.fst_add, Prod.snd_add, smul_eq_mul] at h
@@ -116,7 +116,7 @@ section GeneralPosition
 variable {a b c a' b' c' : V × ZMod p × ZMod p}
 
 /-- The first two vertices of a triangle of the lifted sets are linearly independent. -/
-lemma linearIndependent_of_mem_triangles_image_lift
+private lemma linearIndependent_of_mem_triangles_image_lift
     (h : (a, b, c) ∈
       triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1)))) :
     LinearIndependent (ZMod p) ![a, b] := by
@@ -126,7 +126,7 @@ lemma linearIndependent_of_mem_triangles_image_lift
 
 /-- The span of the first two vertices of a triangle of the lifted sets contains the first two
 vertices of no other triangle of the lifted sets. -/
-lemma eq_of_mem_span_of_mem_triangles_image_lift
+private lemma eq_of_mem_span_of_mem_triangles_image_lift
     (h : (a, b, c) ∈
       triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1))))
     (h' : (a', b', c') ∈

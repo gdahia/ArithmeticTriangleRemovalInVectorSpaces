@@ -5,7 +5,8 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Decomposition
+public import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Basic
+import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Decomposition
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
@@ -34,22 +35,22 @@ namespace ArithmeticTriangleRemovalInVectorSpaces
 
 variable {N : ℕ} {π π₁ π₂ π₃ : ℕ → ℝ}
 
-lemma IsDecreasingOn.isWeight (h : IsDecreasingOn N π) :
+private lemma IsDecreasingOn.isWeight (h : IsDecreasingOn N π) :
     IsWeight N fun k ↦ (k + 1) * (π k - π (k + 1)) :=
   ⟨h.weight_nonneg, fun _ hk ↦ h.weight_eq_zero hk⟩
 
-lemma IsDecreasingOn.mass_eq (h : IsDecreasingOn N π) :
+private lemma IsDecreasingOn.mass_eq (h : IsDecreasingOn N π) :
     mass N π = mass N fun k ↦ (k + 1) * (π k - π (k + 1)) := by
   nth_rw 1 [h.eq_hat]
   exact mass_hat _
 
-lemma IsDecreasingOn.moment_eq (h : IsDecreasingOn N π) :
+private lemma IsDecreasingOn.moment_eq (h : IsDecreasingOn N π) :
     moment N π = moment N (fun k ↦ (k + 1) * (π k - π (k + 1))) / 2 := by
   nth_rw 1 [h.eq_hat]
   exact moment_hat _
 
 /-- Pebody's theorem at every level. -/
-lemma decreasingCompatible (N : ℕ) : DecreasingCompatible N := by
+private lemma decreasingCompatible (N : ℕ) : DecreasingCompatible N := by
   induction N using Nat.strong_induction_on with
   | _ N ih =>
   intro π₁ π₂ π₃ h₁ h₂ h₃ hm₂ hm₃ hmom
@@ -62,7 +63,7 @@ lemma decreasingCompatible (N : ℕ) : DecreasingCompatible N := by
 
 /-- **Pebody's theorem.** Three decreasing mass functions on `[0, N]` with equal masses whose means
 sum to `N` are compatible. -/
-lemma compatible_of_isDecreasingOn (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
+private lemma compatible_of_isDecreasingOn (h₁ : IsDecreasingOn N π₁) (h₂ : IsDecreasingOn N π₂)
     (h₃ : IsDecreasingOn N π₃) (hm₂ : mass N π₂ = mass N π₁) (hm₃ : mass N π₃ = mass N π₁)
     (hmom : moment N π₁ + moment N π₂ + moment N π₃ = N * mass N π₁) :
     Compatible N π₁ π₂ π₃ :=
@@ -72,17 +73,18 @@ lemma compatible_of_isDecreasingOn (h₁ : IsDecreasingOn N π₁) (h₂ : IsDec
 @[expose] noncomputable def geom (N : ℕ) (ρ : ℝ) (k : ℕ) : ℝ :=
   if k ≤ N then ρ ^ k else 0
 
-lemma mass_geom (ρ : ℝ) : mass N (geom N ρ) = ∑ k ∈ range (N + 1), ρ ^ k := by
+private lemma mass_geom (ρ : ℝ) : mass N (geom N ρ) = ∑ k ∈ range (N + 1), ρ ^ k := by
   rw [mass]
   congr! 1 with k hk
   simp [geom, Nat.le_of_lt_succ (mem_range.1 hk)]
 
-lemma moment_geom (ρ : ℝ) : moment N (geom N ρ) = ∑ k ∈ range (N + 1), k * ρ ^ k := by
+private lemma moment_geom (ρ : ℝ) : moment N (geom N ρ) = ∑ k ∈ range (N + 1), k * ρ ^ k := by
   rw [moment]
   congr! 1 with k hk
   simp [geom, Nat.le_of_lt_succ (mem_range.1 hk)]
 
-lemma isDecreasingOn_geom {ρ : ℝ} (hρ₀ : 0 ≤ ρ) (hρ₁ : ρ ≤ 1) : IsDecreasingOn N (geom N ρ) := by
+private lemma isDecreasingOn_geom {ρ : ℝ} (hρ₀ : 0 ≤ ρ) (hρ₁ : ρ ≤ 1) :
+    IsDecreasingOn N (geom N ρ) := by
   refine ⟨?_, ?_, by simp [geom]⟩
   · intro k
     unfold geom
@@ -92,7 +94,7 @@ lemma isDecreasingOn_geom {ρ : ℝ} (hρ₀ : 0 ≤ ρ) (hρ₁ : ρ ≤ 1) : I
     grind [pow_le_pow_of_le_one, pow_nonneg]
 
 /-- `∑ k ≤ M, (3 * k - N) / 2 ^ k = 6 - 2 * N - (3 * M + 6 - N) / 2 ^ M`. -/
-lemma sum_mul_half_pow (N M : ℕ) :
+private lemma sum_mul_half_pow (N M : ℕ) :
     ∑ k ∈ range (M + 1), (3 * k - N : ℝ) * (1 / 2) ^ k = 6 - 2 * N - (3 * M + 6 - N) / 2 ^ M := by
   induction M with
   | zero =>
@@ -105,7 +107,7 @@ lemma sum_mul_half_pow (N M : ℕ) :
     ring
 
 /-- For `N > 0`, the polynomial `∑ k ≤ N, (3 k - N) ρ ^ k` is nonpositive at `ρ = 1 / 2`. -/
-lemma sum_mul_half_pow_nonpos (hN : 0 < N) :
+private lemma sum_mul_half_pow_nonpos (hN : 0 < N) :
     ∑ k ∈ range (N + 1), (3 * k - N : ℝ) * (1 / 2) ^ k ≤ 0 := by
   rw [sum_mul_half_pow]
   obtain rfl | rfl | hN := (by grind : N = 1 ∨ N = 2 ∨ 3 ≤ N)
@@ -115,7 +117,7 @@ lemma sum_mul_half_pow_nonpos (hN : 0 < N) :
     linarith [div_nonneg (by linarith : (0 : ℝ) ≤ 3 * N + 6 - N) (by positivity : (0 : ℝ) ≤ 2 ^ N)]
 
 /-- The polynomial `∑ k ≤ N, (3 k - N) ρ ^ k` has a root in `[1 / 2, 1)`. -/
-lemma exists_sum_mul_pow_eq_zero (hN : 0 < N) :
+private lemma exists_sum_mul_pow_eq_zero (hN : 0 < N) :
     ∃ ρ : ℝ, 1 / 2 ≤ ρ ∧ ρ < 1 ∧ ∑ k ∈ range (N + 1), (3 * k - N) * ρ ^ k = 0 := by
   set f : ℝ → ℝ := fun ρ ↦ ∑ k ∈ range (N + 1), (3 * k - N) * ρ ^ k
   have hf₁ : f 1 = N * (N + 1) / 2 := by

@@ -5,7 +5,9 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Data.Fintype.Card
 import Mathlib.LinearAlgebra.Matrix.Rank
 
 /-!
@@ -35,7 +37,8 @@ variable {ι F : Type*} [Fintype ι] [Field F]
 omit [Fintype ι] in
 /-- A subspace `W` of `ι → F` with `#s < finrank F W` contains a nonzero vector that vanishes on
 `s`. -/
-lemma exists_mem_ne_zero_forall_eq_zero_of_card_lt_finrank [Finite ι] (W : Submodule F (ι → F))
+private lemma exists_mem_ne_zero_forall_eq_zero_of_card_lt_finrank [Finite ι]
+    (W : Submodule F (ι → F))
     {s : Finset ι} (hs : #s < finrank F W) : ∃ v ∈ W, v ≠ 0 ∧ ∀ i ∈ s, v i = 0 := by
   obtain ⟨⟨v, hvW⟩, hv, hv0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot
     (LinearMap.ker_ne_bot_of_finrank_lt
@@ -45,7 +48,7 @@ lemma exists_mem_ne_zero_forall_eq_zero_of_card_lt_finrank [Finite ι] (W : Subm
   simpa using congr_fun (LinearMap.mem_ker.1 hv) ⟨i, hi⟩
 
 /-- A subspace `W` of `ι → F` contains a vector with at least `finrank F W` nonzero coordinates. -/
-lemma exists_mem_finrank_le_card [DecidableEq F] (W : Submodule F (ι → F)) :
+private lemma exists_mem_finrank_le_card [DecidableEq F] (W : Submodule F (ι → F)) :
     ∃ w ∈ W, finrank F W ≤ #{i | w i ≠ 0} := by
   classical
   obtain ⟨s, hs, hmax⟩ := exists_max_image
@@ -66,7 +69,7 @@ lemma exists_mem_finrank_le_card [DecidableEq F] (W : Submodule F (ι → F)) :
 
 /-- For functions `f a : ι → F` indexed by `a ∈ A`, some `w : ι → F` orthogonal to all of them has
 at least `Fintype.card ι - #A` nonzero coordinates. -/
-lemma exists_forall_sum_mul_eq_zero_card_le [DecidableEq F] {α : Type*} (A : Finset α)
+private lemma exists_forall_sum_mul_eq_zero_card_le [DecidableEq F] {α : Type*} (A : Finset α)
     (f : α → ι → F) :
     ∃ w : ι → F, (∀ a ∈ A, ∑ i, w i * f a i = 0) ∧ Fintype.card ι ≤ #A + #{i | w i ≠ 0} := by
   let L : Matrix A ι F := of fun a i ↦ f a i
@@ -82,7 +85,7 @@ lemma exists_forall_sum_mul_eq_zero_card_le [DecidableEq F] {α : Type*} (A : Fi
 `card_le_card_add_card_add_card`, and `w` is orthogonal to the functions `f a`, then `w` has at
 most `#B + #C` nonzero coordinates: the diagonal matrix with diagonal `w` factors through
 `B ⊕ C`. -/
-lemma card_filter_ne_zero_le_card_add_card [DecidableEq ι] [DecidableEq F] {α β γ : Type*}
+private lemma card_filter_ne_zero_le_card_add_card [DecidableEq ι] [DecidableEq F] {α β γ : Type*}
     {A : Finset α} {B : Finset β} {C : Finset γ} (f : α → ι → F) (g : α → ι → ι → F)
     (f' : β → ι → F) (g' : β → ι → ι → F) (f'' : γ → ι → F) (g'' : γ → ι → ι → F)
     (h : ∀ i j k, (if i = j ∧ j = k then 1 else 0 : F) =

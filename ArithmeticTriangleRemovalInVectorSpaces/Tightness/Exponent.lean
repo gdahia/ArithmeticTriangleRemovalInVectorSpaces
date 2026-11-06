@@ -108,7 +108,7 @@ lemma inv_pow_le_inv_add_sq_rpow {P η : ℝ} (hP : 2 ≤ P) (hη : 0 < η) {n :
     (by push_cast; linarith [(by ring : 3 * (2 / η) = 6 / η)])
 
 /-- For `κ > 0`, `c * (1 - c * κ) ≤ κ⁻¹ - c`. -/
-lemma mul_one_sub_mul_le_inv_sub {c κ : ℝ} (hκ : 0 < κ) : c * (1 - c * κ) ≤ κ⁻¹ - c := by
+private lemma mul_one_sub_mul_le_inv_sub {c κ : ℝ} (hκ : 0 < κ) : c * (1 - c * κ) ≤ κ⁻¹ - c := by
   rw [le_sub_iff_add_le, ← mul_one κ⁻¹, le_inv_mul_iff₀ hκ]
   nlinarith [sq_nonneg (1 - c * κ)]
 

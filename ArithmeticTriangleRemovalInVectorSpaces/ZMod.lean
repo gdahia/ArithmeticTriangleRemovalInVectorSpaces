@@ -5,9 +5,7 @@ Authors: Gabriel Dahia
 -/
 module
 
-public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
-public import ArithmeticTriangleRemovalInVectorSpaces.Triangle.Basic
 import ArithmeticTriangleRemovalInVectorSpaces.Construction.LowerBound
 import ArithmeticTriangleRemovalInVectorSpaces.DisjointTriangles.MaximalFamily
 import ArithmeticTriangleRemovalInVectorSpaces.DisjointTriangles.TensorPower
@@ -91,7 +89,7 @@ variable {l : ℕ} {ι : Type*} [Fintype ι] {x y z : ι → Fin n → ZMod p}
 /-- **The construction of Section 3 of Fox and Lovász, part one.** For a multicolored sum-free
 family of `m` triples in `Fin n → ZMod p` with vertex sets `X`, `Y` and `Z`, the sets `X × W`,
 `Y × W` and `Z × W` with `W = Fin l → ZMod p` contain `m * p ^ (2 * l)` triangles. -/
-lemma IsMulticoloredSumFree.card_triangles_prod_pi (h : IsMulticoloredSumFree x y z) :
+private lemma IsMulticoloredSumFree.card_triangles_prod_pi (h : IsMulticoloredSumFree x y z) :
     #(triangles (univ.image x ×ˢ (univ : Finset (Fin l → ZMod p))) (univ.image y ×ˢ univ)
       (univ.image z ×ˢ univ)) = Fintype.card ι * p ^ (2 * l) := by
   rw [h.card_triangles_prod, Fintype.card_fun, ZMod.card, Fintype.card_fin, ← pow_mul,
@@ -100,7 +98,7 @@ lemma IsMulticoloredSumFree.card_triangles_prod_pi (h : IsMulticoloredSumFree x 
 /-- **The construction of Section 3 of Fox and Lovász, part two.** Removing fewer than
 `m * p ^ l` elements from the sets `X × W`, `Y × W` and `Z × W` of
 `card_triangles_prod_pi` leaves a triangle. -/
-lemma IsMulticoloredSumFree.triangles_prod_pi_nonempty (h : IsMulticoloredSumFree x y z)
+private lemma IsMulticoloredSumFree.triangles_prod_pi_nonempty (h : IsMulticoloredSumFree x y z)
     {X' Y' Z' : Finset ((Fin n → ZMod p) × (Fin l → ZMod p))}
     (hcard : #((univ.image x ×ˢ univ) \ X') + #((univ.image y ×ˢ univ) \ Y') +
       #((univ.image z ×ˢ univ) \ Z') < Fintype.card ι * p ^ l) :
@@ -115,7 +113,7 @@ triangle-free by removing at most `ε * N` elements, where `N = p ^ n`. Then eve
 sum-free family of more than `ε * N` triples has at least `δ * N ^ 2` members. With the
 Kleinberg–Sawin–Speyer families of size `p ^ ((1 - c p) * n - o(n))` of Norin and Pebody, this gives
 `δ ≤ ε ^ (C p - o(1))`. -/
-lemma IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset {ε δ : ℝ}
+private lemma IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset {ε δ : ℝ}
     (h : IsMulticoloredSumFree x y z) (hε : ε * p ^ n < Fintype.card ι)
     (hδ : ∀ X Y Z : Finset (Fin n → ZMod p),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
@@ -132,8 +130,8 @@ lemma IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset {ε δ : ℝ}
 omit [Fact p.Prime] in
 /-- If the removal lemma holds in `Fin n → ZMod p` with `ε` and `δ`, and some multicolored
 sum-free family has more than `ε * N` members, where `N = p ^ n`, then `δ * N ^ 2 ≤ ε * N + 1`. -/
-lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ} (h : IsMulticoloredSumFree x y z)
-    (hε0 : 0 ≤ ε) (hε : ε * p ^ n < Fintype.card ι)
+private lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ}
+    (h : IsMulticoloredSumFree x y z) (hε0 : 0 ≤ ε) (hε : ε * p ^ n < Fintype.card ι)
     (hδ : ∀ X Y Z : Finset (Fin n → ZMod p),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
@@ -151,7 +149,7 @@ lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ} (h : IsMulticolo
 /-- The asymptotic tightness bound for fixed `κ` and `η'` with `1 ≤ κ`, `1 / c p - η / 2 ≤ κ`
 and `0 < η' < 1 / κ - c p`, for `0 < ε < p ^ (-(n₀ p η' + 1))` and
 `ε ≤ (p + p ^ 2) ^ (-2 / η)`. -/
-lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤ κ)
+private lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤ κ)
     (hκη : (c p)⁻¹ - η / 2 ≤ κ) (hη'₀ : 0 < η') (hη' : η' < κ⁻¹ - c p) (hε0 : 0 < ε)
     (hε : ε < ((p : ℝ) ^ (n₀ p η' + 1))⁻¹) (hε' : ε ≤ (p + p ^ 2 : ℝ)⁻¹ ^ (2 / η))
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
@@ -176,7 +174,7 @@ lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤
     (inv_pow_le_mul_rpow (by positivity) hε0 (by positivity) hpow') this]
   exact mul_rpow_le_rpow_sub (by positivity) hε0 hε₁ hη (by rw [C, one_div]; linarith) hε'
 
-lemma ε₀_pos (η : ℝ) : 0 < ε₀ p η := by
+private lemma ε₀_pos (η : ℝ) : 0 < ε₀ p η := by
   have := (Fact.out : p.Prime).pos
   rw [ε₀]
   positivity
