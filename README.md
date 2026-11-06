@@ -3,18 +3,19 @@
 Lean 4 formalisation of the main results of Jacob Fox and László Miklós Lovász,
 [*A tight bound for Green's arithmetic triangle removal lemma in vector
 spaces*](https://arxiv.org/abs/1606.01230): the arithmetic triangle removal lemma in
-$\mathbb{F}_p^n$ with a polynomial bound (Theorem 1), the Kleinberg–Sawin–Speyer bound on
+$\mathbb{F}\_p^n$ with a polynomial bound (Theorem 1), the Kleinberg–Sawin–Speyer bound on
 multicolored sum-free families (Theorem 2), the count of triangles spanned by vertex-disjoint
 triangles (Theorem 3), and the tightness of the exponent in Theorem 1 (Theorem 4).
 
 ## Results
 
 **Theorem 1** (`exists_subset_card_sdiff_add_le_forall_add_ne_zero`, Theorem 1 of the paper). Let
-$p$ be a prime, $n \ge 0$, $N = p^n$, $\varepsilon \ge 0$ and $X, Y, Z \subseteq \mathbb{F}_p^n$.
+$p$ be a prime, $n \ge 0$, $N = p^n$, $\varepsilon \ge 0$ and $X, Y, Z \subseteq \mathbb{F}\_p^n$.
 If $X \times Y \times Z$ contains fewer than $(\varepsilon / 3)^{C_p} N^2$ triangles, then there
 are $X' \subseteq X$, $Y' \subseteq Y$ and $Z' \subseteq Z$ with
 
-$$|X \setminus X'| + |Y \setminus Y'| + |Z \setminus Z'| \le \varepsilon N$$
+$$\left\lvert X \setminus X'\right\rvert + \left\lvert Y \setminus Y'\right\rvert +
+\left\lvert Z \setminus Z'\right\rvert \le \varepsilon N$$
 
 such that $X' \times Y' \times Z'$ contains no triangle, where a triangle is a triple $(x, y, z)$
 with $x + y + z = 0$, $C_p = 1 + 1 / c_p$, and $c_p$ is defined by
@@ -22,15 +23,15 @@ with $x + y + z = 0$, $C_p = 1 + 1 / c_p$, and $c_p$ is defined by
 $$p^{1 - c_p} = \inf_{0 < x < 1} x^{-(p-1)/3} \left(1 + x + \cdots + x^{p-1}\right).$$
 
 **Theorem 2** (`card_le_rpow_one_sub_c_mul`, Theorem 2 of the paper, due to Kleinberg, Sawin and
-Speyer). Let $p$ be a prime and let $(x_i, y_i, z_i)_{i \in I}$ be a finite family of triples in
-$\mathbb{F}_p^n$. If $x_i + y_j + z_k = 0$ holds exactly when $i = j = k$, then
+Speyer). Let $p$ be a prime and let $(x_i, y_i, z_i)\_{i \in I}$ be a finite family of triples in
+$\mathbb{F}\_p^n$. If $x_i + y_j + z_k = 0$ holds exactly when $i = j = k$, then
 
-$$|I| \le p^{(1 - c_p) n},$$
+$$\left\lvert I\right\rvert \le p^{(1 - c_p) n},$$
 
 where $c_p$ is as in Theorem 1.
 
 **Theorem 3** (`div_pow_rpow_C_mul_sq_le_card_triangles`, Theorem 3 of the paper). Let $p$ be a
-prime, $N = p^n$ and $X, Y, Z \subseteq \mathbb{F}_p^n$. If $X \times Y \times Z$ contains $m$
+prime, $N = p^n$ and $X, Y, Z \subseteq \mathbb{F}\_p^n$. If $X \times Y \times Z$ contains $m$
 vertex-disjoint triangles, then it contains at least
 
 $$\left(\frac{m}{N}\right)^{C_p} N^2$$
@@ -45,10 +46,10 @@ n_0 = \left\lceil \left(\frac{2^{p+3} p^{10}}{\eta'}\right)^2 \right\rceil + p^4
 \varepsilon_0 = p^{-(n_0 + 1)}.$$
 
 The following holds for every $0 < \varepsilon < \varepsilon_0$ and every $\delta$. If for every
-$n$, every $X, Y, Z \subseteq \mathbb{F}_p^n$ with fewer than $\delta N^2$ triangles, where
+$n$, every $X, Y, Z \subseteq \mathbb{F}\_p^n$ with fewer than $\delta N^2$ triangles, where
 $N = p^n$, has subsets $X' \subseteq X$, $Y' \subseteq Y$ and $Z' \subseteq Z$ with
-$|X \setminus X'| + |Y \setminus Y'| + |Z \setminus Z'| \le \varepsilon N$ such that
-$X' \times Y' \times Z'$ contains no triangle, then
+$\left\lvert X \setminus X'\right\rvert + \left\lvert Y \setminus Y'\right\rvert + \left\lvert Z \setminus Z'\right\rvert \le \varepsilon N$
+such that $X' \times Y' \times Z'$ contains no triangle, then
 
 $$\delta \le \varepsilon^{C_p - \eta},$$
 
@@ -66,7 +67,7 @@ where triangles and $C_p$ are as in Theorem 1.
 | `Tightness/` | Real inequalities for the exponent $C_p$ |
 | `Coupling/` | Couplings of decreasing mass functions |
 | `Construction/` | Large multicolored sum-free families |
-| `ZMod.lean` | Theorems 1 to 4 in $\mathbb{F}_p^n$ |
+| `ZMod.lean` | Theorems 1 to 4 in $\mathbb{F}\_p^n$ |
 
 [formalization.yaml](formalization.yaml) records the sources, the differences from them, the scope,
 and the use of AI coding agents.
