@@ -25,11 +25,10 @@ open Finset Function
 namespace ArithmeticTriangleRemovalInVectorSpaces
 
 /-- The exponent `c p` of Kleinberg, Sawin and Speyer, defined by
-`p ^ (1 - c p) = ⨅ x ∈ (0, 1), x ^ (-(p - 1) / 3) * (1 + x + ⋯ + x ^ (p - 1))`. The numeral `3` is
-a natural number, so that the definition contains no proofs. -/
+`p ^ (1 - c p) = ⨅ x ∈ (0, 1), x ^ (-(p - 1) / 3) * (1 + x + ⋯ + x ^ (p - 1))`. -/
 noncomputable def c (p : ℕ) : ℝ :=
   1 - Real.logb p
-    (⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / (3 : ℕ)) * ∑ j ∈ range p, (x : ℝ) ^ j)
+    (⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, (x : ℝ) ^ j)
 
 /-- The exponent `C p = 1 + 1 / c p` of the arithmetic triangle removal lemma in
 `Fin n → ZMod p`. -/

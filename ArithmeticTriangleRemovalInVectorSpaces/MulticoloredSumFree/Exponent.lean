@@ -39,11 +39,10 @@ open Finset Filter Topology
 namespace ArithmeticTriangleRemovalInVectorSpaces
 
 /-- The exponent `c p` of Kleinberg, Sawin and Speyer, defined by
-`p ^ (1 - c p) = ⨅ x : Set.Ioo 0 1, x ^ (-(p - 1) / 3) * ∑ j ∈ range p, x ^ j`. The numeral `3` is
-a natural number, so that the definition contains no proofs. -/
+`p ^ (1 - c p) = ⨅ x : Set.Ioo 0 1, x ^ (-(p - 1) / 3) * ∑ j ∈ range p, x ^ j`. -/
 noncomputable def c (p : ℕ) : ℝ :=
   1 - Real.logb p
-    (⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / (3 : ℕ)) * ∑ j ∈ range p, (x : ℝ) ^ j)
+    (⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, (x : ℝ) ^ j)
 
 /-- The exponent `C p = 1 + 1 / c p` of the arithmetic triangle removal lemma in
 `Fin n → ZMod p`. -/
@@ -76,7 +75,7 @@ lemma rpow_one_sub_c (hp : 2 ≤ p) :
     (p : ℝ) ^ (1 - c p) =
       ⨅ x : Set.Ioo (0 : ℝ) 1, (x : ℝ) ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, (x : ℝ) ^ j := by
   have : Nonempty (Set.Ioo (0 : ℝ) 1) := ⟨⟨1 / 2, by norm_num, by norm_num⟩⟩
-  rw [c, sub_sub_cancel, Nat.cast_ofNat, Real.rpow_logb (by positivity)
+  rw [c, sub_sub_cancel, Real.rpow_logb (by positivity)
     (by exact_mod_cast (by grind : p ≠ 1))]
   refine lt_of_lt_of_le (by norm_num : (0 : ℝ) < 3 / 2) (le_ciInf ?_)
   rintro ⟨x, hx₀, hx₁⟩
