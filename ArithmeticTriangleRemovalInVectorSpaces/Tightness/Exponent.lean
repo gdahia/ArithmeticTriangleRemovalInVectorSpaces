@@ -27,6 +27,9 @@ Section 3 of Fox and Lovász turns a multicolored sum-free family of `m` triples
   `δ ≤ (P + P ^ 2) * ε ^ (1 + κ)` from `δ * N ^ 2 ≤ ε * N + 1` and `N⁻¹ ≤ P * ε ^ κ`.
 * `ArithmeticTriangleRemovalInVectorSpaces.mul_rpow_le_rpow_sub`: a constant factor `A` is absorbed
   by lowering the exponent, for small `ε`.
+* `ArithmeticTriangleRemovalInVectorSpaces.mul_min_div_two_lt_inv_max_sub` and
+  `ArithmeticTriangleRemovalInVectorSpaces.div_le_sq_div_mul_min_div_two`: the exponent
+  `η' = c * min (1 - c) (c * η / 2) / 2` of the bound `ε₀` is small enough.
 -/
 
 public section
@@ -93,5 +96,52 @@ lemma mul_rpow_le_rpow_sub {A ε κ C η : ℝ} (hA : 0 < A) (hε₀ : 0 < ε) (
         ring_nf
     _ ≤ ε ^ (C - η) := by
         grw [hεη, mul_inv_cancel₀ hA.ne', one_mul]
+
+/-- For `P ≥ 2`, `η > 0` and `6 / η ≤ n`, `(P ^ n)⁻¹ ≤ (P + P ^ 2)⁻¹ ^ (2 / η)`. -/
+lemma inv_pow_le_inv_add_sq_rpow {P η : ℝ} (hP : 2 ≤ P) (hη : 0 < η) {n : ℕ} (hn : 6 / η ≤ n) :
+    (P ^ n)⁻¹ ≤ (P + P ^ 2)⁻¹ ^ (2 / η) := by
+  rw [Real.inv_rpow (by positivity)]
+  gcongr
+  grw [(by nlinarith : P + P ^ 2 ≤ P ^ 3), ← Real.rpow_natCast_mul (by positivity),
+    ← Real.rpow_natCast]
+  exact Real.rpow_le_rpow_of_exponent_le (by linarith)
+    (by push_cast; linarith [(by ring : 3 * (2 / η) = 6 / η)])
+
+/-- For `κ > 0`, `c * (1 - c * κ) ≤ κ⁻¹ - c`. -/
+lemma mul_one_sub_mul_le_inv_sub {c κ : ℝ} (hκ : 0 < κ) : c * (1 - c * κ) ≤ κ⁻¹ - c := by
+  rw [le_sub_iff_add_le, ← mul_one κ⁻¹, le_inv_mul_iff₀ hκ]
+  nlinarith [sq_nonneg (1 - c * κ)]
+
+lemma mul_min_div_two_pos {c η : ℝ} (hc₀ : 0 < c) (hc₁ : c < 1) (hη : 0 < η) :
+    0 < c * min (1 - c) (c * η / 2) / 2 := by
+  have := lt_min (sub_pos.2 hc₁) (by positivity : 0 < c * η / 2)
+  positivity
+
+/-- For `0 < c < 1` and `η > 0`, the exponent `η' = c * min (1 - c) (c * η / 2) / 2` satisfies
+`η' < 1 / κ - c` for `κ = max 1 (1 / c - η / 2)`. -/
+lemma mul_min_div_two_lt_inv_max_sub {c η : ℝ} (hc₀ : 0 < c) (hc₁ : c < 1) (hη : 0 < η) :
+    c * min (1 - c) (c * η / 2) / 2 < (max 1 (c⁻¹ - η / 2))⁻¹ - c := by
+  have hmin : min (1 - c) (c * η / 2) ≤ 1 - c * max 1 (c⁻¹ - η / 2) := by
+    rcases le_total 1 (c⁻¹ - η / 2) with h | h
+    · rw [max_eq_right h, mul_sub, mul_inv_cancel₀ hc₀.ne']
+      linarith [min_le_right (1 - c) (c * η / 2)]
+    · rw [max_eq_left h, mul_one]
+      exact min_le_left _ _
+  grw [← mul_one_sub_mul_le_inv_sub (lt_max_of_lt_left one_pos)]
+  linarith [mul_le_mul_of_nonneg_left hmin hc₀.le, mul_min_div_two_pos hc₀ hc₁ hη]
+
+/-- For `0 < c < 1`, `η > 0` and `X ≥ 1`, the exponent `η' = c * min (1 - c) (c * η / 2) / 2`
+satisfies `6 / η ≤ (X / η') ^ 2`. -/
+lemma div_le_sq_div_mul_min_div_two {c η X : ℝ} (hc₀ : 0 < c) (hc₁ : c < 1) (hη : 0 < η)
+    (hX : 1 ≤ X) : 6 / η ≤ (X / (c * min (1 - c) (c * η / 2) / 2)) ^ 2 := by
+  have h := mul_min_div_two_pos hc₀ hc₁ hη
+  have hη' : c * min (1 - c) (c * η / 2) / 2 ≤ η / 4 := by
+    nlinarith [mul_le_mul_of_nonneg_left (min_le_right (1 - c) (c * η / 2)) hc₀.le,
+      mul_le_mul_of_nonneg_right (by nlinarith : c * c ≤ 1) hη.le]
+  have h₈ : c * min (1 - c) (c * η / 2) / 2 ≤ 1 / 8 := by
+    nlinarith [mul_le_mul_of_nonneg_left (min_le_left (1 - c) (c * η / 2)) hc₀.le,
+      sq_nonneg (c - 1 / 2)]
+  rw [div_pow, div_le_div_iff₀ hη (pow_pos h 2)]
+  nlinarith [mul_le_mul hη' h₈ h.le (by positivity), one_le_pow₀ (n := 2) hX]
 
 end ArithmeticTriangleRemovalInVectorSpaces

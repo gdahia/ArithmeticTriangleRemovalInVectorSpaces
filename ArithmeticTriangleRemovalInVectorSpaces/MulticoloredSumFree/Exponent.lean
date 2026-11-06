@@ -22,10 +22,10 @@ the arithmetic triangle removal lemma in `Fin n → ZMod p` is `C p = 1 + 1 / c 
 
 * `ArithmeticTriangleRemovalInVectorSpaces.c p`: the exponent `c p`.
 * `ArithmeticTriangleRemovalInVectorSpaces.C p`: the exponent `C p = 1 + 1 / c p`.
-* `ArithmeticTriangleRemovalInVectorSpaces.sumFreeDim p η`: the dimension `n₀` from which on there
-  are multicolored sum-free families with at least `p ^ ((1 - c p - η) * n)` members.
-* `ArithmeticTriangleRemovalInVectorSpaces.tightnessEps p η`: the bound `ε₀` below which
-  `δ ≤ ε ^ (C p - η)` in the arithmetic triangle removal lemma.
+* `ArithmeticTriangleRemovalInVectorSpaces.n₀ p η`: the dimension from which on there are
+  multicolored sum-free families with at least `p ^ ((1 - c p - η) * n)` members.
+* `ArithmeticTriangleRemovalInVectorSpaces.ε₀ p η`: the bound below which `δ ≤ ε ^ (C p - η)` in
+  the arithmetic triangle removal lemma.
 
 ## Main statements
 
@@ -53,18 +53,26 @@ noncomputable def c (p : ℕ) : ℝ :=
 noncomputable def C (p : ℕ) : ℝ :=
   1 + 1 / c p
 
-/-- The dimension `n₀ = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1` from which on
+/-- The dimension `n₀ p η = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1` from which on
 `Fin n → ZMod p` contains a multicolored sum-free family with at least `p ^ ((1 - c p - η) * n)`
 members. -/
-noncomputable def sumFreeDim (p : ℕ) (η : ℝ) : ℕ :=
+noncomputable def n₀ (p : ℕ) (η : ℝ) : ℕ :=
   ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉₊ + p ^ 4 + 1
 
-/-- The bound `ε₀ = p ^ (-(n₀ + 1))`, where `n₀ = sumFreeDim p η'` with
-`η' = c p * min (1 - c p) (c p * η / 2) / 2`. For `0 < ε < ε₀`, every `δ` that works with `ε` in
-the arithmetic triangle removal lemma in `Fin n → ZMod p` for every `n` satisfies
-`δ ≤ ε ^ (C p - η)`. -/
-noncomputable def tightnessEps (p : ℕ) (η : ℝ) : ℝ :=
-  ((p : ℝ) ^ (sumFreeDim p (c p * min (1 - c p) (c p * η / 2) / 2) + 1))⁻¹
+/-- The bound `ε₀ p η = p ^ (-(n₀ p η' + 1))` with `η' = c p * min (1 - c p) (c p * η / 2) / 2`.
+For `0 < ε < ε₀ p η`, every `δ` that works with `ε` in the arithmetic triangle removal lemma in
+`Fin n → ZMod p` for every `n` satisfies `δ ≤ ε ^ (C p - η)`. -/
+noncomputable def ε₀ (p : ℕ) (η : ℝ) : ℝ :=
+  ((p : ℝ) ^ (n₀ p (c p * min (1 - c p) (c p * η / 2) / 2) + 1))⁻¹
+
+lemma pow_four_lt_n₀ (p : ℕ) (η : ℝ) : p ^ 4 < n₀ p η := by
+  grind [n₀]
+
+lemma sq_add_one_le_n₀ (p : ℕ) (η : ℝ) : (2 ^ (p + 3) * p ^ 10 / η) ^ 2 + 1 ≤ n₀ p η := by
+  rw [n₀]
+  push_cast
+  gcongr ?_ + 1
+  exact (Nat.le_ceil _).trans (le_add_of_nonneg_right (by positivity))
 
 variable {p : ℕ}
 

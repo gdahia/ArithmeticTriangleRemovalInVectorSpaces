@@ -117,14 +117,14 @@ automation:
         spend_usd: "not tracked"
         hardware: "local machine"
       prompting_notes: >-
-        Five instructions in turn. The first asked the agent to formalize the main results of the
+        Six instructions in turn. The first asked the agent to formalize the main results of the
         paper for submission to Palomar, following the maintainer's Lean style guide. The second
         asked it to review the project against the maintainer's Lean and Palomar standards and fix
         what the review found, the third to put the second part of Theorem 1 back into
         Challenge.lean, and the fourth to align this file with the maintainer's edits to the
         README. The fifth asked it to make the bound ε₀ of the second part of Theorem 1, and the
         dimension n₀ from which on the large multicolored sum-free families exist, explicit in p
-        and η.
+        and η, and the sixth to restyle and refactor the new proofs.
   spend_usd: "not tracked"
   notes: >-
     Claude Code wrote the Lean code, the README and this file at the request of Gabriel Dahia.
@@ -137,8 +137,11 @@ automation:
     this file, comparator.json and the remaining references in the README and Challenge.lean to
     match. To make ε₀ and n₀ explicit, the agent placed the parameter ρ of the geometric
     distribution of Kleinberg, Sawin and Speyer in [1/2, 1), which bounds the error terms of the
-    type class estimate by explicit functions of p, and stated both thresholds as the definitions
-    sumFreeDim and tightnessEps, which Challenge.lean repeats. Every proof is checked by Lean.
+    type class estimate by explicit functions of p, and stated both thresholds as definitions,
+    which Challenge.lean repeats. In the restyle, the maintainer chose to keep the definitions
+    under the names n₀ and ε₀, and the agent split the new proofs into lemmas on the error term of
+    the type class estimate and on the real inequalities satisfied by η'. Every proof is checked
+    by Lean.
 
 fidelity:
   divergences: >-
@@ -184,11 +187,11 @@ alignment:
     - source: "The exponent C_p = 1 + 1/c_p"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.C"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
-    - source: "The dimension n₀ = ⌈(2^(p+3) p^10 / η)^2⌉ + p^4 + 1 from which on the multicolored sum-free families of Kleinberg, Sawin and Speyer have at least p^((1 - c_p - η)n) members"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.sumFreeDim"
+    - source: "The dimension n₀ = ⌈(2^(p+3) p^10 / η)^2⌉ + p^4 + 1 in the bound ε₀"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.n₀"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
-    - source: "The bound ε₀ of the second part of Theorem 1"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.tightnessEps"
+    - source: "The bound ε₀ = p^(-(n₀ + 1)) of the second part of Theorem 1"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.ε₀"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
 
 acknowledgements: "Lean 4 and Mathlib; the Palomar registry template."

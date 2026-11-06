@@ -91,33 +91,33 @@ lemma isDecreasingOn_geom {ρ : ℝ} (hρ₀ : 0 ≤ ρ) (hρ₁ : ρ ≤ 1) : I
     unfold geom
     grind [pow_le_pow_of_le_one, pow_nonneg]
 
-/-- `∑ k ≤ M, (3 * k - N) / 2 ^ k = 6 - 3 * (M + 2) / 2 ^ M - N * (2 - 1 / 2 ^ M)`. -/
+/-- `∑ k ≤ M, (3 * k - N) / 2 ^ k = 6 - 2 * N - (3 * M + 6 - N) / 2 ^ M`. -/
 lemma sum_mul_half_pow (N M : ℕ) :
-    ∑ k ∈ range (M + 1), (3 * k - N : ℝ) * (1 / 2) ^ k =
-      6 - 3 * (M + 2) / 2 ^ M - N * (2 - 1 / 2 ^ M) := by
+    ∑ k ∈ range (M + 1), (3 * k - N : ℝ) * (1 / 2) ^ k = 6 - 2 * N - (3 * M + 6 - N) / 2 ^ M := by
   induction M with
-  | zero => norm_num
+  | zero =>
+    norm_num
+    ring
   | succ M ih =>
     rw [sum_range_succ, ih, one_div_pow]
     push_cast
     field_simp
     ring
 
+/-- For `N > 0`, the polynomial `∑ k ≤ N, (3 k - N) ρ ^ k` is nonpositive at `ρ = 1 / 2`. -/
+lemma sum_mul_half_pow_nonpos (hN : 0 < N) :
+    ∑ k ∈ range (N + 1), (3 * k - N : ℝ) * (1 / 2) ^ k ≤ 0 := by
+  rw [sum_mul_half_pow]
+  obtain rfl | rfl | hN := (by grind : N = 1 ∨ N = 2 ∨ 3 ≤ N)
+  · norm_num
+  · norm_num
+  · have hN' : (3 : ℝ) ≤ N := by exact_mod_cast hN
+    linarith [div_nonneg (by linarith : (0 : ℝ) ≤ 3 * N + 6 - N) (by positivity : (0 : ℝ) ≤ 2 ^ N)]
+
 /-- The polynomial `∑ k ≤ N, (3 k - N) ρ ^ k` has a root in `[1 / 2, 1)`. -/
 lemma exists_sum_mul_pow_eq_zero (hN : 0 < N) :
     ∃ ρ : ℝ, 1 / 2 ≤ ρ ∧ ρ < 1 ∧ ∑ k ∈ range (N + 1), (3 * k - N) * ρ ^ k = 0 := by
   set f : ℝ → ℝ := fun ρ ↦ ∑ k ∈ range (N + 1), (3 * k - N) * ρ ^ k
-  have hf₀ : f (1 / 2) ≤ 0 := by
-    simp only [f, sum_mul_half_pow]
-    obtain rfl | rfl | hN := (by grind : N = 1 ∨ N = 2 ∨ 3 ≤ N)
-    · norm_num
-    · norm_num
-    · have hN' : (3 : ℝ) ≤ N := by exact_mod_cast hN
-      have : 6 - 3 * (N + 2) / 2 ^ N - N * (2 - 1 / 2 ^ N) =
-          (6 - 2 * N - (2 * N + 6) / 2 ^ N : ℝ) := by
-        field_simp
-        ring
-      linarith [(by positivity : (0 : ℝ) ≤ (2 * N + 6) / 2 ^ N)]
   have hf₁ : f 1 = N * (N + 1) / 2 := by
     simp only [f, one_pow, mul_one, sum_sub_distrib, ← mul_sum, sum_const, card_range,
       nsmul_eq_mul, sum_range_succ_cast]
@@ -126,7 +126,7 @@ lemma exists_sum_mul_pow_eq_zero (hN : 0 < N) :
   have hN' : (0 : ℝ) < N := by exact_mod_cast hN
   obtain ⟨ρ, ⟨hρ₀, hρ₁⟩, hρ⟩ := intermediate_value_Icc (by norm_num : (1 / 2 : ℝ) ≤ 1)
     (by fun_prop : Continuous f).continuousOn
-    (⟨hf₀, by nlinarith⟩ : (0 : ℝ) ∈ Set.Icc (f (1 / 2)) (f 1))
+    (⟨sum_mul_half_pow_nonpos hN, by nlinarith⟩ : (0 : ℝ) ∈ Set.Icc (f (1 / 2)) (f 1))
   refine ⟨ρ, hρ₀, lt_of_le_of_ne hρ₁ ?_, hρ⟩
   rintro rfl
   nlinarith

@@ -13,8 +13,8 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Base
 The main results of Fox and Lovász, *A tight bound for Green's arithmetic triangle removal lemma
 in vector spaces*, [arXiv:1606.01230](https://arxiv.org/abs/1606.01230), in `Fin n → ZMod p`:
 Theorems 1, 2 and 3, including the bound `δ ≤ ε ^ (C p - η)` of Theorem 1 for
-`0 < ε < tightnessEps p η`, an explicit function of `p` and `η`. A triangle of `X × Y × Z` is a
-triple `(x, y, z)` with `x + y + z = 0`.
+`0 < ε < ε₀ p η`, an explicit function of `p` and `η`. A triangle of `X × Y × Z` is a triple
+`(x, y, z)` with `x + y + z = 0`.
 
 The proofs are in `Solution.lean`.
 -/
@@ -36,18 +36,14 @@ noncomputable def c (p : ℕ) : ℝ :=
 noncomputable def C (p : ℕ) : ℝ :=
   1 + 1 / c p
 
-/-- The dimension `n₀ = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1` from which on
-`Fin n → ZMod p` contains a multicolored sum-free family with at least `p ^ ((1 - c p - η) * n)`
-members. -/
-noncomputable def sumFreeDim (p : ℕ) (η : ℝ) : ℕ :=
+/-- The dimension `n₀ p η = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1` in the bound `ε₀`. -/
+noncomputable def n₀ (p : ℕ) (η : ℝ) : ℕ :=
   ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉₊ + p ^ 4 + 1
 
-/-- The bound `ε₀ = p ^ (-(n₀ + 1))`, where `n₀ = sumFreeDim p η'` with
-`η' = c p * min (1 - c p) (c p * η / 2) / 2`. For `0 < ε < ε₀`, every `δ` that works with `ε` in
-the arithmetic triangle removal lemma in `Fin n → ZMod p` for every `n` satisfies
-`δ ≤ ε ^ (C p - η)`. -/
-noncomputable def tightnessEps (p : ℕ) (η : ℝ) : ℝ :=
-  ((p : ℝ) ^ (sumFreeDim p (c p * min (1 - c p) (c p * η / 2) / 2) + 1))⁻¹
+/-- The bound `ε₀ p η = p ^ (-(n₀ p η' + 1))` with `η' = c p * min (1 - c p) (c p * η / 2) / 2`
+of the second part of Theorem 1. -/
+noncomputable def ε₀ (p : ℕ) (η : ℝ) : ℝ :=
+  ((p : ℝ) ^ (n₀ p (c p * min (1 - c p) (c p * η / 2) / 2) + 1))⁻¹
 
 variable {p n : ℕ} [Fact p.Prime]
 
@@ -81,11 +77,10 @@ theorem div_pow_rpow_C_mul_sq_le_card_triangles' {ι : Type*} [Fintype ι]
   sorry
 
 /-- **Asymptotic tightness of the arithmetic triangle removal lemma** (the "Furthermore" part of
-Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < tightnessEps p η`, any `δ` that
-works with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies
-`δ ≤ ε ^ (C p - η)`. -/
+Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < ε₀ p η`, any `δ` that works
+with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies `δ ≤ ε ^ (C p - η)`. -/
 theorem le_rpow_C_sub_of_forall_exists_subset' {η ε δ : ℝ} (hη : 0 < η) (hε₀ : 0 < ε)
-    (hε : ε < tightnessEps p η)
+    (hε : ε < ε₀ p η)
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧

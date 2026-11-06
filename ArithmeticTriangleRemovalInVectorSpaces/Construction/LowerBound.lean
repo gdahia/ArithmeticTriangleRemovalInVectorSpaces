@@ -23,7 +23,7 @@ three copies of the truncated geometric distribution `geomDist N ρ` on `range (
 empirical distributions within a bounded error of `d * geomDist N ρ`, so their type classes have
 about `(ρ ^ (-N / 3) * ∑ k, ρ ^ k) ^ n ≥ p ^ ((1 - c p) * n)` elements. The sum-free family of
 this base point, padded with zero coordinates, has at least `p ^ ((1 - c p - η) * n)` members for
-`n ≥ sumFreeDim p η`. Taking `ρ ≥ 1 / 2` keeps the error terms explicit in `p`.
+`n ≥ n₀ p η`. Taking `ρ ≥ 1 / 2` bounds the error terms by explicit functions of `p`.
 
 ## Main definitions
 
@@ -39,8 +39,8 @@ this base point, padded with zero coordinates, has at least `p ^ ((1 - c p - η)
 * `ArithmeticTriangleRemovalInVectorSpaces.exists_le_log_card_typeClass`: base points with large
   type classes in every dimension `d ≥ p ^ 4 + 1`.
 * `ArithmeticTriangleRemovalInVectorSpaces.exists_isMulticoloredSumFree_rpow_le`: for every
-  `η > 0` and `n ≥ sumFreeDim p η`, there is a multicolored sum-free family in `Fin n → ZMod p`
-  with at least `p ^ ((1 - c p - η) * n)` members (the second part of Theorem 2 of Fox and Lovász).
+  `η > 0` and `n ≥ n₀ p η`, there is a multicolored sum-free family in `Fin n → ZMod p` with at
+  least `p ^ ((1 - c p - η) * n)` members (the second part of Theorem 2 of Fox and Lovász).
 -/
 
 public section
@@ -232,6 +232,46 @@ lemma marginal_inv_smul_eq_geomDist {J : ℕ × ℕ × ℕ → ℝ} {g : ℕ × 
     marginal N ((∑ j ∈ range (N + 1), ρ ^ j)⁻¹ • J) g k = geomDist N ρ k := by
   simp [marginal_smul, hg, geom, geomDist, hk, div_eq_inv_mul]
 
+lemma card_sumTriples_le (N : ℕ) : #(sumTriples N) ≤ (N + 1) ^ 3 := by
+  grw [card_le_card (t := range (N + 1) ×ˢ range (N + 1) ×ˢ range (N + 1)) ?_]
+  · simp [pow_three]
+  · rintro ⟨a, b, c⟩ h
+    grind [mem_sumTriples]
+
+/-- For `ρ ∈ [1 / 2, 1]`, `(geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N`. -/
+lemma inv_geomDist_le (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ ≤ 1) : (geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N := by
+  rw [geomDist, inv_div, div_le_iff₀ (pow_pos (by linarith) N), mul_assoc, ← mul_pow]
+  grw [sum_le_card_nsmul _ _ 1 fun j _ ↦ pow_le_one₀ (by linarith) hρ₁]
+  simp only [card_range, nsmul_one, Nat.cast_add_one]
+  exact le_mul_of_one_le_right (by positivity) (one_le_pow₀ (by linarith))
+
+/-- For `N > 0`, `0 ≤ T ≤ (N + 1) ^ 3` and `ρ ∈ [1 / 2, 1)`, the error term of
+`le_log_card_typeClass_geomDist` is at most `2 ^ (N + 1) * (N + 1) ^ 10`. -/
+lemma mul_one_add_sq_div_geomDist_sub_le (hN : 0 < N) (hρ₀ : 1 / 2 ≤ ρ) (hρ₁ : ρ < 1) {T : ℝ}
+    (hT₀ : 0 ≤ T) (hT : T ≤ (N + 1) ^ 3) :
+    (N + 1) * (1 + ((N + 1) * T) ^ 2 / geomDist N ρ N) - T * N * (N + 1) * log ρ ≤
+      2 ^ (N + 1) * (N + 1) ^ 10 := by
+  have hsq : ((N + 1) * T) ^ 2 / geomDist N ρ N ≤
+      ((N + 1) * (N + 1) ^ 3) ^ 2 * ((N + 1) * 2 ^ N) := by
+    rw [div_eq_mul_inv]
+    gcongr
+    · exact (inv_pos.2 (geomDist_pos (by linarith) N)).le
+    · exact inv_geomDist_le hρ₀ hρ₁.le
+  have hlog : T * N * (N + 1) * -log ρ ≤ (N + 1) ^ 3 * (N + 1) * (N + 1) * 1 := by
+    gcongr
+    · linarith [log_neg (by linarith : 0 < ρ) hρ₁]
+    · linarith
+    · linarith [one_sub_inv_le_log_of_pos (by linarith : 0 < ρ),
+        (inv_le_comm₀ (by linarith : 0 < ρ) two_pos).2 (by linarith)]
+  have hq : (N + 1 : ℝ) + (N + 1) ^ 5 ≤ 2 ^ N * (N + 1) ^ 10 := by
+    have h₂ : (2 : ℝ) ≤ N + 1 := by norm_cast; grind
+    grw [← one_le_pow₀ (by norm_num : (1 : ℝ) ≤ 2) (n := N), one_mul]
+    nlinarith [le_self_pow₀ (by linarith : (1 : ℝ) ≤ N + 1) (by norm_num : 5 ≠ 0),
+      mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (by norm_num) h₂ 5)
+        (by positivity : (0 : ℝ) ≤ (N + 1) ^ 5)]
+  rw [pow_succ (2 : ℝ) N]
+  nlinarith [mul_le_mul_of_nonneg_left hsq (by positivity : (0 : ℝ) ≤ N + 1)]
+
 /-- **Base points with large type classes.** For `p ≥ 2` and `d ≥ p ^ 4 + 1` there are
 `n ∈ [d - p ^ 4, d]` and `a₀ b₀ c₀ : Fin n → ℕ` with `a₀ r + b₀ r + c₀ r = p - 1` whose type
 classes all have at least `exp (n * ((1 - c p) * log p) - 2 ^ p * p ^ 10 - p * log (n + 1))`
@@ -245,50 +285,7 @@ lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 �
   obtain ⟨N, rfl⟩ : ∃ N, p = N + 1 := ⟨p - 1, by grind⟩
   obtain ⟨ρ, hρ, hρ₁, hmean, J, hJ, h₁, h₂, h₃⟩ := exists_compatible_geom (N := N) (by grind)
   have hρ₀ : 0 < ρ := by linarith
-  have hS : (#(sumTriples N) : ℝ) ≤ (N + 1) ^ 3 := by
-    have hsub : sumTriples N ⊆ range (N + 1) ×ˢ range (N + 1) ×ˢ range (N + 1) := by
-      rintro ⟨a, b, c⟩ h
-      simp only [mem_sumTriples] at h
-      simp only [mem_product, mem_range]
-      grind
-    have : #(sumTriples N) ≤ (N + 1) ^ 3 := by
-      grw [card_le_card hsub]
-      simp [card_product, pow_three]
-    exact_mod_cast this
-  have hK : (N + 1) * (1 + ((N + 1) * #(sumTriples N)) ^ 2 / geomDist N ρ N) -
-      #(sumTriples N) * N * (N + 1) * log ρ ≤ 2 ^ (N + 1) * (N + 1) ^ 10 := by
-    have hg : (geomDist N ρ N)⁻¹ ≤ (N + 1) * 2 ^ N := by
-      rw [geomDist, inv_div, div_le_iff₀ (by positivity)]
-      have : ∑ j ∈ range (N + 1), ρ ^ j ≤ N + 1 := by
-        grw [sum_le_card_nsmul _ _ 1 fun j _ ↦ pow_le_one₀ hρ₀.le hρ₁.le]
-        simp
-      nlinarith [(by rw [← mul_pow]; exact one_le_pow₀ (by linarith) : 1 ≤ 2 ^ N * ρ ^ N)]
-    have hlog : -log ρ ≤ 1 := by
-      have := log_le_log (by norm_num) hρ
-      rw [one_div, log_inv] at this
-      linarith [log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
-    have hq : (2 : ℝ) ≤ N + 1 := by exact_mod_cast hp
-    have hq₅ : (2 : ℝ) ≤ (N + 1) ^ 5 := hq.trans (le_self_pow₀ (by linarith) (by norm_num))
-    have hsq : ((N + 1) * #(sumTriples N) : ℝ) ^ 2 / geomDist N ρ N ≤
-        ((N + 1) * (N + 1) ^ 3) ^ 2 * ((N + 1) * 2 ^ N) := by
-      rw [div_eq_mul_inv]
-      gcongr
-      exact (inv_pos.2 (geomDist_pos hρ₀ N)).le
-    have hlin : #(sumTriples N) * N * (N + 1) * -log ρ ≤ (N + 1) ^ 3 * (N + 1) * (N + 1) * 1 := by
-      gcongr
-      · linarith [log_neg hρ₀ hρ₁]
-      · linarith
-    have hq₁₀ : (N + 1 : ℝ) + (N + 1) ^ 5 ≤ 2 ^ N * (N + 1) ^ 10 := by
-      have : (N + 1 : ℝ) ≤ (N + 1) ^ 5 := le_self_pow₀ (by linarith) (by norm_num)
-      have : 2 * (N + 1 : ℝ) ^ 5 ≤ (N + 1) ^ 10 := by
-        nlinarith [(by ring : (N + 1 : ℝ) ^ 10 = (N + 1) ^ 5 * (N + 1) ^ 5)]
-      nlinarith [one_le_pow₀ (by norm_num : (1 : ℝ) ≤ 2) (n := N),
-        (by positivity : (0 : ℝ) ≤ (N + 1) ^ 10)]
-    rw [pow_succ (2 : ℝ) N]
-    nlinarith [mul_le_mul_of_nonneg_left hsq (by positivity : (0 : ℝ) ≤ N + 1)]
-  have hT : (N + 1) * (#(sumTriples N) : ℝ) ≤ (N + 1) ^ 4 := by
-    grw [hS]
-    exact le_of_eq (by ring)
+  have hS : (#(sumTriples N) : ℝ) ≤ (N + 1) ^ 3 := by exact_mod_cast card_sumTriples_le N
   have hd' : ((N + 1) ^ 4 + 1 : ℝ) ≤ d := by exact_mod_cast hd
   obtain ⟨n, f₀, hf₀, hcount⟩ := exists_card_filter_mem_Icc (N := N)
     (J := (∑ j ∈ range (N + 1), ρ ^ j)⁻¹ • J)
@@ -305,6 +302,8 @@ lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 �
   obtain ⟨hn₁, hn₂⟩ := natCast_mem_Icc_of_card_filter_mem_Icc (fun r ↦ by grind [hsum r])
     (hD _ h₁)
   rw [sum_geomDist hρ₀, mul_one] at hn₁ hn₂
+  have hn : (d : ℝ) - (N + 1) ^ 4 ≤ n := by
+    linarith [mul_le_mul_of_nonneg_left hS (by positivity : (0 : ℝ) ≤ N + 1)]
   have hlog (g : ℕ × ℕ × ℕ → ℕ) (hga : ∀ r, g (a₀ r, b₀ r, c₀ r) ≤ N)
       (hg : marginal N J g = geom N ρ) :
       n * ((1 - c (N + 1)) * log (N + 1 : ℕ)) - 2 ^ (N + 1) * (N + 1 : ℕ) ^ 10 -
@@ -312,7 +311,8 @@ lemma exists_le_log_card_typeClass {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4 + 1 �
     push_cast
     nlinarith [le_log_card_typeClass_geomDist hρ₀ hρ₁ hmean (Nat.cast_nonneg _) _ hga
       (by exact_mod_cast (by linarith : (1 : ℝ) ≤ n)) (hD g hg),
-      mul_le_mul_of_nonneg_left (one_sub_c_mul_log_le (N := N) (by grind) hρ₀ hρ₁) n.cast_nonneg]
+      mul_le_mul_of_nonneg_left (one_sub_c_mul_log_le (N := N) (by grind) hρ₀ hρ₁) n.cast_nonneg,
+      mul_one_add_sq_div_geomDist_sub_le (by grind) hρ hρ₁ (by positivity) hS]
   exact ⟨n, a₀, b₀, c₀, fun r ↦ by grind [hsum r], by push_cast; linarith,
     by exact_mod_cast hn₂, hlog (fun (a, _, _) ↦ a) (fun r ↦ by grind [hsum r]) h₁,
     hlog (fun (_, b, _) ↦ b) (fun r ↦ by grind [hsum r]) h₂,
@@ -352,20 +352,20 @@ lemma exists_isMulticoloredSumFree_exp_le {p d : ℕ} (hp : 2 ≤ p) (hd : p ^ 4
   rw [div_le_div_iff_of_pos_right (by positivity), sub_eq_add_neg _ (4 * √_), exp_add, ← neg_mul]
   exact mul_le_mul_of_nonneg_right (le_max_right _ _) (exp_pos _).le
 
-/-- For `a > 0`, `b * √(d + 1) ≤ a * d` once `(2 * b / a) ^ 2 + 1 ≤ d`. -/
-lemma mul_sqrt_add_one_le {a b : ℝ} (ha : 0 < a) {d : ℕ} (hd : (2 * b / a) ^ 2 + 1 ≤ d) :
-    b * √(d + 1) ≤ a * d := by
-  have hb : 2 * b / a ≤ √(d + 1) := (le_abs_self _).trans (abs_le_sqrt (by linarith))
-  rw [div_le_iff₀ ha] at hb
+/-- For `a > 0`, `b * √(d + 1) ≤ a * d` once `2 * b / a ≤ B` and `B ^ 2 + 1 ≤ d`. -/
+lemma mul_sqrt_add_one_le {a b B : ℝ} (ha : 0 < a) (hb : 2 * b / a ≤ B) {d : ℕ}
+    (hd : B ^ 2 + 1 ≤ d) : b * √(d + 1) ≤ a * d := by
+  grw [(le_abs_self B).trans (abs_le_sqrt (by linarith : B ^ 2 ≤ d + 1)), div_le_iff₀ ha] at hb
   nlinarith [sq_sqrt (by positivity : (0 : ℝ) ≤ d + 1), sqrt_nonneg (d + 1)]
 
 /-- The error terms of `exists_isMulticoloredSumFree_exp_le` are at most `ε * d` for large `d`:
-for every `A` and `ε > 0`, `A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d`
-for every `n ≤ d` once `(2 * b / ε) ^ 2 + 1 ≤ d`, where
-`b = |A| + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)`. -/
-lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε : ℝ} (hε : 0 < ε) {d : ℕ}
-    (hd : (2 * (|A| + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)) / ε) ^ 2 + 1 ≤ d) {n : ℕ}
-    (hn : n ≤ d) : A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d := by
+for `0 ≤ A` and `ε > 0`, `A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d`
+for every `n ≤ d` once `2 * b / ε ≤ B` and `B ^ 2 + 1 ≤ d`, where
+`b = A + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)`. -/
+lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε B : ℝ} (hA : 0 ≤ A) (hε : 0 < ε)
+    (hb : 2 * (A + 2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)) / ε ≤ B) {d : ℕ}
+    (hd : B ^ 2 + 1 ≤ d) {n : ℕ} (hn : n ≤ d) :
+    A + p * log (n + 1) + 4 * √(log ((12 + 2 * p) * p ^ (3 * n))) ≤ ε * d := by
   have hn' : (n : ℝ) ≤ d := by exact_mod_cast hn
   have hlog : log (n + 1) ≤ 2 * √(d + 1) := by
     grw [log_le_log (by positivity) (by linarith : (n : ℝ) + 1 ≤ d + 1),
@@ -379,83 +379,55 @@ lemma add_mul_log_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) {A ε : ℝ} (hε : 0 < �
     push_cast
     nlinarith [log_nonneg (by linarith [p.cast_nonneg (α := ℝ)] : (1 : ℝ) ≤ 12 + 2 * p),
       log_nonneg (by exact_mod_cast (by grind : 1 ≤ p) : (1 : ℝ) ≤ p)]
-  nlinarith [mul_sqrt_add_one_le hε hd, (le_abs_self A).trans (le_mul_of_one_le_right
-    (abs_nonneg A) (one_le_sqrt.2 (by simp) : (1 : ℝ) ≤ √(d + 1))), p.cast_nonneg (α := ℝ)]
+  nlinarith [mul_sqrt_add_one_le hε hb hd,
+    le_mul_of_one_le_right hA (one_le_sqrt.2 (by simp) : (1 : ℝ) ≤ √(d + 1)),
+    p.cast_nonneg (α := ℝ)]
 
 /-- The constant `b` of `add_mul_log_add_sqrt_le` for the error terms of
 `exists_isMulticoloredSumFree_exp_le` is at most `2 ^ (p + 1) * p ^ 10`. -/
-lemma abs_add_mul_add_sqrt_le {p : ℕ} (hp : 2 ≤ p) :
-    |(1 - c p) * log p * p ^ 4 + 2 ^ p * p ^ 10 + log (4 * (12 + 2 * p))| + 2 * p +
+lemma log_mul_pow_add_le_two_pow_succ_mul {p : ℕ} (hp : 2 ≤ p) :
+    log p * p ^ 4 + 2 ^ p * p ^ 10 + (48 + 8 * p) + 2 * p +
       4 * √(log (12 + 2 * p) + 3 * log p) ≤ 2 ^ (p + 1) * p ^ 10 := by
   have hp' : (2 : ℝ) ≤ p := by exact_mod_cast hp
-  have hc₀ := c_pos hp
-  have hc₁ := c_lt_one hp
-  have hlogp : log p ≤ p := log_le_self (by positivity)
-  have hlogp₀ : 0 ≤ log p := log_nonneg (by linarith)
-  have hlog₁ : log (4 * (12 + 2 * p)) ≤ 4 * (12 + 2 * p) := log_le_self (by positivity)
-  have hlog₂ : log (12 + 2 * p) ≤ 12 + 2 * p := log_le_self (by positivity)
-  have hlog₂₀ : 0 ≤ log (12 + 2 * p) := log_nonneg (by linarith)
   have hsqrt : √(log (12 + 2 * p) + 3 * log p) ≤ 13 + 5 * p := by
-    rw [sqrt_le_left (by linarith)]
-    nlinarith
-  have h₄ : (16 : ℝ) * p ≤ p ^ 5 := by
-    have := pow_le_pow_left₀ (by norm_num) hp' 4
-    norm_num at this
-    nlinarith
-  have h₅ : (32 : ℝ) ≤ p ^ 5 := by
-    have := pow_le_pow_left₀ (by norm_num) hp' 5
-    norm_num at this
-    exact this
-  have h₁ : (1 - c p) * log p * p ^ 4 ≤ p ^ 5 := by
-    have : (1 - c p) * log p ≤ p := by nlinarith
-    nlinarith [mul_le_mul_of_nonneg_right this (by positivity : (0 : ℝ) ≤ p ^ 4)]
-  have h₁₀ : 0 ≤ (1 - c p) * log p * p ^ 4 := by
-    have : 0 ≤ 1 - c p := by linarith
-    positivity
-  have h₂ : (32 : ℝ) * p ^ 5 ≤ 2 ^ p * p ^ 10 := by
-    calc (32 : ℝ) * p ^ 5 ≤ (p : ℝ) ^ 5 * p ^ 5 := by gcongr
-      _ = (p : ℝ) ^ 10 := by ring
-      _ ≤ 2 ^ p * p ^ 10 := le_mul_of_one_le_left (by positivity) (one_le_pow₀ (by norm_num))
-  rw [abs_of_nonneg (by linarith [log_nonneg (by linarith : (1 : ℝ) ≤ 4 * (12 + 2 * p)),
-    (by positivity : (0 : ℝ) ≤ 2 ^ p * p ^ 10)]), pow_succ (2 : ℝ) p]
-  linarith
+    rw [sqrt_le_left (by positivity)]
+    nlinarith [log_le_self (by positivity : (0 : ℝ) ≤ 12 + 2 * p),
+      log_le_self (by positivity : (0 : ℝ) ≤ p), log_nonneg (by linarith : (1 : ℝ) ≤ p),
+      log_nonneg (by linarith : (1 : ℝ) ≤ 12 + 2 * p)]
+  grw [hsqrt, log_le_self (by positivity : (0 : ℝ) ≤ p), pow_succ (2 : ℝ) p]
+  nlinarith [mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hp)
+      (by positivity : (0 : ℝ) ≤ p ^ 10),
+    mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (by norm_num) hp' 5)
+      (by positivity : (0 : ℝ) ≤ p ^ 5),
+    le_self_pow₀ (by linarith : (1 : ℝ) ≤ p) (by norm_num : 5 ≠ 0)]
 
 /-- **Large multicolored sum-free families** (Kleinberg, Sawin and Speyer, using Pebody's theorem;
 the second part of Theorem 2 of Fox and Lovász). For `p ≥ 2`, `η > 0` and
-`n ≥ sumFreeDim p η = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1`, there is a multicolored
-sum-free family in `Fin n → ZMod p` with at least `p ^ ((1 - c p - η) * n)` members. -/
+`d ≥ n₀ p η = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1`, there is a multicolored sum-free
+family in `Fin d → ZMod p` with at least `p ^ ((1 - c p - η) * d)` members. -/
 theorem exists_isMulticoloredSumFree_rpow_le {p d : ℕ} (hp : 2 ≤ p) {η : ℝ} (hη : 0 < η)
-    (hd : sumFreeDim p η ≤ d) :
+    (hd : n₀ p η ≤ d) :
     ∃ (m : ℕ) (x y z : Fin m → Fin d → ZMod p),
       IsMulticoloredSumFree x y z ∧ (p : ℝ) ^ ((1 - c p - η) * d) ≤ m := by
-  unfold sumFreeDim at hd
   have hlogp : 1 / 2 ≤ log p := by
     linarith [one_sub_inv_le_log_of_pos (by norm_num : (0 : ℝ) < 2),
       log_le_log (by norm_num) (by exact_mod_cast hp : (2 : ℝ) ≤ p)]
-  have hb : (2 * (|(1 - c p) * log p * p ^ 4 + 2 ^ p * p ^ 10 + log (4 * (12 + 2 * p))| +
-      2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)) / (η * log p)) ^ 2 + 1 ≤ d := by
-    have h := abs_add_mul_add_sqrt_le hp
-    have hd' : ((⌈(2 ^ (p + 3) * (p : ℝ) ^ 10 / η) ^ 2⌉₊ + p ^ 4 + 1 : ℕ) : ℝ) ≤ d := by
-      exact_mod_cast hd
-    push_cast at hd'
-    have hle : 2 * (|(1 - c p) * log p * p ^ 4 + 2 ^ p * p ^ 10 + log (4 * (12 + 2 * p))| +
-        2 * p + 4 * √(log (12 + 2 * p) + 3 * log p)) / (η * log p) ≤
-          2 ^ (p + 3) * p ^ 10 / η := by
-      rw [div_le_div_iff₀ (by positivity) hη, pow_add]
-      grw [h, pow_succ]
-      nlinarith [(by positivity : (0 : ℝ) ≤ 2 ^ p * p ^ 10 * η)]
-    grw [hle]
-    linarith [Nat.le_ceil ((2 ^ (p + 3) * (p : ℝ) ^ 10 / η) ^ 2),
-      (by positivity : (0 : ℝ) ≤ p ^ 4)]
-  obtain ⟨n, m, x, y, z, hsf, hn₁, hn₂, hm⟩ := exists_isMulticoloredSumFree_exp_le hp (d := d)
-    (by grind)
+  have hb : 2 * (log p * p ^ 4 + 2 ^ p * p ^ 10 + (48 + 8 * p) + 2 * p +
+      4 * √(log (12 + 2 * p) + 3 * log p)) / (η * log p) ≤ 2 ^ (p + 3) * p ^ 10 / η := by
+    rw [div_le_div_iff₀ (by positivity) hη, pow_add]
+    grw [log_mul_pow_add_le_two_pow_succ_mul hp, pow_succ]
+    nlinarith [(by positivity : (0 : ℝ) ≤ 2 ^ p * p ^ 10 * η)]
+  obtain ⟨n, m, x, y, z, hsf, hn₁, hn₂, hm⟩ :=
+    exists_isMulticoloredSumFree_exp_le hp ((pow_four_lt_n₀ p η).trans_le hd)
   refine ⟨m, x, y, z, hsf, ?_⟩
   grw [← hm]
   rw [rpow_def_of_pos (by positivity), le_div_iff₀ (by positivity),
     ← exp_log (by positivity : (0 : ℝ) < 4 * (12 + 2 * p)), ← exp_add, exp_le_exp]
-  nlinarith [add_mul_log_add_sqrt_le hp (mul_pos hη (by linarith)) hb
-      (by exact_mod_cast hn₂ : n ≤ d),
+  nlinarith [add_mul_log_add_sqrt_le hp (by positivity) (mul_pos hη (by linarith)) hb
+      ((sq_add_one_le_n₀ p η).trans (by exact_mod_cast hd)) (by exact_mod_cast hn₂ : n ≤ d),
     mul_le_mul_of_nonneg_right hn₁
-      (mul_nonneg (sub_nonneg.2 (c_lt_one hp).le) (by linarith : (0 : ℝ) ≤ log p))]
+      (mul_nonneg (sub_nonneg.2 (c_lt_one hp).le) (by linarith : (0 : ℝ) ≤ log p)),
+    mul_nonneg (c_pos hp).le (by positivity : (0 : ℝ) ≤ log p * p ^ 4),
+    log_le_self (by positivity : (0 : ℝ) ≤ 4 * (12 + 2 * p))]
 
 end ArithmeticTriangleRemovalInVectorSpaces

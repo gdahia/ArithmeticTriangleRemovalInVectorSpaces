@@ -37,8 +37,8 @@ theorems write out the triangles and multicolored sum-freeness in terms of Mathl
   `ε` and `δ`, then every multicolored sum-free family of more than `ε * N` triples has at least
   `δ * N ^ 2` members.
 * `le_rpow_C_sub_of_forall_exists_subset`: `δ ≤ ε ^ (C p - η)` whenever `ε` and `δ` work in the
-  removal lemma and `0 < ε < tightnessEps p η` (the "Furthermore" part of Theorem 1). It uses the
-  multicolored sum-free families of size `p ^ ((1 - c p - η') * n)` for `n ≥ sumFreeDim p η'` of
+  removal lemma and `0 < ε < ε₀ p η` (the "Furthermore" part of Theorem 1). It uses the
+  multicolored sum-free families of size `p ^ ((1 - c p - η') * n)` for `n ≥ n₀ p η'` of
   `exists_isMulticoloredSumFree_rpow_le` (the second part of Theorem 2).
 -/
 
@@ -149,11 +149,11 @@ lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ} (h : IsMulticolo
     exact_mod_cast Nat.lt_floor_add_one (ε * p ^ n)
 
 /-- The asymptotic tightness bound for fixed `κ` and `η'` with `1 ≤ κ`, `1 / c p - η / 2 ≤ κ`
-and `0 < η' < 1 / κ - c p`, for `0 < ε < p ^ (-(sumFreeDim p η' + 1))` and
+and `0 < η' < 1 / κ - c p`, for `0 < ε < p ^ (-(n₀ p η' + 1))` and
 `ε ≤ (p + p ^ 2) ^ (-2 / η)`. -/
 lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤ κ)
     (hκη : (c p)⁻¹ - η / 2 ≤ κ) (hη'₀ : 0 < η') (hη' : η' < κ⁻¹ - c p) (hε₀ : 0 < ε)
-    (hε : ε < ((p : ℝ) ^ (sumFreeDim p η' + 1))⁻¹) (hε' : ε ≤ (p + p ^ 2 : ℝ)⁻¹ ^ (2 / η))
+    (hε : ε < ((p : ℝ) ^ (n₀ p η' + 1))⁻¹) (hε' : ε ≤ (p + p ^ 2 : ℝ)⁻¹ ^ (2 / η))
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
@@ -161,11 +161,11 @@ lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤
     δ ≤ ε ^ (C p - η) := by
   have hp₀ := (Fact.out : p.Prime).pos
   have hp : 1 < (p : ℝ) := Nat.one_lt_cast.2 (Fact.out : p.Prime).one_lt
-  have ht : 1 < (p : ℝ) ^ κ⁻¹ := Real.one_lt_rpow hp (by positivity)
-  have htp : (p : ℝ) ^ κ⁻¹ ≤ p := by
-    simpa using Real.rpow_le_rpow_of_exponent_le hp.le (inv_le_one_of_one_le₀ hκ₁)
-  obtain ⟨n, hn, hpow, hpow'⟩ := exists_lt_pow_le_inv_lt ht hε₀
-    (hε.trans_le (inv_anti₀ (by positivity) (pow_le_pow_left₀ (by positivity) htp _)))
+  have hεκ : ε < (((p : ℝ) ^ κ⁻¹) ^ (n₀ p η' + 1))⁻¹ := by
+    grw [Real.rpow_le_self_of_one_le hp.le (inv_le_one_of_one_le₀ hκ₁)]
+    exact hε
+  obtain ⟨n, hn, hpow, hpow'⟩ :=
+    exists_lt_pow_le_inv_lt (Real.one_lt_rpow hp (by positivity)) hε₀ hεκ
   have hε₁ : ε ≤ 1 := hε.le.trans (inv_le_one_of_one_le₀ (one_le_pow₀ hp.le))
   obtain ⟨m, x, y, z, hxyz, hm⟩ :=
     exists_isMulticoloredSumFree_rpow_le (Fact.out : p.Prime).two_le hη'₀ hn.le
@@ -176,80 +176,35 @@ lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤
     (inv_pow_le_mul_rpow (by positivity) hε₀ (by positivity) hpow') this]
   exact mul_rpow_le_rpow_sub (by positivity) hε₀ hε₁ hη (by rw [C, one_div]; linarith) hε'
 
-lemma tightnessEps_pos (η : ℝ) : 0 < tightnessEps p η := by
+lemma ε₀_pos (η : ℝ) : 0 < ε₀ p η := by
   have := (Fact.out : p.Prime).pos
-  unfold tightnessEps
+  rw [ε₀]
   positivity
 
 /-- **Asymptotic tightness of the arithmetic triangle removal lemma** (the "Furthermore" part of
-Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < tightnessEps p η`, any `δ` that
-works with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies
-`δ ≤ ε ^ (C p - η)`. Here `tightnessEps p η = p ^ (-(sumFreeDim p η' + 1))` with
-`η' = c p * min (1 - c p) (c p * η / 2) / 2` and
-`sumFreeDim p η' = ⌈(2 ^ (p + 3) * p ^ 10 / η') ^ 2⌉ + p ^ 4 + 1`. The proof combines the
-construction of Section 3 with the multicolored sum-free families of size
-`p ^ ((1 - c p - η') * n)` of Kleinberg, Sawin and Speyer. -/
+Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < ε₀ p η`, any `δ` that works
+with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies `δ ≤ ε ^ (C p - η)`.
+Here `ε₀ p η = p ^ (-(n₀ p η' + 1))` with `η' = c p * min (1 - c p) (c p * η / 2) / 2` and
+`n₀ p η' = ⌈(2 ^ (p + 3) * p ^ 10 / η') ^ 2⌉ + p ^ 4 + 1`. The proof combines the construction of
+Section 3 with the multicolored sum-free families of size `p ^ ((1 - c p - η') * n)` of Kleinberg,
+Sawin and Speyer. -/
 theorem le_rpow_C_sub_of_forall_exists_subset {η ε δ : ℝ} (hη : 0 < η) (hε₀ : 0 < ε)
-    (hε : ε < tightnessEps p η)
+    (hε : ε < ε₀ p η)
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
           ∀ x ∈ X', ∀ y ∈ Y', ∀ z ∈ Z', x + y + z ≠ 0) :
     δ ≤ ε ^ (C p - η) := by
-  have hp := (Fact.out : p.Prime).two_le
-  have hp' : (2 : ℝ) ≤ p := by exact_mod_cast hp
-  have hc := c_pos hp
-  have hc₁ := c_lt_one hp
-  unfold tightnessEps at hε
-  set η' := c p * min (1 - c p) (c p * η / 2) / 2 with hη'
-  have hmin₀ : 0 < min (1 - c p) (c p * η / 2) := lt_min (by linarith) (by positivity)
-  have hη'₀ : 0 < η' := by positivity
-  set κ := max 1 ((c p)⁻¹ - η / 2) with hκ
-  have hκ₁ : 1 ≤ κ := le_max_left _ _
-  have hmin : min (1 - c p) (c p * η / 2) ≤ 1 - c p * κ := by
-    rcases le_total 1 ((c p)⁻¹ - η / 2) with h | h
-    · rw [hκ, max_eq_right h, mul_sub, mul_inv_cancel₀ hc.ne']
-      linarith [min_le_right (1 - c p) (c p * η / 2)]
-    · rw [hκ, max_eq_left h, mul_one]
-      exact min_le_left _ _
-  have hη'κ : η' < κ⁻¹ - c p := by
-    have : κ⁻¹ - c p = c p * (1 - c p * κ) + (1 - c p * κ) ^ 2 / κ := by
-      field_simp
-      ring
-    nlinarith [mul_le_mul_of_nonneg_left hmin hc.le,
-      div_nonneg (sq_nonneg (1 - c p * κ)) (by linarith : (0 : ℝ) ≤ κ)]
-  have hη'η : η' ≤ η / 4 := by
-    nlinarith [mul_le_mul_of_nonneg_left (min_le_right (1 - c p) (c p * η / 2)) hc.le,
-      mul_le_mul_of_nonneg_right (by nlinarith : c p * c p ≤ 1) hη.le]
-  have hη'₈ : η' ≤ 1 / 8 := by
-    nlinarith [mul_le_mul_of_nonneg_left (min_le_left (1 - c p) (c p * η / 2)) hc.le,
-      sq_nonneg (c p - 1 / 2)]
-  have hdim : 6 / η ≤ (sumFreeDim p η' : ℝ) + 1 := by
-    have h₁ : (1 / η') ^ 2 ≤ (2 ^ (p + 3) * p ^ 10 / η') ^ 2 := by
-      gcongr
-      exact one_le_mul_of_one_le_of_one_le (one_le_pow₀ (by norm_num))
-        (one_le_pow₀ (by linarith))
-    have h₂ : 6 / η ≤ (1 / η') ^ 2 := by
-      rw [div_pow, one_pow, div_le_div_iff₀ hη (by positivity)]
-      nlinarith
-    unfold sumFreeDim
-    push_cast
-    linarith [Nat.le_ceil ((2 ^ (p + 3) * (p : ℝ) ^ 10 / η') ^ 2),
-      (by positivity : (0 : ℝ) ≤ p ^ 4)]
-  have hε' : ε ≤ (p + p ^ 2 : ℝ)⁻¹ ^ (2 / η) := by
-    refine hε.le.trans ?_
-    rw [Real.inv_rpow (by positivity)]
-    gcongr
-    calc (p + p ^ 2 : ℝ) ^ (2 / η) ≤ ((p : ℝ) ^ 3) ^ (2 / η) := by
-          gcongr
-          nlinarith
-      _ = (p : ℝ) ^ (3 * (2 / η)) := by
-          rw [← Real.rpow_natCast, ← Real.rpow_mul (by positivity)]
-          norm_num
-      _ ≤ (p : ℝ) ^ ((sumFreeDim p η' + 1 : ℕ) : ℝ) :=
-          Real.rpow_le_rpow_of_exponent_le (by linarith)
-            (by push_cast; linarith [(by ring : 3 * (2 / η) = 6 / η)])
-      _ = (p : ℝ) ^ (sumFreeDim p η' + 1) := Real.rpow_natCast _ _
-  exact le_rpow_C_sub_of_lt hη hκ₁ (le_max_right _ _) hη'₀ hη'κ hε₀ hε hε' hδ
+  have hp : (2 : ℝ) ≤ p := by exact_mod_cast (Fact.out : p.Prime).two_le
+  have hc := c_pos (Fact.out : p.Prime).two_le
+  have hc₁ := c_lt_one (Fact.out : p.Prime).two_le
+  rw [ε₀] at hε
+  refine le_rpow_C_sub_of_lt hη (le_max_left _ _) (le_max_right _ _)
+    (mul_min_div_two_pos hc hc₁ hη) (mul_min_div_two_lt_inv_max_sub hc hc₁ hη) hε₀ hε
+    (hε.le.trans (inv_pow_le_inv_add_sq_rpow hp hη ?_)) hδ
+  push_cast
+  linarith [div_le_sq_div_mul_min_div_two (X := 2 ^ (p + 3) * (p : ℝ) ^ 10) hc hc₁ hη
+      (one_le_mul_of_one_le_of_one_le (one_le_pow₀ (by norm_num)) (one_le_pow₀ (by linarith))),
+    sq_add_one_le_n₀ p (c p * min (1 - c p) (c p * η / 2) / 2)]
 
 end ArithmeticTriangleRemovalInVectorSpaces

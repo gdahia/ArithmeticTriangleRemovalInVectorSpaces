@@ -52,9 +52,7 @@ $X' \times Y' \times Z'$ contains no triangle, then
 
 $$\delta \le \varepsilon^{C_p - \eta},$$
 
-where triangles and $C_p$ are as in Theorem 1. The proof uses multicolored sum-free families in
-$\mathbb{F}_p^n$ with at least $p^{(1 - c_p - \eta') n}$ members for every
-$n \ge \lceil (2^{p+3} p^{10} / \eta')^2 \rceil + p^4 + 1$ (`exists_isMulticoloredSumFree_rpow_le`).
+where triangles and $C_p$ are as in Theorem 1.
 
 ## Files
 
@@ -76,10 +74,10 @@ and the use of AI coding agents.
 ## Verification
 
 `Challenge.lean` imports only the Mathlib module `Mathlib.Analysis.SpecialFunctions.Log.Base`. It
-defines `c`, `C`, `sumFreeDim` ($n_0$) and `tightnessEps` ($\varepsilon_0$) as in the library and
-states Theorems 1 to 4 as `exists_subset_card_sdiff_add_le_forall_add_ne_zero'`,
-`card_le_rpow_one_sub_c_mul'`, `div_pow_rpow_C_mul_sq_le_card_triangles'` and
-`le_rpow_C_sub_of_forall_exists_subset'` with `sorry`.
+defines `c`, `C`, `n₀` and `ε₀` as in the library and states Theorems 1 to 4 as
+`exists_subset_card_sdiff_add_le_forall_add_ne_zero'`, `card_le_rpow_one_sub_c_mul'`,
+`div_pow_rpow_C_mul_sq_le_card_triangles'` and `le_rpow_C_sub_of_forall_exists_subset'` with
+`sorry`.
 `comparator.json` names these theorems,
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge` and
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Solution` as the modules to compare, no
