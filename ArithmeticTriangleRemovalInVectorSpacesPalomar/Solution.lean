@@ -7,7 +7,6 @@ module -- shake: keep-all
 
 public import Mathlib.Analysis.SpecialFunctions.Log.Base
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
-import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.SmallPrimes
 import ArithmeticTriangleRemovalInVectorSpaces.ZMod
 
 /-!

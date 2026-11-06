@@ -5,7 +5,7 @@ Lean 4 formalisation of the main results of Jacob Fox and László Miklós Lová
 spaces*](https://arxiv.org/abs/1606.01230): the arithmetic triangle removal lemma in
 $\mathbb{F}_p^n$ with a polynomial bound (Theorem 1), the Kleinberg–Sawin–Speyer bound on
 multicolored sum-free families (Theorem 2), the count of triangles spanned by vertex-disjoint
-triangles (Theorem 3), the tightness of the exponent in Theorem 1 (Theorem 4).
+triangles (Theorem 3), and the tightness of the exponent in Theorem 1 (Theorem 4).
 
 ## Results
 
@@ -69,10 +69,9 @@ and the use of AI coding agents.
 ## Verification
 
 `Challenge.lean` imports only the Mathlib module `Mathlib.Analysis.SpecialFunctions.Log.Base`. It
-defines `c` and `C` as in the library and states Theorems 1 to 6 as
+defines `c` and `C` as in the library and states Theorems 1 to 4 as
 `exists_subset_card_sdiff_add_le_forall_add_ne_zero'`, `card_le_rpow_one_sub_c_mul'`,
-`div_pow_rpow_C_mul_sq_le_card_triangles'`, `exists_pos_forall_le_rpow_C_sub'`, `c_two'` and
-`c_three'` with `sorry`.
+`div_pow_rpow_C_mul_sq_le_card_triangles'` and `exists_pos_forall_le_rpow_C_sub'` with `sorry`.
 `comparator.json` names these theorems,
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge` and
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Solution` as the modules to compare, no

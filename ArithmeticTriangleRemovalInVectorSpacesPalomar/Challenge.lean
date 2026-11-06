@@ -12,9 +12,8 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 The main results of Fox and Lovász, *A tight bound for Green's arithmetic triangle removal lemma
 in vector spaces*, [arXiv:1606.01230](https://arxiv.org/abs/1606.01230), in `Fin n → ZMod p`:
-Theorems 1, 2 and 3, including the bound `δ ≤ ε ^ (C p - o(1))` of Theorem 1, and the values of
-`c 2` and `c 3`. A triangle of `X × Y × Z` is a triple
-`(x, y, z)` with `x + y + z = 0`.
+Theorems 1, 2 and 3, including the bound `δ ≤ ε ^ (C p - o(1))` of Theorem 1. A triangle of
+`X × Y × Z` is a triple `(x, y, z)` with `x + y + z = 0`.
 
 The proofs are in `Solution.lean`.
 -/

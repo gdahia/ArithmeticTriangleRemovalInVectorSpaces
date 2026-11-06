@@ -4,19 +4,12 @@ version: "v0.4"
 project:
   name: "A tight bound for Green's arithmetic triangle removal lemma in vector spaces"
   description: >-
-    Lean 4 formalization of the main results of Fox and Lovász, A tight bound for Green's
-    arithmetic triangle removal lemma in vector spaces (arXiv:1606.01230). For a prime p, the
-    exponent c_p of Kleinberg, Sawin and Speyer is defined by
-    p^(1 - c_p) = inf over 0 < x < 1 of x^(-(p - 1)/3)(1 + x + ... + x^(p - 1)), and
-    C_p = 1 + 1/c_p. The project proves Theorem 1 of the paper: if X, Y, Z ⊆ F_p^n have fewer than
-    (ε/3)^(C_p) N² triangles x + y + z = 0, where N = p^n, then removing at most εN elements
-    leaves no triangle. It proves Theorem 2, the Kleinberg–Sawin–Speyer bound m ≤ p^((1 - c_p)n)
-    for multicolored sum-free families, by the slice rank method, and Theorem 3: m vertex-disjoint
-    triangles span at least (m/N)^(C_p) N² triangles. It proves the second part of Theorem 1:
-    if the removal lemma holds with ε and δ in every dimension, then δ ≤ ε^(C_p - o(1)) as ε
-    tends to 0. It also proves the values
-    c_2 = 5/3 - log_2 3 and c_3 = 1 - log b / log 3, where b = a^(-2/3) + a^(1/3) + a^(4/3) and
-    a = (√33 - 1)/8.
+    Lean 4 formalisation of the main results of Jacob Fox and László Miklós Lovász, A tight bound
+    for Green's arithmetic triangle removal lemma in vector spaces (arXiv:1606.01230): the
+    arithmetic triangle removal lemma in F_p^n with a polynomial bound (Theorem 1), the
+    Kleinberg–Sawin–Speyer bound on multicolored sum-free families (Theorem 2), the count of
+    triangles spanned by vertex-disjoint triangles (Theorem 3), and the tightness of the exponent
+    in Theorem 1 (the second part of Theorem 1).
   authors:
     - "Gabriel Dahia"
   license: "Apache-2.0"
@@ -34,7 +27,7 @@ sources:
       - "László Miklós Lovász"
     id: "arXiv:1606.01230"
     type: "paper"
-    location: "Theorems 1, 2 and 3, Section 3, and the values of c_2 and c_3 in Section 1"
+    location: "Theorems 1, 2 and 3, and Section 3"
     relationship: "formalizes"
     note: >-
       The project follows the proof of the paper, with two changes of method. The sets are
@@ -44,8 +37,7 @@ sources:
       argument of the paper removes the constant factor. The second part of Theorem 1 follows
       the construction of Section 3, with the large multicolored sum-free families that the paper
       takes from Kleinberg, Sawin and Speyer, Norin and Pebody. These families are constructed
-      following Kleinberg, Sawin and Speyer and Pebody; see those sources. The values of c_2 and
-      c_3 follow from the weighted arithmetic-geometric mean inequality.
+      following Kleinberg, Sawin and Speyer and Pebody; see those sources.
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "The growth rate of tri-colored sum-free sets"
@@ -94,8 +86,8 @@ related_formalizations:
   - id: "https://github.com/leanprover-community/mathlib4"
     relationship: "builds-on"
     note: >-
-      The statements use finite sets, ZMod p, Fintype.card, Real.rpow, Real.logb and Real.sqrt
-      from Mathlib. The proofs use its multivariate polynomials, matrix rank, linear maps between
+      The statements use finite sets, ZMod p, Fintype.card, Real.rpow and Real.logb from
+      Mathlib. The proofs use its multivariate polynomials, matrix rank, linear maps between
       finite vector spaces, Jensen's inequality for concave functions, the weighted
       arithmetic-geometric mean inequality, and double counting. Mathlib has none of the
       theorems of the sources.
@@ -103,9 +95,9 @@ related_formalizations:
 status:
   scope: >-
     The project proves Theorems 1, 2 and 3 of Fox and Lovász in Fin n → ZMod p, including the
-    second part of Theorem 1, and the values of c_2 and c_3. The sorry counts refer to the
-    library and ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean;
-    ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean has six placeholders, one for
+    second part of Theorem 1. The sorry counts refer to the library and
+    ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean;
+    ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean has four placeholders, one for
     each statement.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -125,31 +117,32 @@ automation:
         spend_usd: "not tracked"
         hardware: "local machine"
       prompting_notes: >-
-        One instruction to formalize the main results of the paper for submission to Palomar,
-        following the maintainer's Lean style guide. Later, one instruction to review the project
-        against the maintainer's Lean and Palomar standards and fix what the review found.
-        Later, one instruction to put the second part of Theorem 1 back into Challenge.lean.
+        Four instructions in turn. The first asked the agent to formalize the main results of the
+        paper for submission to Palomar, following the maintainer's Lean style guide. The second
+        asked it to review the project against the maintainer's Lean and Palomar standards and fix
+        what the review found, the third to put the second part of Theorem 1 back into
+        Challenge.lean, and the fourth to align this file with the maintainer's edits to the
+        README.
   spend_usd: "not tracked"
   notes: >-
     Claude Code wrote the Lean code, the README and this file at the request of Gabriel Dahia.
-    The agent chose the random linear map, the potential minimization and the proofs of the values
-    of c_2 and c_3 by the weighted arithmetic-geometric mean inequality. Later, the agent
+    The agent chose the random linear map and the potential minimization. In the review, it
     restyled the library, with subagents working on separate directories, reduced Challenge.lean
     to the main results chosen by the maintainer, and wrote the triangles and multicolored
-    sum-freeness in its statements in terms of Mathlib definitions. Later, the agent added the
-    second part of Theorem 1 back to Challenge.lean in the same form. Every proof is checked by
-    Lean.
+    sum-freeness in its statements in terms of Mathlib definitions. It then added the second part
+    of Theorem 1 back to Challenge.lean in the same form. After the maintainer shortened the
+    README and removed two statements from Challenge.lean and Solution.lean, the agent updated
+    this file, comparator.json and the remaining references in the README and Challenge.lean to
+    match. Every proof is checked by Lean.
 
 fidelity:
   divergences: >-
     Theorem 1 assumes 0 ≤ ε in place of 0 < ε < 1, and bounds the number of removed elements by
-    εN. Theorem 2 indexes the family by a finite type. Theorem 3 allows X, Y and Z to contain more
-    than the vertices of the m triangles, which are given as injective functions x, y and z from a
-    finite type with x i + y i + z i = 0. The bound δ ≤ ε^(C_p - o(1)) of the second part of
-    Theorem 1 is stated as: for every η > 0 there is ε₀ > 0 such that for 0 < ε < ε₀, any δ that
-    works with ε in the removal lemma for every n satisfies δ ≤ ε^(C_p - η). The value of c_3 is stated for any a with
-    a = (√33 - 1)/8, and logarithms are natural logarithms, as their ratio does not depend on the
-    base.
+    εN. Theorem 3 allows X, Y and Z to contain more than the vertices of the m triangles, which
+    are given as injective functions x, y and z from a finite type with x i + y i + z i = 0. The
+    bound δ ≤ ε^(C_p - o(1)) of the second part of Theorem 1 is stated as: for every η > 0 there
+    is ε₀ > 0 such that for 0 < ε < ε₀, any δ that works with ε in the removal lemma for every n
+    satisfies δ ≤ ε^(C_p - η).
 
 review:
   status: "unchecked"
@@ -179,16 +172,6 @@ alignment:
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
       note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Section 1, c_2 = 5/3 - log_2 3"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.c_two'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.c_two in ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.SmallPrimes."
-    - source: "Fox and Lovász, Section 1, c_3 = 1 - log b / log 3"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.c_three'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.c_three in ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.SmallPrimes."
     - source: "The exponent c_p of Kleinberg, Sawin and Speyer"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.c"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
