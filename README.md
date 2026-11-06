@@ -37,17 +37,24 @@ $$\left(\frac{m}{N}\right)^{C_p} N^2$$
 
 triangles, where $C_p$ is as in Theorem 1.
 
-**Theorem 4** (`exists_pos_forall_le_rpow_C_sub`, the second part of Theorem 1 of the paper). Let
-$p$ be a prime and $\eta > 0$. There is $\varepsilon_0 > 0$ such that the following holds for
-every $0 < \varepsilon < \varepsilon_0$ and every $\delta$. If for every $n$, every
-$X, Y, Z \subseteq \mathbb{F}_p^n$ with fewer than $\delta N^2$ triangles, where $N = p^n$, has
-subsets $X' \subseteq X$, $Y' \subseteq Y$ and $Z' \subseteq Z$ with
+**Theorem 4** (`le_rpow_C_sub_of_forall_exists_subset`, the second part of Theorem 1 of the
+paper). Let $p$ be a prime, $\eta > 0$, and put
+
+$$\eta' = \frac{c_p \min(1 - c_p, c_p \eta / 2)}{2}, \qquad
+n_0 = \left\lceil \left(\frac{2^{p+3} p^{10}}{\eta'}\right)^2 \right\rceil + p^4 + 1, \qquad
+\varepsilon_0 = p^{-(n_0 + 1)}.$$
+
+The following holds for every $0 < \varepsilon < \varepsilon_0$ and every $\delta$. If for every
+$n$, every $X, Y, Z \subseteq \mathbb{F}_p^n$ with fewer than $\delta N^2$ triangles, where
+$N = p^n$, has subsets $X' \subseteq X$, $Y' \subseteq Y$ and $Z' \subseteq Z$ with
 $|X \setminus X'| + |Y \setminus Y'| + |Z \setminus Z'| \le \varepsilon N$ such that
 $X' \times Y' \times Z'$ contains no triangle, then
 
 $$\delta \le \varepsilon^{C_p - \eta},$$
 
-where triangles and $C_p$ are as in Theorem 1.
+where triangles and $C_p$ are as in Theorem 1. The proof uses multicolored sum-free families in
+$\mathbb{F}_p^n$ with at least $p^{(1 - c_p - \eta') n}$ members for every
+$n \ge \lceil (2^{p+3} p^{10} / \eta')^2 \rceil + p^4 + 1$ (`exists_isMulticoloredSumFree_rpow_le`).
 
 ## Files
 
@@ -69,9 +76,10 @@ and the use of AI coding agents.
 ## Verification
 
 `Challenge.lean` imports only the Mathlib module `Mathlib.Analysis.SpecialFunctions.Log.Base`. It
-defines `c` and `C` as in the library and states Theorems 1 to 4 as
-`exists_subset_card_sdiff_add_le_forall_add_ne_zero'`, `card_le_rpow_one_sub_c_mul'`,
-`div_pow_rpow_C_mul_sq_le_card_triangles'` and `exists_pos_forall_le_rpow_C_sub'` with `sorry`.
+defines `c`, `C`, `sumFreeDim` ($n_0$) and `tightnessEps` ($\varepsilon_0$) as in the library and
+states Theorems 1 to 4 as `exists_subset_card_sdiff_add_le_forall_add_ne_zero'`,
+`card_le_rpow_one_sub_c_mul'`, `div_pow_rpow_C_mul_sq_le_card_triangles'` and
+`le_rpow_C_sub_of_forall_exists_subset'` with `sorry`.
 `comparator.json` names these theorems,
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge` and
 `ArithmeticTriangleRemovalInVectorSpacesPalomar.Solution` as the modules to compare, no

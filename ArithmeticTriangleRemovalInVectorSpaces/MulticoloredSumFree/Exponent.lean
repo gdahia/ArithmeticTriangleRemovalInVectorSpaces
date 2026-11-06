@@ -11,7 +11,7 @@ import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 /-!
-# The exponents `c p` and `C p`
+# The exponents `c p` and `C p`, and the thresholds of Theorem 1
 
 The exponent `c p` of Kleinberg, Sawin and Speyer is defined by
 `p ^ (1 - c p) = ⨅ x : Set.Ioo 0 1, x ^ (-(p - 1) / 3) * ∑ j ∈ range p, x ^ j`. A multicolored
@@ -22,6 +22,10 @@ the arithmetic triangle removal lemma in `Fin n → ZMod p` is `C p = 1 + 1 / c 
 
 * `ArithmeticTriangleRemovalInVectorSpaces.c p`: the exponent `c p`.
 * `ArithmeticTriangleRemovalInVectorSpaces.C p`: the exponent `C p = 1 + 1 / c p`.
+* `ArithmeticTriangleRemovalInVectorSpaces.sumFreeDim p η`: the dimension `n₀` from which on there
+  are multicolored sum-free families with at least `p ^ ((1 - c p - η) * n)` members.
+* `ArithmeticTriangleRemovalInVectorSpaces.tightnessEps p η`: the bound `ε₀` below which
+  `δ ≤ ε ^ (C p - η)` in the arithmetic triangle removal lemma.
 
 ## Main statements
 
@@ -48,6 +52,19 @@ noncomputable def c (p : ℕ) : ℝ :=
 `Fin n → ZMod p`. -/
 noncomputable def C (p : ℕ) : ℝ :=
   1 + 1 / c p
+
+/-- The dimension `n₀ = ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉ + p ^ 4 + 1` from which on
+`Fin n → ZMod p` contains a multicolored sum-free family with at least `p ^ ((1 - c p - η) * n)`
+members. -/
+noncomputable def sumFreeDim (p : ℕ) (η : ℝ) : ℕ :=
+  ⌈(2 ^ (p + 3) * p ^ 10 / η) ^ 2⌉₊ + p ^ 4 + 1
+
+/-- The bound `ε₀ = p ^ (-(n₀ + 1))`, where `n₀ = sumFreeDim p η'` with
+`η' = c p * min (1 - c p) (c p * η / 2) / 2`. For `0 < ε < ε₀`, every `δ` that works with `ε` in
+the arithmetic triangle removal lemma in `Fin n → ZMod p` for every `n` satisfies
+`δ ≤ ε ^ (C p - η)`. -/
+noncomputable def tightnessEps (p : ℕ) (η : ℝ) : ℝ :=
+  ((p : ℝ) ^ (sumFreeDim p (c p * min (1 - c p) (c p * η / 2) / 2) + 1))⁻¹
 
 variable {p : ℕ}
 

@@ -13,7 +13,7 @@ import ArithmeticTriangleRemovalInVectorSpaces.ZMod
 # A tight bound for Green's arithmetic triangle removal lemma in vector spaces
 
 The statements of `Challenge.lean`, each proved by the library theorem with the same name without
-the prime. The definitions `c` and `C` are those of the library.
+the prime. The definitions `c`, `C`, `sumFreeDim` and `tightnessEps` are those of the library.
 -/
 
 public section
@@ -54,15 +54,16 @@ theorem div_pow_rpow_C_mul_sq_le_card_triangles' {ι : Type*} [Fintype ι]
   div_pow_rpow_C_mul_sq_le_card_triangles hx hy hz hxX hyY hzZ hsum
 
 /-- **Asymptotic tightness of the arithmetic triangle removal lemma** (the "Furthermore" part of
-Theorem 1 of Fox and Lovász). For every `η > 0` and every small `ε > 0`, any `δ` that works with
-`ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies `δ ≤ ε ^ (C p - η)`. -/
-theorem exists_pos_forall_le_rpow_C_sub' {η : ℝ} (hη : 0 < η) :
-    ∃ ε₀ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ δ : ℝ,
-      (∀ n (X Y Z : Finset (Fin n → ZMod p)),
-        #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
-          ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
-            ∀ x ∈ X', ∀ y ∈ Y', ∀ z ∈ Z', x + y + z ≠ 0) →
-      δ ≤ ε ^ (C p - η) :=
-  exists_pos_forall_le_rpow_C_sub hη
+Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < tightnessEps p η`, any `δ` that
+works with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies
+`δ ≤ ε ^ (C p - η)`. -/
+theorem le_rpow_C_sub_of_forall_exists_subset' {η ε δ : ℝ} (hη : 0 < η) (hε₀ : 0 < ε)
+    (hε : ε < tightnessEps p η)
+    (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
+      #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
+        ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
+          ∀ x ∈ X', ∀ y ∈ Y', ∀ z ∈ Z', x + y + z ≠ 0) :
+    δ ≤ ε ^ (C p - η) :=
+  le_rpow_C_sub_of_forall_exists_subset hη hε₀ hε hδ
 
 end ArithmeticTriangleRemovalInVectorSpaces

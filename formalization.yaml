@@ -113,16 +113,18 @@ automation:
         definitions, the statements and the proofs, checked them with the Lean compiler, and
         wrote Challenge.lean, Solution.lean, the README and this file.
       cost:
-        wall_time: "two sessions"
+        wall_time: "three sessions"
         spend_usd: "not tracked"
         hardware: "local machine"
       prompting_notes: >-
-        Four instructions in turn. The first asked the agent to formalize the main results of the
+        Five instructions in turn. The first asked the agent to formalize the main results of the
         paper for submission to Palomar, following the maintainer's Lean style guide. The second
         asked it to review the project against the maintainer's Lean and Palomar standards and fix
         what the review found, the third to put the second part of Theorem 1 back into
         Challenge.lean, and the fourth to align this file with the maintainer's edits to the
-        README.
+        README. The fifth asked it to make the bound ε₀ of the second part of Theorem 1, and the
+        dimension n₀ from which on the large multicolored sum-free families exist, explicit in p
+        and η.
   spend_usd: "not tracked"
   notes: >-
     Claude Code wrote the Lean code, the README and this file at the request of Gabriel Dahia.
@@ -133,16 +135,20 @@ automation:
     of Theorem 1 back to Challenge.lean in the same form. After the maintainer shortened the
     README and removed two statements from Challenge.lean and Solution.lean, the agent updated
     this file, comparator.json and the remaining references in the README and Challenge.lean to
-    match. Every proof is checked by Lean.
+    match. To make ε₀ and n₀ explicit, the agent placed the parameter ρ of the geometric
+    distribution of Kleinberg, Sawin and Speyer in [1/2, 1), which bounds the error terms of the
+    type class estimate by explicit functions of p, and stated both thresholds as the definitions
+    sumFreeDim and tightnessEps, which Challenge.lean repeats. Every proof is checked by Lean.
 
 fidelity:
   divergences: >-
     Theorem 1 assumes 0 ≤ ε in place of 0 < ε < 1, and bounds the number of removed elements by
     εN. Theorem 3 allows X, Y and Z to contain more than the vertices of the m triangles, which
     are given as injective functions x, y and z from a finite type with x i + y i + z i = 0. The
-    bound δ ≤ ε^(C_p - o(1)) of the second part of Theorem 1 is stated as: for every η > 0 there
-    is ε₀ > 0 such that for 0 < ε < ε₀, any δ that works with ε in the removal lemma for every n
-    satisfies δ ≤ ε^(C_p - η).
+    bound δ ≤ ε^(C_p - o(1)) of the second part of Theorem 1 is stated as: for every η > 0 and
+    0 < ε < ε₀, any δ that works with ε in the removal lemma for every n satisfies
+    δ ≤ ε^(C_p - η), where ε₀ = p^(-(n₀ + 1)) with n₀ = ⌈(2^(p+3) p^10 / η')^2⌉ + p^4 + 1 and
+    η' = c_p min(1 - c_p, c_p η / 2) / 2. The paper does not make ε₀ explicit.
 
 review:
   status: "unchecked"
@@ -168,15 +174,21 @@ alignment:
       status: "proved"
       note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.div_pow_rpow_C_mul_sq_le_card_triangles in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
     - source: "Fox and Lovász, Theorem 1, second part, δ ≤ ε^(C_p - o(1)), as derived in Section 3"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub'"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.le_rpow_C_sub_of_forall_exists_subset'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
+      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.le_rpow_C_sub_of_forall_exists_subset in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
     - source: "The exponent c_p of Kleinberg, Sawin and Speyer"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.c"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
     - source: "The exponent C_p = 1 + 1/c_p"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.C"
+      module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
+    - source: "The dimension n₀ = ⌈(2^(p+3) p^10 / η)^2⌉ + p^4 + 1 from which on the multicolored sum-free families of Kleinberg, Sawin and Speyer have at least p^((1 - c_p - η)n) members"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.sumFreeDim"
+      module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
+    - source: "The bound ε₀ of the second part of Theorem 1"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.tightnessEps"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"
 
 acknowledgements: "Lean 4 and Mathlib; the Palomar registry template."

@@ -5,7 +5,7 @@
     "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_forall_add_ne_zero'",
     "ArithmeticTriangleRemovalInVectorSpaces.card_le_rpow_one_sub_c_mul'",
     "ArithmeticTriangleRemovalInVectorSpaces.div_pow_rpow_C_mul_sq_le_card_triangles'",
-    "ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub'"
+    "ArithmeticTriangleRemovalInVectorSpaces.le_rpow_C_sub_of_forall_exists_subset'"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
