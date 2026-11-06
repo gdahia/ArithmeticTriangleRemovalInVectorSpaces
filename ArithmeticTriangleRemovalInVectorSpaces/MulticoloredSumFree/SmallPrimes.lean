@@ -9,7 +9,7 @@ public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Expone
 import Mathlib.Analysis.MeanInequalities
 
 /-!
-# The exponents `c_2` and `c_3`
+# The exponents `c 2` and `c 3`
 
 The infimum defining `c p` is attained where the weighted arithmetic-geometric mean inequality is
 tight. For `p = 2` this is at `x = 1 / 2`, which gives `c 2 = 5 / 3 - logb 2 3`. For `p = 3` it is
@@ -28,7 +28,7 @@ open Finset
 
 namespace ArithmeticTriangleRemovalInVectorSpaces
 
-/-- If the function defining `c p` attains its infimum over `(0, 1)` at `a`, then `c p` is
+/-- If the function defining `c p` attains its infimum over `Set.Ioo 0 1` at `a`, then `c p` is
 `1 - logb p` of its value at `a`. -/
 lemma c_eq_one_sub_logb {p : ℕ} (hp : 2 ≤ p) {a : ℝ} (ha₀ : 0 < a) (ha₁ : a < 1)
     (h : ∀ x : ℝ, 0 < x → x < 1 → a ^ (-((p : ℝ) - 1) / 3) * ∑ j ∈ range p, a ^ j ≤
@@ -42,11 +42,10 @@ lemma c_eq_one_sub_logb {p : ℕ} (hp : 2 ≤ p) {a : ℝ} (ha₀ : 0 < a) (ha�
 `(1 / 2) ^ (-1 / 3) * (3 / 2) ≤ x ^ (-1 / 3) * (1 + x)`. -/
 lemma rpow_mul_one_add_le {x : ℝ} (hx : 0 < x) :
     (1 / 2 : ℝ) ^ (-(1 / 3) : ℝ) * (3 / 2) ≤ x ^ (-(1 / 3) : ℝ) * (1 + x) := by
-  have hq : 0 ≤ x / (1 / 2) := by positivity
   have h := Real.geom_mean_le_arith_mean2_weighted (w₁ := 2 / 3) (w₂ := 1 / 3)
     (p₁ := 3 / 2) (p₂ := 3 / 2 * (x / (1 / 2))) (by norm_num) (by norm_num) (by norm_num)
     (by positivity) (by norm_num)
-  rw [Real.mul_rpow (by norm_num) hq, ← mul_assoc, ← Real.rpow_add (by norm_num),
+  rw [Real.mul_rpow (by norm_num) (by positivity), ← mul_assoc, ← Real.rpow_add (by norm_num),
     (by norm_num : (2 / 3 : ℝ) + 1 / 3 = 1), Real.rpow_one,
     (by field_simp : 2 / 3 * (3 / 2 : ℝ) + 1 / 3 * (3 / 2 * (x / (1 / 2))) = 1 + x),
     Real.div_rpow hx.le (by norm_num), mul_div_assoc', div_le_iff₀ (by positivity)] at h
@@ -54,43 +53,37 @@ lemma rpow_mul_one_add_le {x : ℝ} (hx : 0 < x) :
     div_le_div_iff₀ (by positivity) (by positivity)]
   linarith
 
+/-- The weighted arithmetic-geometric mean inequality for `1`, `x / a` and `(x / a) ^ 2` with
+weights proportional to `1`, `a` and `a ^ 2`, where `4 * a ^ 2 + a - 2 = 0`:
+`(x / a) ^ (2 / 3) ≤ (1 + x + x ^ 2) / (1 + a + a ^ 2)`. -/
+lemma div_rpow_two_div_three_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
+    (hw : 4 * a ^ 2 + a - 2 = 0) :
+    (x / a) ^ (2 / 3 : ℝ) ≤ (1 + x + x ^ 2) / (1 + a + a ^ 2) := by
+  have h := Real.geom_mean_le_arith_mean3_weighted (w₁ := 1 / (1 + a + a ^ 2))
+    (w₂ := a / (1 + a + a ^ 2)) (w₃ := a ^ 2 / (1 + a + a ^ 2)) (p₁ := 1) (p₂ := x / a)
+    (p₃ := (x / a) ^ 2) (by positivity) (by positivity) (by positivity) zero_le_one
+    (by positivity) (by positivity) (by field_simp)
+  rw [Real.one_rpow, one_mul, ← Real.rpow_natCast_mul (by positivity),
+    ← Real.rpow_add (by positivity)] at h
+  convert h using 2
+  · field_simp
+    push_cast
+    linarith
+  · field_simp
+
 /-- The weighted arithmetic-geometric mean inequality with weights proportional to `1`, `a` and
 `a ^ 2`, where `4 * a ^ 2 + a - 2 = 0`:
 `a ^ (-2 / 3) * (1 + a + a ^ 2) ≤ x ^ (-2 / 3) * (1 + x + x ^ 2)`. -/
 lemma rpow_mul_one_add_add_sq_le {a x : ℝ} (ha : 0 < a) (hx : 0 < x)
     (hw : 4 * a ^ 2 + a - 2 = 0) :
     a ^ (-(2 / 3) : ℝ) * (1 + a + a ^ 2) ≤ x ^ (-(2 / 3) : ℝ) * (1 + x + x ^ 2) := by
-  have hS : 0 < 1 + a + a ^ 2 := by positivity
-  have hq : 0 ≤ x / a := by positivity
-  have h := Real.geom_mean_le_arith_mean3_weighted (w₁ := 1 / (1 + a + a ^ 2))
-    (w₂ := a / (1 + a + a ^ 2)) (w₃ := a ^ 2 / (1 + a + a ^ 2)) (p₁ := 1 + a + a ^ 2)
-    (p₂ := (1 + a + a ^ 2) * (x / a)) (p₃ := (1 + a + a ^ 2) * (x / a) ^ 2) (by positivity)
-    (by positivity) (by positivity) hS.le (by positivity) (by positivity) (by field_simp)
-  rw [Real.mul_rpow hS.le hq, Real.mul_rpow hS.le (by positivity),
-    ← Real.rpow_natCast_mul hq] at h
-  have e₁ : (1 + a + a ^ 2) ^ (1 / (1 + a + a ^ 2)) * (1 + a + a ^ 2) ^ (a / (1 + a + a ^ 2)) *
-      (1 + a + a ^ 2) ^ (a ^ 2 / (1 + a + a ^ 2)) = 1 + a + a ^ 2 := by
-    rw [← Real.rpow_add hS, ← Real.rpow_add hS, ← add_div, ← add_div, div_self hS.ne',
-      Real.rpow_one]
-  have e₂ : (x / a) ^ (a / (1 + a + a ^ 2)) * (x / a) ^ ((2 : ℕ) * (a ^ 2 / (1 + a + a ^ 2))) =
-      (x / a) ^ (2 / 3 : ℝ) := by
-    rw [← Real.rpow_add (by positivity)]
-    congr 1
-    field_simp
-    push_cast
-    linarith
-  have h' : (1 + a + a ^ 2) * (x / a) ^ (2 / 3 : ℝ) ≤ 1 + x + x ^ 2 := by
-    rw [← e₁, ← e₂]
-    have : 1 / (1 + a + a ^ 2) * (1 + a + a ^ 2) + a / (1 + a + a ^ 2) * ((1 + a + a ^ 2) *
-        (x / a)) + a ^ 2 / (1 + a + a ^ 2) * ((1 + a + a ^ 2) * (x / a) ^ 2) = 1 + x + x ^ 2 := by
-      field_simp
-    linarith
-  rw [Real.div_rpow hx.le ha.le, mul_div_assoc', div_le_iff₀ (by positivity)] at h'
+  have h := div_rpow_two_div_three_le ha hx hw
+  rw [Real.div_rpow hx.le ha.le, div_le_div_iff₀ (by positivity) (by positivity)] at h
   rw [Real.rpow_neg ha.le, Real.rpow_neg hx.le, inv_mul_eq_div, inv_mul_eq_div,
     div_le_div_iff₀ (by positivity) (by positivity)]
   linarith
 
-/-- **The exponent `c_2`.** `c 2 = 5 / 3 - logb 2 3`. -/
+/-- The exponent `c 2` is `5 / 3 - logb 2 3`. -/
 theorem c_two : c 2 = 5 / 3 - Real.logb 2 3 := by
   rw [c_eq_one_sub_logb le_rfl (a := 1 / 2) (by norm_num) (by norm_num) ?_]
   · norm_num [sum_range_succ]
@@ -102,21 +95,23 @@ theorem c_two : c 2 = 5 / 3 - Real.logb 2 3 := by
     norm_num [sum_range_succ]
     exact rpow_mul_one_add_le hx₀
 
-/-- **The exponent `c_3`.** With `a = (√33 - 1) / 8` and
-`b = a ^ (-2 / 3) + a ^ (1 / 3) + a ^ (4 / 3)`, `c 3 = 1 - log b / log 3`. -/
+/-- With `a = (√33 - 1) / 8` and `b = a ^ (-2 / 3) + a ^ (1 / 3) + a ^ (4 / 3)`, the exponent
+`c 3` is `1 - log b / log 3`. -/
 theorem c_three {a : ℝ} (ha : a = (√33 - 1) / 8) :
     c 3 = 1 - Real.log (a ^ (-2 / 3 : ℝ) + a ^ (1 / 3 : ℝ) + a ^ (4 / 3 : ℝ)) / Real.log 3 := by
   have h33 : √33 ^ 2 = 33 := Real.sq_sqrt (by norm_num)
-  have h5 : 5 < √33 := (Real.lt_sqrt (by norm_num)).2 (by norm_num)
-  have h7 : √33 < 7 := (Real.sqrt_lt' (by norm_num)).2 (by norm_num)
-  have ha₀ : 0 < a := by rw [ha]; linarith
-  rw [c_eq_one_sub_logb (by norm_num) ha₀ (by rw [ha]; linarith) ?_]
+  obtain ⟨ha₀, ha₁⟩ : 0 < a ∧ a < 1 := by
+    rw [ha]
+    constructor <;> nlinarith [Real.sqrt_nonneg 33]
+  rw [c_eq_one_sub_logb (by norm_num) ha₀ ha₁ ?_]
   · norm_num [sum_range_succ]
     rw [Real.logb, mul_add, mul_add, mul_one, ← Real.rpow_add_one ha₀.ne',
       ← Real.rpow_add_natCast ha₀.ne']
     norm_num
   · intro x hx₀ hx₁
     norm_num [sum_range_succ]
-    exact rpow_mul_one_add_add_sq_le ha₀ hx₀ (by rw [ha]; linear_combination h33 / 16)
+    apply rpow_mul_one_add_add_sq_le ha₀ hx₀
+    rw [ha]
+    linear_combination h33 / 16
 
 end ArithmeticTriangleRemovalInVectorSpaces

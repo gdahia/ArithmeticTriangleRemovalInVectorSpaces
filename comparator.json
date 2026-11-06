@@ -2,16 +2,9 @@
   "challenge_module": "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge",
   "solution_module": "ArithmeticTriangleRemovalInVectorSpacesPalomar.Solution",
   "theorem_names": [
-    "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_triangles_eq_empty'",
-    "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_rpow_mul'",
+    "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_forall_add_ne_zero'",
+    "ArithmeticTriangleRemovalInVectorSpaces.card_le_rpow_one_sub_c_mul'",
     "ArithmeticTriangleRemovalInVectorSpaces.div_pow_rpow_C_mul_sq_le_card_triangles'",
-    "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_of_card_triangles_lt'",
-    "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_card_rpow'",
-    "ArithmeticTriangleRemovalInVectorSpaces.div_rpow_C_mul_sq_le_card_triangles'",
-    "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_triangles_prod_pi'",
-    "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.triangles_prod_pi_nonempty'",
-    "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset'",
-    "ArithmeticTriangleRemovalInVectorSpaces.exists_forall_ge_exists_isMulticoloredSumFree'",
     "ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub'",
     "ArithmeticTriangleRemovalInVectorSpaces.c_two'",
     "ArithmeticTriangleRemovalInVectorSpaces.c_three'"

@@ -5,32 +5,36 @@ Authors: Gabriel Dahia
 -/
 module
 
+public import ArithmeticTriangleRemovalInVectorSpaces.Construction.Hash
 public import ArithmeticTriangleRemovalInVectorSpaces.Construction.TypeClass
-public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 import ArithmeticTriangleRemovalInVectorSpaces.Construction.Behrend
-import ArithmeticTriangleRemovalInVectorSpaces.Construction.Hash
 import Mathlib.NumberTheory.Bertrand
 
 /-!
 # The sum-free family of a base point
 
-Let `f₀ : Fin n → ℕ × ℕ × ℕ` be a sequence of triples summing to `p - 1`. The triples `(a, b, c)`
-of vectors summing to `p - 1`, with `a`, `b` and `c` in the type classes of the three coordinates
-of `f₀`, are permuted transitively in each coordinate, so each vector lies in equally many of
-them. Hashing them with a prime `P` chosen by Bertrand's postulate into a set chosen by Behrend's
-construction gives a multicolored sum-free family nearly as large as the smallest type class.
+Let `a₀`, `b₀` and `c₀` be vectors in `Fin n → ℕ` with `a₀ r + b₀ r + c₀ r = p - 1` for every `r`.
+The triples `(a, b, c)` with `a`, `b` and `c` in the type classes of `a₀`, `b₀` and `c₀` and
+`a r + b r + c r = p - 1` for every `r` are permuted transitively in each coordinate, so each
+vector lies in equally many of them. Hashing them with a prime `P` chosen by Bertrand's postulate
+into a set chosen by Behrend's construction gives a multicolored sum-free family nearly as large as
+the smallest of the three type classes.
 
 ## Main definitions
 
-* `ArithmeticTriangleRemovalInVectorSpaces.baseTriples p f₀`: the triples of the type classes of
-  the coordinates of `f₀` summing to `p - 1`.
+* `ArithmeticTriangleRemovalInVectorSpaces.permTriple σ v`: the triple `v` with the entries of its
+  three vectors permuted by `σ`.
 
 ## Main statements
 
+* `ArithmeticTriangleRemovalInVectorSpaces.card_filter_mul_card_typeClass_eq`: the fibers of a
+  projection compatible with the permutations all have the same size.
+* `ArithmeticTriangleRemovalInVectorSpaces.exists_isMulticoloredSumFree_mul_exp_le`: hashing with
+  a prime from Bertrand's postulate into a set from Behrend's construction.
 * `ArithmeticTriangleRemovalInVectorSpaces.exists_isMulticoloredSumFree_of_typeClass`: a
   multicolored sum-free family in `Fin n → ZMod p` with at least
-  `w exp (-4 √(log ((36 + 2 p) p ^ (3 n)))) / (4 (36 + 2 p))` members, where `w` is at most the
-  size of each type class.
+  `w * exp (-4 * √(log ((12 + 2 * p) * p ^ (3 * n)))) / (4 * (12 + 2 * p))` members, where `w` is
+  at most the size of each type class.
 -/
 
 public section
@@ -42,9 +46,9 @@ namespace ArithmeticTriangleRemovalInVectorSpaces
 variable {n p : ℕ}
 
 /-- Permuting the entries of the three vectors of a triple simultaneously. -/
-@[expose] def permTriple (σ : Equiv.Perm (Fin n)) (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) :
-    (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) :=
-  (v.1 ∘ σ, v.2.1 ∘ σ, v.2.2 ∘ σ)
+@[expose] def permTriple (σ : Equiv.Perm (Fin n)) :
+    (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)
+  | (a, b, c) => (a ∘ σ, b ∘ σ, c ∘ σ)
 
 lemma permTriple_permTriple (σ τ : Equiv.Perm (Fin n))
     (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) :
@@ -54,191 +58,164 @@ lemma permTriple_permTriple (σ τ : Equiv.Perm (Fin n))
 lemma permTriple_one (v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) : permTriple 1 v = v :=
   rfl
 
-lemma comp_mem_typeClass {a b : Fin n → ℕ} (hb : b ∈ typeClass a) (σ : Equiv.Perm (Fin n)) :
-    b ∘ σ ∈ typeClass a := by
-  obtain ⟨τ, rfl⟩ := mem_typeClass.1 hb
-  exact mem_typeClass.2 ⟨τ * σ, rfl⟩
-
-lemma exists_eq_comp_of_mem_typeClass {a b b' : Fin n → ℕ} (hb : b ∈ typeClass a)
-    (hb' : b' ∈ typeClass a) : ∃ σ : Equiv.Perm (Fin n), b' = b ∘ σ := by
-  obtain ⟨τ, rfl⟩ := mem_typeClass.1 hb
-  obtain ⟨τ', rfl⟩ := mem_typeClass.1 hb'
-  refine ⟨τ⁻¹ * τ', ?_⟩
-  ext r
-  simp
-
-lemma sum_eq_of_mem_typeClass {a b : Fin n → ℕ} (hb : b ∈ typeClass a) :
-    ∑ r, b r = ∑ r, a r := by
-  obtain ⟨τ, rfl⟩ := mem_typeClass.1 hb
-  exact Equiv.sum_comp τ a
-
-lemma card_typeClass_le {a : Fin n → ℕ} (ha : ∀ r, a r < p) : #(typeClass a) ≤ p ^ n := by
-  have hsub : typeClass a ⊆ Fintype.piFinset fun _ ↦ range p := by
-    intro b hb
-    obtain ⟨τ, rfl⟩ := mem_typeClass.1 hb
-    simp [ha]
-  grw [card_le_card hsub]
-  simp
-
-/-- The triples `(a, b, c)` summing to `p - 1` with `a`, `b` and `c` in the type classes of the
-three coordinates of `f₀`. -/
-def baseTriples (p : ℕ) (f₀ : Fin n → ℕ × ℕ × ℕ) :
-    Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)) :=
-  {v ∈ typeClass (fun r ↦ (f₀ r).1) ×ˢ typeClass (fun r ↦ (f₀ r).2.1) ×ˢ
-    typeClass (fun r ↦ (f₀ r).2.2) | ∀ r, v.1 r + v.2.1 r + v.2.2 r = p - 1}
-
-variable {f₀ : Fin n → ℕ × ℕ × ℕ}
-
-lemma card_baseTriples_le (hp : 2 ≤ p) (hf₀ : ∀ r, (f₀ r).1 + (f₀ r).2.1 + (f₀ r).2.2 = p - 1) :
-    #(baseTriples p f₀) ≤ p ^ (3 * n) := by
-  rw [baseTriples]
-  grw [card_filter_le, card_product, card_product,
-    card_typeClass_le (p := p) (fun r ↦ by grind [hf₀ r]),
-    card_typeClass_le (p := p) (fun r ↦ by grind [hf₀ r]),
-    card_typeClass_le (p := p) (fun r ↦ by grind [hf₀ r])]
-  exact le_of_eq (by ring)
-
-lemma mem_baseTriples {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)} :
-    v ∈ baseTriples p f₀ ↔ (v.1 ∈ typeClass (fun r ↦ (f₀ r).1) ∧
-      v.2.1 ∈ typeClass (fun r ↦ (f₀ r).2.1) ∧ v.2.2 ∈ typeClass (fun r ↦ (f₀ r).2.2)) ∧
-      ∀ r, v.1 r + v.2.1 r + v.2.2 r = p - 1 := by
-  simp [baseTriples]
-
-lemma permTriple_mem_baseTriples {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
-    (hv : v ∈ baseTriples p f₀) (σ : Equiv.Perm (Fin n)) : permTriple σ v ∈ baseTriples p f₀ := by
-  obtain ⟨⟨h₁, h₂, h₃⟩, hsum⟩ := mem_baseTriples.1 hv
-  exact mem_baseTriples.2 ⟨⟨comp_mem_typeClass h₁ σ, comp_mem_typeClass h₂ σ,
-    comp_mem_typeClass h₃ σ⟩, fun r ↦ hsum (σ r)⟩
-
-/-- **Equal fibers.** If permutations act on `V` compatibly with a projection `g` onto a set `W` on
-which they act transitively, then every fiber of `g` has `|V| / |W|` elements. -/
-lemma card_filter_mul_card_eq {V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))}
-    {W : Finset (Fin n → ℕ)} (g : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → Fin n → ℕ)
-    (hg : ∀ σ v, g (permTriple σ v) = g v ∘ σ) (hgW : ∀ v ∈ V, g v ∈ W)
-    (hW : ∀ w ∈ W, ∀ w' ∈ W, ∃ σ : Equiv.Perm (Fin n), w' = w ∘ σ)
-    (hV : ∀ σ, ∀ v ∈ V, permTriple σ v ∈ V) {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
-    (hv : v ∈ V) : #{v' ∈ V | g v = g v'} * #W = #V := by
-  rw [card_eq_sum_card_fiberwise hgW, sum_const_nat, mul_comm]
-  intro w hw
-  obtain ⟨σ, rfl⟩ := hW (g v) (hgW v hv) w hw
-  symm
-  refine card_nbij' (permTriple σ) (permTriple σ⁻¹) ?_ ?_ ?_ ?_
-  · intro v' hv'
-    simp only [coe_filter, Set.mem_ofPred_eq] at hv' ⊢
-    obtain ⟨hv'V, hv'g⟩ := hv'
-    exact ⟨hV σ v' hv'V, by rw [hg, hv'g]⟩
-  · intro v' hv'
-    simp only [coe_filter, Set.mem_ofPred_eq] at hv' ⊢
-    obtain ⟨hv'V, hv'g⟩ := hv'
-    refine ⟨hV σ⁻¹ v' hv'V, ?_⟩
-    rw [hg, hv'g]
+/-- **Equal fibers.** If permutations act on `V` compatibly with a map `g` into the type class of
+`w₀`, then every fiber of `g` over the type class has `#V / #(typeClass w₀)` elements. -/
+lemma card_filter_mul_card_typeClass_eq {V : Finset ((Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ))}
+    {w₀ : Fin n → ℕ} (g : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → Fin n → ℕ)
+    (hg : ∀ σ v, g (permTriple σ v) = g v ∘ σ) (hgV : ∀ v ∈ V, g v ∈ typeClass w₀)
+    (hV : ∀ σ, ∀ v ∈ V, permTriple σ v ∈ V) {w : Fin n → ℕ} (hw : w ∈ typeClass w₀) :
+    #{v ∈ V | g v = w} * #(typeClass w₀) = #V := by
+  rw [card_eq_sum_card_fiberwise hgV, sum_const_nat, mul_comm]
+  intro w' hw'
+  obtain ⟨σ, rfl⟩ := exists_eq_comp_of_mem_typeClass hw hw'
+  refine card_nbij' (permTriple σ⁻¹) (permTriple σ) ?_ ?_ ?_ ?_
+  · intro v hv
+    simp only [coe_filter, Set.mem_ofPred_eq] at hv ⊢
+    obtain ⟨hvV, hvg⟩ := hv
+    refine ⟨hV σ⁻¹ v hvV, ?_⟩
+    rw [hg, hvg]
     ext r
     simp
-  · intro v' _
-    rw [permTriple_permTriple, mul_inv_cancel, permTriple_one]
-  · intro v' _
+  · intro v hv
+    simp only [coe_filter, Set.mem_ofPred_eq] at hv ⊢
+    obtain ⟨hvV, hvg⟩ := hv
+    exact ⟨hV σ v hvV, by rw [hg, hvg]⟩
+  · intro v _
     rw [permTriple_permTriple, inv_mul_cancel, permTriple_one]
+  · intro v _
+    rw [permTriple_permTriple, mul_inv_cancel, permTriple_one]
 
-/-- **The sum-free family of a base point.** If `f₀` is a sequence of triples summing to `p - 1`
-and `1 ≤ w` is at most the size of each type class of a coordinate of `f₀`, then there is a
-multicolored sum-free family in `Fin n → ZMod p` with at least
-`w exp (-4 √(log ((36 + 2 p) p ^ (3 n)))) / (4 (36 + 2 p))` members. -/
-lemma exists_isMulticoloredSumFree_of_typeClass (hp : 2 ≤ p)
-    (hf₀ : ∀ r, (f₀ r).1 + (f₀ r).2.1 + (f₀ r).2.2 = p - 1) {w : ℝ} (hw : 1 ≤ w)
-    (hw₁ : w ≤ #(typeClass fun r ↦ (f₀ r).1)) (hw₂ : w ≤ #(typeClass fun r ↦ (f₀ r).2.1))
-    (hw₃ : w ≤ #(typeClass fun r ↦ (f₀ r).2.2)) :
-    ∃ (m : ℕ) (x y z : Fin m → Fin n → ZMod p), IsMulticoloredSumFree x y z ∧
-      w * exp (-4 * √(log ((36 + 2 * p) * p ^ (3 * n)))) / (4 * (36 + 2 * p)) ≤ m := by
-  set V := baseTriples p f₀
-  set W₁ := typeClass fun r ↦ (f₀ r).1
-  set W₂ := typeClass fun r ↦ (f₀ r).2.1
-  set W₃ := typeClass fun r ↦ (f₀ r).2.2
-  have hv₀ : ((fun r ↦ (f₀ r).1), (fun r ↦ (f₀ r).2.1), fun r ↦ (f₀ r).2.2) ∈ V :=
-    mem_baseTriples.2 ⟨⟨mem_typeClass.2 ⟨1, rfl⟩, mem_typeClass.2 ⟨1, rfl⟩,
-      mem_typeClass.2 ⟨1, rfl⟩⟩, hf₀⟩
-  have hV (v) (hv : v ∈ V) : ∀ r, v.1 r + v.2.1 r + v.2.2 r = p - 1 := (mem_baseTriples.1 hv).2
-  have hclosed : ∀ v ∈ V, ∀ v' ∈ V, ∀ v'' ∈ V, (∀ r, v.1 r + v'.2.1 r + v''.2.2 r = p - 1) →
-      (v.1, v'.2.1, v''.2.2) ∈ V := by
-    intro v hv v' hv' v'' hv'' h
-    obtain ⟨⟨h₁, -, -⟩, -⟩ := mem_baseTriples.1 hv
-    obtain ⟨⟨-, h₂, -⟩, -⟩ := mem_baseTriples.1 hv'
-    obtain ⟨⟨-, -, h₃⟩, -⟩ := mem_baseTriples.1 hv''
-    exact mem_baseTriples.2 ⟨⟨h₁, h₂, h₃⟩, h⟩
-  have hsum : ∀ v ∈ V, ∀ v' ∈ V, ∀ v'' ∈ V, ∑ r, (v.1 r + v'.2.1 r + v''.2.2 r) = n * (p - 1) := by
-    intro v hv v' hv' v'' hv''
-    obtain ⟨⟨h₁, -, -⟩, -⟩ := mem_baseTriples.1 hv
-    obtain ⟨⟨-, h₂, -⟩, -⟩ := mem_baseTriples.1 hv'
-    obtain ⟨⟨-, -, h₃⟩, -⟩ := mem_baseTriples.1 hv''
-    rw [sum_add_distrib, sum_add_distrib, sum_eq_of_mem_typeClass h₁, sum_eq_of_mem_typeClass h₂,
-      sum_eq_of_mem_typeClass h₃, ← sum_add_distrib, ← sum_add_distrib]
-    simp [hf₀]
-  have hperm := fun σ v (hv : v ∈ V) ↦ permTriple_mem_baseTriples hv σ
-  have hfib₁ (v) (hv : v ∈ V) : #{v' ∈ V | v.1 = v'.1} * #W₁ = #V :=
-    card_filter_mul_card_eq (fun v ↦ v.1) (fun _ _ ↦ rfl) (fun v hv ↦ (mem_baseTriples.1 hv).1.1)
-      (fun _ h _ h' ↦ exists_eq_comp_of_mem_typeClass h h') hperm hv
-  have hfib₂ (v) (hv : v ∈ V) : #{v' ∈ V | v.2.1 = v'.2.1} * #W₂ = #V :=
-    card_filter_mul_card_eq (fun v ↦ v.2.1) (fun _ _ ↦ rfl)
-      (fun v hv ↦ (mem_baseTriples.1 hv).1.2.1)
-      (fun _ h _ h' ↦ exists_eq_comp_of_mem_typeClass h h') hperm hv
-  have hfib₃ (v) (hv : v ∈ V) : #{v' ∈ V | v.2.2 = v'.2.2} * #W₃ = #V :=
-    card_filter_mul_card_eq (fun v ↦ v.2.2) (fun _ _ ↦ rfl)
-      (fun v hv ↦ (mem_baseTriples.1 hv).1.2.2)
-      (fun _ h _ h' ↦ exists_eq_comp_of_mem_typeClass h h') hperm hv
-  have hW₁ : 0 < #W₁ := card_pos.2 ⟨_, mem_typeClass.2 ⟨1, rfl⟩⟩
-  have hW₂ : 0 < #W₂ := card_pos.2 ⟨_, mem_typeClass.2 ⟨1, rfl⟩⟩
-  have hW₃ : 0 < #W₃ := card_pos.2 ⟨_, mem_typeClass.2 ⟨1, rfl⟩⟩
-  set F := #V / #W₁ + #V / #W₂ + #V / #W₃
-  have hF (v) (hv : v ∈ V) : #{v' ∈ V | v.1 = v'.1} ≤ F ∧ #{v' ∈ V | v.2.1 = v'.2.1} ≤ F ∧
-      #{v' ∈ V | v.2.2 = v'.2.2} ≤ F := by
-    have h₁ := Nat.eq_div_of_mul_eq_left hW₁.ne' (hfib₁ v hv)
-    have h₂ := Nat.eq_div_of_mul_eq_left hW₂.ne' (hfib₂ v hv)
-    have h₃ := Nat.eq_div_of_mul_eq_left hW₃.ne' (hfib₃ v hv)
-    grind
-  obtain ⟨P, hPprime, hPlt, hPle⟩ := Nat.exists_prime_lt_and_le_two_mul (6 * F + p) (by grind)
-  have := Fact.mk hPprime
-  obtain ⟨S, hS, hScard⟩ := exists_finset_zmod_add_eq_add_lower_bound hPprime.pos
-  obtain ⟨m, x, y, z, hsf, hm⟩ := exists_isMulticoloredSumFree_of_hash (V := V) (S := S) hp
-    (by grind) hV hclosed hsum (fun v hv ↦ (hF v hv).1) (fun v hv ↦ (hF v hv).2.1)
-    (fun v hv ↦ (hF v hv).2.2) hS
-  refine ⟨m, x, y, z, hsf, ?_⟩
-  have hVW (W : Finset (Fin n → ℕ)) (g : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → Fin n → ℕ)
-      (v) (hv : v ∈ V) (h : #{v' ∈ V | g v = g v'} * #W = #V) : (#W : ℝ) ≤ #V := by
-    rw [← h]
-    exact_mod_cast Nat.le_mul_of_pos_left #W
-      (card_pos.2 ⟨v, mem_filter.2 ⟨hv, rfl⟩⟩ : 0 < #{v' ∈ V | g v = g v'})
-  have hw₀ : 0 < w := by linarith
-  have hV₀ : (0 : ℝ) < #V := by linarith [hVW W₁ (fun v ↦ v.1) _ hv₀ (hfib₁ _ hv₀)]
-  have hP : (0 : ℝ) < P := by exact_mod_cast hPprime.pos
-  have hFle : (F : ℝ) ≤ 3 * (#V / w) := by
-    have h (W : ℕ) (hW : w ≤ W) : ((#V / W : ℕ) : ℝ) ≤ #V / w :=
-      Nat.cast_div_le.trans (div_le_div_of_nonneg_left hV₀.le hw₀ hW)
-    simp only [F, Nat.cast_add]
-    linarith [h _ hw₁, h _ hw₂, h _ hw₃]
-  have hVw : 1 ≤ (#V : ℝ) / w :=
-    (one_le_div hw₀).2 (hw₁.trans (hVW W₁ (fun v ↦ v.1) _ hv₀ (hfib₁ _ hv₀)))
-  have hPle' : (P : ℝ) ≤ (36 + 2 * p) * (#V / w) := by
-    have h₁ : (P : ℝ) ≤ 2 * (6 * F + p) := by exact_mod_cast hPle
-    nlinarith [(Nat.cast_nonneg p : (0 : ℝ) ≤ p)]
-  have hlogP : log P ≤ log ((36 + 2 * p) * p ^ (3 * n)) := by
-    refine log_le_log hP (hPle'.trans ?_)
-    grw [div_le_self hV₀.le hw]
-    exact_mod_cast Nat.mul_le_mul_left _ (card_baseTriples_le hp hf₀)
-  have hE : exp (-4 * √(log ((36 + 2 * p) * p ^ (3 * n)))) ≤ exp (-4 * √(log P)) :=
-    exp_le_exp.2 (by linarith [Real.sqrt_le_sqrt hlogP])
-  have h3F : (P : ℝ) / 2 ≤ P - 3 * F := by
-    have : (6 * F + p : ℝ) < P := by exact_mod_cast hPlt
-    linarith [(Nat.cast_nonneg p : (0 : ℝ) ≤ p)]
-  have h₁ : (#V : ℝ) * (P / 2 * exp (-4 * √(log P))) * (P / 2) ≤ m * P ^ 3 := by
-    refine le_trans ?_ hm
+variable {a₀ b₀ c₀ : Fin n → ℕ}
+
+lemma permTriple_mem_vecSumTriples (σ : Equiv.Perm (Fin n))
+    {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
+    (hv : v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) :
+    permTriple σ v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) := by
+  obtain ⟨a, b, c⟩ := v
+  obtain ⟨ha, hb, hc, hsum⟩ := mk_mem_vecSumTriples.1 hv
+  exact mk_mem_vecSumTriples.2 ⟨comp_mem_typeClass ha σ, comp_mem_typeClass hb σ,
+    comp_mem_typeClass hc σ, fun r ↦ hsum (σ r)⟩
+
+lemma sum_add_add_eq (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) {a b c : Fin n → ℕ}
+    (ha : a ∈ typeClass a₀) (hb : b ∈ typeClass b₀) (hc : c ∈ typeClass c₀) :
+    ∑ r, (a r + b r + c r) = n * (p - 1) := by
+  rw [sum_add_distrib, sum_add_distrib, sum_eq_of_mem_typeClass ha, sum_eq_of_mem_typeClass hb,
+    sum_eq_of_mem_typeClass hc, ← sum_add_distrib, ← sum_add_distrib]
+  simp [h₀]
+
+lemma card_typeClass_le_card_vecSumTriples (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) :
+    #(typeClass a₀) ≤ #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) := by
+  rw [← card_filter_mul_card_typeClass_eq (fun (a, _, _) ↦ a) (fun _ _ ↦ rfl)
+    (by simp +contextual) (fun σ _ ↦ permTriple_mem_vecSumTriples σ) (self_mem_typeClass a₀)]
+  refine Nat.le_mul_of_pos_left _ (card_pos.2 ⟨(a₀, b₀, c₀), ?_⟩)
+  simpa using ⟨self_mem_typeClass a₀, self_mem_typeClass b₀, self_mem_typeClass c₀, h₀⟩
+
+/-- If `0 < w` is at most the size of each type class, then at most
+`3 * (#V / w)` triples of `V = vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)` share
+a vector with a given one. -/
+lemma card_filter_shares_le {w : ℝ} (hw : 0 < w) (hwa : w ≤ #(typeClass a₀))
+    (hwb : w ≤ #(typeClass b₀)) (hwc : w ≤ #(typeClass c₀))
+    {v : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ)}
+    (hv : v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) :
+    #{v' ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) | Shares v v'} ≤
+      3 * (#(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) / w) := by
+  have hfib {w₀ : Fin n → ℕ} (g : (Fin n → ℕ) × (Fin n → ℕ) × (Fin n → ℕ) → Fin n → ℕ)
+      (hg : ∀ σ v, g (permTriple σ v) = g v ∘ σ)
+      (hgV : ∀ v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀),
+        g v ∈ typeClass w₀)
+      (hw₀ : w ≤ #(typeClass w₀)) {x : Fin n → ℕ} (hx : x ∈ typeClass w₀) :
+      #{v ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) | g v = x} ≤
+        #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) / w := by
+    rw [le_div_iff₀ hw, ← card_filter_mul_card_typeClass_eq g hg hgV
+      (fun σ _ ↦ permTriple_mem_vecSumTriples σ) hx]
+    push_cast
     gcongr
-  have h₂ : (#V : ℝ) * exp (-4 * √(log P)) ≤ 4 * m * P := by
-    refine le_of_mul_le_mul_left ?_ (by positivity : (0 : ℝ) < P ^ 2 / 4)
-    convert h₁ using 1 <;> ring
+  obtain ⟨a, b, c⟩ := v
+  obtain ⟨ha, hb, hc, -⟩ := mk_mem_vecSumTriples.1 hv
+  have hsub : {v' ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) |
+      Shares (a, b, c) v'} ⊆
+      {v' ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) |
+        (fun (a', _, _) ↦ a') v' = a} ∪
+      {v' ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) |
+        (fun (_, b', _) ↦ b') v' = b} ∪
+      {v' ∈ vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀) |
+        (fun (_, _, c') ↦ c') v' = c} := by
+    rintro ⟨a', b', c'⟩
+    simp only [mem_filter, mem_union, shares_mk]
+    grind
+  grw [card_le_card hsub, card_union_le, card_union_le]
+  push_cast
+  linarith [hfib (fun (a, _, _) ↦ a) (fun _ _ ↦ rfl) (by simp +contextual) hwa ha,
+    hfib (fun (_, b, _) ↦ b) (fun _ _ ↦ rfl) (by simp +contextual) hwb hb,
+    hfib (fun (_, _, c) ↦ c) (fun _ _ ↦ rfl) (by simp +contextual) hwc hc]
+
+/-- Hashing `vecSumTriples p A B C` with a prime `P ≤ 2 * (2 * F + p)` from Bertrand's postulate
+into a set from Behrend's construction gives a multicolored sum-free family with at least
+`#V * exp (-4 * √(log P)) / (4 * P)` members, if at most `F` triples share a vector with a given
+one. -/
+lemma exists_isMulticoloredSumFree_mul_exp_le {A B C : Finset (Fin n → ℕ)} (hp : 2 ≤ p)
+    (hsum : ∀ a ∈ A, ∀ b ∈ B, ∀ c ∈ C, ∑ r, (a r + b r + c r) = n * (p - 1)) {F : ℝ}
+    (hF₀ : 0 ≤ F)
+    (hF : ∀ v ∈ vecSumTriples p A B C, #{v' ∈ vecSumTriples p A B C | Shares v v'} ≤ F) :
+    ∃ (P m : ℕ) (x y z : Fin m → Fin n → ZMod p), IsMulticoloredSumFree x y z ∧ 0 < P ∧
+      P ≤ 2 * (2 * F + p) ∧ #(vecSumTriples p A B C) * exp (-4 * √(log P)) ≤ 4 * m * P := by
+  obtain ⟨P, hP, hPlt, hPle⟩ := Nat.exists_prime_lt_and_le_two_mul (2 * ⌊F⌋₊ + p) (by grind)
+  have := Fact.mk hP
+  obtain ⟨S, hS, hScard⟩ := exists_threeAPFree_le_card_zmod hP.pos
+  obtain ⟨m, x, y, z, hsf, hm⟩ := exists_isMulticoloredSumFree_of_hash hp (by grind) hsum
+    (fun v hv ↦ Nat.le_floor (hF v hv)) hS
+  refine ⟨P, m, x, y, z, hsf, hP.pos, ?_, ?_⟩
+  · grw [hPle]
+    push_cast
+    grw [Nat.floor_le hF₀]
+  · have hPF : (P : ℝ) / 2 ≤ P - ⌊F⌋₊ := by
+      rw [le_sub_comm, sub_half, le_div_iff₀ two_pos]
+      exact_mod_cast (by grind : ⌊F⌋₊ * 2 ≤ P)
+    have h : #(vecSumTriples p A B C) * (P / 2 * exp (-4 * √(log P))) * (P / 2) ≤ m * P ^ 3 := by
+      grw [hScard, hPF]
+      exact hm
+    refine le_of_mul_le_mul_right ?_ (pow_pos (by exact_mod_cast hP.pos : (0 : ℝ) < P) 2)
+    linarith
+
+/-- **The sum-free family of a base point.** If `a₀ r + b₀ r + c₀ r = p - 1` for every `r` and
+`1 ≤ w` is at most the size of the type classes of `a₀`, `b₀` and `c₀`, then there is a
+multicolored sum-free family in `Fin n → ZMod p` with at least
+`w * exp (-4 * √(log ((12 + 2 * p) * p ^ (3 * n)))) / (4 * (12 + 2 * p))` members. -/
+lemma exists_isMulticoloredSumFree_of_typeClass (hp : 2 ≤ p)
+    (h₀ : ∀ r, a₀ r + b₀ r + c₀ r = p - 1) {w : ℝ} (hw : 1 ≤ w) (hwa : w ≤ #(typeClass a₀))
+    (hwb : w ≤ #(typeClass b₀)) (hwc : w ≤ #(typeClass c₀)) :
+    ∃ (m : ℕ) (x y z : Fin m → Fin n → ZMod p), IsMulticoloredSumFree x y z ∧
+      w * exp (-4 * √(log ((12 + 2 * p) * p ^ (3 * n)))) / (4 * (12 + 2 * p)) ≤ m := by
+  obtain ⟨P, m, x, y, z, hsf, hP, hPle, hm⟩ := exists_isMulticoloredSumFree_mul_exp_le hp
+    (fun a ha b hb c hc ↦ sum_add_add_eq h₀ ha hb hc) (by positivity)
+    (fun v hv ↦ card_filter_shares_le (by positivity) hwa hwb hwc hv)
+  refine ⟨m, x, y, z, hsf, ?_⟩
+  have hwV : w ≤ #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) :=
+    hwa.trans (by exact_mod_cast card_typeClass_le_card_vecSumTriples h₀)
+  have hPV : (P : ℝ) ≤
+      (12 + 2 * p) * (#(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) / w) := by
+    nlinarith [(one_le_div (by positivity)).2 hwV]
+  have hE : exp (-4 * √(log ((12 + 2 * p) * p ^ (3 * n)))) ≤ exp (-4 * √(log P)) := by
+    rw [exp_le_exp, neg_mul, neg_mul, neg_le_neg_iff]
+    gcongr
+    grw [hPV, div_le_self (by positivity) hw, card_vecSumTriples_le,
+      card_typeClass_le (p := p) (fun r ↦ by grind [h₀ r]),
+      card_typeClass_le (p := p) (fun r ↦ by grind [h₀ r]),
+      card_typeClass_le (p := p) (fun r ↦ by grind [h₀ r])]
+    push_cast
+    exact le_of_eq (by ring)
   rw [div_le_iff₀ (by positivity)]
-  calc w * exp (-4 * √(log ((36 + 2 * p) * p ^ (3 * n))))
-      ≤ w * exp (-4 * √(log P)) := by gcongr
-    _ = w * (#V * exp (-4 * √(log P))) / #V := by field_simp
-    _ ≤ w * (4 * m * ((36 + 2 * p) * (#V / w))) / #V := by grw [h₂, hPle']
-    _ = m * (4 * (36 + 2 * p)) := by field_simp
+  calc w * exp (-4 * √(log ((12 + 2 * p) * p ^ (3 * n))))
+      ≤ w * exp (-4 * √(log P)) := by grw [hE]
+    _ = w * (#(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) *
+        exp (-4 * √(log P))) / #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) := by
+      field_simp [(by linarith : (0 : ℝ) < #(vecSumTriples p (typeClass a₀) (typeClass b₀)
+        (typeClass c₀))).ne']
+    _ ≤ w * (4 * m * ((12 + 2 * p) *
+        (#(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) / w))) /
+        #(vecSumTriples p (typeClass a₀) (typeClass b₀) (typeClass c₀)) := by grw [hm, hPV]
+    _ = m * (4 * (12 + 2 * p)) := by
+      field_simp [(by linarith : (0 : ℝ) < #(vecSumTriples p (typeClass a₀) (typeClass b₀)
+        (typeClass c₀))).ne']
 
 end ArithmeticTriangleRemovalInVectorSpaces

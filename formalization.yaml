@@ -12,15 +12,11 @@ project:
     (ε/3)^(C_p) N² triangles x + y + z = 0, where N = p^n, then removing at most εN elements
     leaves no triangle. It proves Theorem 2, the Kleinberg–Sawin–Speyer bound m ≤ p^((1 - c_p)n)
     for multicolored sum-free families, by the slice rank method, and Theorem 3: m vertex-disjoint
-    triangles span at least (m/N)^(C_p) N² triangles. Theorems 1, 2 and 3 are also proved in every
-    finite vector space over F_p. For the tightness part of Theorem 1 it proves the construction
-    of Section 3 of the paper and the inequality it gives: if the removal lemma holds with ε and
-    δ, then every multicolored sum-free family of more than εN triples has at least δN²
-    members. It proves the second part of Theorem 2, which the paper cites from Kleinberg, Sawin
-    and Speyer with Pebody: for every η > 0 and every large n there is a multicolored sum-free
-    family of at least p^((1 - c_p - η)n) triples. From the two it derives the bound
-    δ ≤ ε^(C_p - o(1)) of Section 3. It also proves the values c_2 = 5/3 - log_2 3 and
-    c_3 = 1 - log b / log 3, where b = a^(-2/3) + a^(1/3) + a^(4/3) and a = (√33 - 1)/8.
+    triangles span at least (m/N)^(C_p) N² triangles. It proves the second part of Theorem 1:
+    if the removal lemma holds with ε and δ in every dimension, then δ ≤ ε^(C_p - o(1)) as ε
+    tends to 0. It also proves the values
+    c_2 = 5/3 - log_2 3 and c_3 = 1 - log b / log 3, where b = a^(-2/3) + a^(1/3) + a^(4/3) and
+    a = (√33 - 1)/8.
   authors:
     - "Gabriel Dahia"
   license: "Apache-2.0"
@@ -38,20 +34,18 @@ sources:
       - "László Miklós Lovász"
     id: "arXiv:1606.01230"
     type: "paper"
-    location: "Theorems 1, 2 and 3, Lemma 5, Section 3, and the values of c_2 and c_3 in Section 1"
+    location: "Theorems 1, 2 and 3, Section 3, and the values of c_2 and c_3 in Section 1"
     relationship: "formalizes"
     note: >-
-      The project follows the structure of the paper: Theorem 1 from Theorem 3 through a maximal
-      family of vertex-disjoint triangles, Theorem 3 from Lemma 5, the embedding of
-      F_p^n into F_p^(n+2) and a product argument, and the construction of Section 3. It
-      departs from the paper in three places. Lemma 5 intersects the sets with the kernel of a
-      uniformly random linear map instead of a uniformly random subspace, and holds for every
-      degree bound ρ. Lemma 6 and Theorem 4, which remove vertices of large degree one at a time
-      and give the exponent C_p + o(1), are replaced by a single choice of subsets minimizing a
-      potential, which gives Theorem 3 up to a constant factor; the product argument then removes
-      the constant factor. The paper's lower bound on the size of multicolored sum-free families,
-      which it takes from Kleinberg, Sawin and Speyer, Norin and Pebody, is proved following
-      Kleinberg, Sawin and Speyer and Pebody; see those sources.
+      The project follows the proof of the paper, with two changes of method. The sets are
+      intersected with the kernel of a uniformly random linear map instead of a uniformly random
+      subspace. Vertices of large degree are not removed one at a time: a single choice of
+      subsets minimizing a potential gives Theorem 3 up to a constant factor, and the product
+      argument of the paper removes the constant factor. The second part of Theorem 1 follows
+      the construction of Section 3, with the large multicolored sum-free families that the paper
+      takes from Kleinberg, Sawin and Speyer, Norin and Pebody. These families are constructed
+      following Kleinberg, Sawin and Speyer and Pebody; see those sources. The values of c_2 and
+      c_3 follow from the weighted arithmetic-geometric mean inequality.
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "The growth rate of tri-colored sum-free sets"
@@ -68,16 +62,15 @@ sources:
       writes the indicator of u + v + w = 0 in F_p^n as a sum of products of monomials of degree
       at most (p - 1)n, bounds the slice rank of the diagonal tensor by Tao's lemma, counts the
       monomials of degree at most (p - 1)n/3 by Chernoff's bound with a parameter 0 < x < 1, and
-      removes the constant factor by taking tensor powers. For the lower bound, it follows the
+      removes the constant factor by taking tensor powers. For the large multicolored sum-free
+      families used in the second part of Theorem 1 of Fox and Lovász, it follows the
       construction of Section 4: a coupling of three geometric distributions of mean (p - 1)/3,
       given by Pebody's theorem, is rounded to a base point; the triples of the type classes of
       its coordinates summing to the all p - 1 vector are hashed into Z/PZ for a prime P from
       Bertrand's postulate, and the triples whose hashes lie in a set without three-term
       progressions from Behrend's construction and share no vector with another such triple
       form the family. The size of a type class is bounded below as in Lemma 3.1, by comparing
-      it with the cross entropy of the geometric distribution and a Stirling bound. The Lean
-      proof works with any p ≥ 2, and pads the family by zero coordinates to reach every large
-      dimension.
+      it with the cross entropy of the geometric distribution and a Stirling bound.
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Proof of a conjecture of Kleinberg, Sawin and Speyer"
@@ -101,24 +94,19 @@ related_formalizations:
   - id: "https://github.com/leanprover-community/mathlib4"
     relationship: "builds-on"
     note: >-
-      The statements use finite sets, ZMod p, Module, Fintype.card, Real.rpow, Real.logb and
-      Real.sqrt from Mathlib. The proofs use its multivariate polynomials, matrix rank, linear
-      maps between finite vector spaces, Jensen's inequality for concave functions, the weighted
+      The statements use finite sets, ZMod p, Fintype.card, Real.rpow, Real.logb and Real.sqrt
+      from Mathlib. The proofs use its multivariate polynomials, matrix rank, linear maps between
+      finite vector spaces, Jensen's inequality for concave functions, the weighted
       arithmetic-geometric mean inequality, and double counting. Mathlib has none of the
       theorems of the sources.
 
 status:
   scope: >-
-    The project proves Theorems 1, 2 and 3 of Fox and Lovász in Fin n → ZMod p and in every
-    finite vector space over ZMod p, Lemma 5 in a form that holds for every degree bound, the
-    construction of Section 3 with the inequality between ε, δ and the size of a multicolored
-    sum-free family that it gives, the second part of Theorem 2 (multicolored sum-free families
-    of size p^((1 - c_p - o(1))n) exist), which the paper cites from Kleinberg, Sawin and
-    Speyer, Norin and Pebody, the asymptotic upper bound δ ≤ ε^(C_p - o(1)) of Section 3, and
-    the values of c_2 and c_3. The sorry counts refer to the library and
-    ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean;
-    ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean has thirteen placeholders, one
-    for each statement.
+    The project proves Theorems 1, 2 and 3 of Fox and Lovász in Fin n → ZMod p, including the
+    second part of Theorem 1, and the values of c_2 and c_3. The sorry counts refer to the
+    library and ArithmeticTriangleRemovalInVectorSpacesPalomar/Solution.lean;
+    ArithmeticTriangleRemovalInVectorSpacesPalomar/Challenge.lean has six placeholders, one for
+    each statement.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -133,34 +121,35 @@ automation:
         definitions, the statements and the proofs, checked them with the Lean compiler, and
         wrote Challenge.lean, Solution.lean, the README and this file.
       cost:
-        wall_time: "one session"
+        wall_time: "two sessions"
         spend_usd: "not tracked"
         hardware: "local machine"
       prompting_notes: >-
         One instruction to formalize the main results of the paper for submission to Palomar,
-        following the maintainer's Lean style guide.
+        following the maintainer's Lean style guide. Later, one instruction to review the project
+        against the maintainer's Lean and Palomar standards and fix what the review found.
+        Later, one instruction to put the second part of Theorem 1 back into Challenge.lean.
   spend_usd: "not tracked"
   notes: >-
     Claude Code wrote the Lean code, the README and this file at the request of Gabriel Dahia.
-    The agent chose the random linear map in Lemma 5, the potential minimization in place of
-    Lemma 6, and the proofs of the values of c_2 and c_3 by the weighted arithmetic-geometric
-    mean inequality. Every proof is checked by Lean.
+    The agent chose the random linear map, the potential minimization and the proofs of the values
+    of c_2 and c_3 by the weighted arithmetic-geometric mean inequality. Later, the agent
+    restyled the library, with subagents working on separate directories, reduced Challenge.lean
+    to the main results chosen by the maintainer, and wrote the triangles and multicolored
+    sum-freeness in its statements in terms of Mathlib definitions. Later, the agent added the
+    second part of Theorem 1 back to Challenge.lean in the same form. Every proof is checked by
+    Lean.
 
 fidelity:
   divergences: >-
     Theorem 1 assumes 0 ≤ ε in place of 0 < ε < 1, and bounds the number of removed elements by
-    εN. Theorem 3 allows X, Y and Z to contain more than the vertices of the m triangles, which
-    are given as injective functions x, y and z from a finite type with x i + y i + z i = 0.
-    The second part of Theorem 2 is stated for every p ≥ 2, prime or not, as: for every η > 0
-    and every large n there is a multicolored sum-free family in Fin n → ZMod p of at least
-    p^((1 - c_p - η)n) triples. The bound δ ≤ ε^(C_p - o(1)) of Section 3 is stated as: for
-    every η > 0 there is ε₀ > 0 such that for 0 < ε < ε₀, any δ that works with ε for every n
-    satisfies δ ≤ ε^(C_p - η).
-    The project also proves the two claims of Section 3 about X × F_p^l, Y × F_p^l and
-    Z × F_p^l, and the inequality δN² ≤ m for any multicolored sum-free family of m > εN
-    triples when the removal lemma holds with ε and δ.
-    The value of c_3 is stated for any a with a = (√33 - 1)/8, and logarithms are natural
-    logarithms, as their ratio does not depend on the base.
+    εN. Theorem 2 indexes the family by a finite type. Theorem 3 allows X, Y and Z to contain more
+    than the vertices of the m triangles, which are given as injective functions x, y and z from a
+    finite type with x i + y i + z i = 0. The bound δ ≤ ε^(C_p - o(1)) of the second part of
+    Theorem 1 is stated as: for every η > 0 there is ε₀ > 0 such that for 0 < ε < ε₀, any δ that
+    works with ε in the removal lemma for every n satisfies δ ≤ ε^(C_p - η). The value of c_3 is stated for any a with
+    a = (√33 - 1)/8, and logarithms are natural logarithms, as their ratio does not depend on the
+    base.
 
 review:
   status: "unchecked"
@@ -170,62 +159,27 @@ review:
 alignment:
   namespace: "ArithmeticTriangleRemovalInVectorSpaces"
   statements:
-    - source: "Fox and Lovász, Theorem 1, first part"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_triangles_eq_empty'"
+    - source: "Fox and Lovász, Theorem 1"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_forall_add_ne_zero'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_triangles_eq_empty in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Theorem 2 (Kleinberg, Sawin and Speyer), first part"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_rpow_mul'"
+      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_forall_add_ne_zero in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
+    - source: "Fox and Lovász, Theorem 2 (Kleinberg, Sawin and Speyer)"
+      lean: "ArithmeticTriangleRemovalInVectorSpaces.card_le_rpow_one_sub_c_mul'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_rpow_mul in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
+      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.card_le_rpow_one_sub_c_mul in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
     - source: "Fox and Lovász, Theorem 3"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.div_pow_rpow_C_mul_sq_le_card_triangles'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
       note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.div_pow_rpow_C_mul_sq_le_card_triangles in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Theorem 1, first part, in a finite vector space over F_p"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_of_card_triangles_lt'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_subset_card_sdiff_add_le_of_card_triangles_lt in ArithmeticTriangleRemovalInVectorSpaces.DisjointTriangles.MaximalFamily."
-    - source: "Fox and Lovász, Theorem 2, first part, in a finite vector space over F_p"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_card_rpow'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_le_card_rpow in ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.TensorPower."
-    - source: "Fox and Lovász, Theorem 3, in a finite vector space over F_p"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.div_rpow_C_mul_sq_le_card_triangles'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.div_rpow_C_mul_sq_le_card_triangles in ArithmeticTriangleRemovalInVectorSpaces.DisjointTriangles.TensorPower."
-    - source: "Fox and Lovász, Section 3, the number of triangles of X × F_p^l, Y × F_p^l and Z × F_p^l"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_triangles_prod_pi'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.card_triangles_prod_pi in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Section 3, removing fewer than m p^l elements leaves a triangle"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.triangles_prod_pi_nonempty'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.triangles_prod_pi_nonempty in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Theorem 1, second part, reduced to the size of multicolored sum-free families"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree.mul_sq_le_card_of_forall_exists_subset in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
-    - source: "Fox and Lovász, Theorem 1, second part, δ ≤ ε^(C_p - o(1)), as derived in Section 3 from Theorem 2, second part"
+    - source: "Fox and Lovász, Theorem 1, second part, δ ≤ ε^(C_p - o(1)), as derived in Section 3"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub in ArithmeticTriangleRemovalInVectorSpaces.ZMod, from the second part of Theorem 2."
-    - source: "Fox and Lovász, Theorem 2 (Kleinberg, Sawin and Speyer, with Pebody), second part"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.exists_forall_ge_exists_isMulticoloredSumFree'"
-      module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
-      status: "proved"
-      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_forall_ge_exists_isMulticoloredSumFree in ArithmeticTriangleRemovalInVectorSpaces.Construction.LowerBound."
-    - source: "Fox and Lovász, Section 1, c_2 = 5/3 - log 3"
+      note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.exists_pos_forall_le_rpow_C_sub in ArithmeticTriangleRemovalInVectorSpaces.ZMod."
+    - source: "Fox and Lovász, Section 1, c_2 = 5/3 - log_2 3"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.c_two'"
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
@@ -235,12 +189,6 @@ alignment:
       module: "ArithmeticTriangleRemovalInVectorSpacesPalomar.Challenge"
       status: "proved"
       note: "Proved as ArithmeticTriangleRemovalInVectorSpaces.c_three in ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.SmallPrimes."
-    - source: "The triangles of X × Y × Z"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.triangles"
-      module: "ArithmeticTriangleRemovalInVectorSpaces.Triangle.Basic"
-    - source: "Multicolored sum-free families of triples"
-      lean: "ArithmeticTriangleRemovalInVectorSpaces.IsMulticoloredSumFree"
-      module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic"
     - source: "The exponent c_p of Kleinberg, Sawin and Speyer"
       lean: "ArithmeticTriangleRemovalInVectorSpaces.c"
       module: "ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent"

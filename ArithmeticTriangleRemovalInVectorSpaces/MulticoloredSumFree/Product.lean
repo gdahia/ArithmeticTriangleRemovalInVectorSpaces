@@ -74,8 +74,7 @@ lemma IsMulticoloredSumFree.card_triangles_image (h : IsMulticoloredSumFree x y 
   · intro i _
     simpa using (h i i i).2 ⟨rfl, rfl⟩
   · intro i _ j _ hij
-    simp only [Prod.mk.injEq] at hij
-    obtain ⟨hx, -⟩ := hij
+    obtain ⟨hx, -⟩ := Prod.mk.inj hij
     exact h.injective_left hx
   · rintro ⟨g₁, g₂, g₃⟩ ht
     simp only [mem_triangles, mem_image, mem_univ, true_and] at ht
@@ -91,13 +90,15 @@ lemma triangles_nonempty_of_card_sdiff_add_lt (hx : Injective x) (hy : Injective
     (triangles X Y Z).Nonempty := by
   classical
   have hle (f : ι → G) (hf : Injective f) (S : Finset G) :
-      #({i | f i ∉ S} : Finset ι) ≤ #(univ.image f \ S) :=
-    card_le_card_of_injOn f (fun i hi ↦ by simp_all) hf.injOn
-  obtain ⟨i, -, hi⟩ := exists_mem_notMem_of_card_lt_card (t := univ)
-    (s := (univ.filter fun i ↦ x i ∉ X) ∪ (univ.filter fun i ↦ y i ∉ Y) ∪
-      univ.filter fun i ↦ z i ∉ Z) (by
-      grw [card_union_le, card_union_le, hle x hx X, hle y hy Y, hle z hz Z, card_univ]
-      exact hcard)
+      #({i | f i ∉ S} : Finset ι) ≤ #(univ.image f \ S) := by
+    apply card_le_card_of_injOn f _ hf.injOn
+    intro i hi
+    simp_all
+  obtain ⟨i, -, hi⟩ : ∃ i ∈ univ, i ∉ (univ.filter fun i ↦ x i ∉ X) ∪
+      (univ.filter fun i ↦ y i ∉ Y) ∪ univ.filter fun i ↦ z i ∉ Z := by
+    apply exists_mem_notMem_of_card_lt_card
+    grw [card_union_le, card_union_le, hle x hx X, hle y hy Y, hle z hz Z, card_univ]
+    exact hcard
   simp only [mem_union, mem_filter, mem_univ, true_and, not_or, not_not] at hi
   obtain ⟨⟨hxi, hyi⟩, hzi⟩ := hi
   exact ⟨_, mem_triangles.2 ⟨hxi, hyi, hzi, hsum i⟩⟩
@@ -117,10 +118,8 @@ lemma IsMulticoloredSumFree.card_triangles_prod (h : IsMulticoloredSumFree x y z
   · rintro ⟨i, a, b⟩ -
     simp only [mem_triangles, mem_product, mem_image, mem_univ, true_and, and_true, Prod.ext_iff,
       Prod.fst_add, Prod.snd_add, Prod.fst_zero, Prod.snd_zero]
-    refine ⟨⟨i, rfl⟩, ⟨i, rfl⟩, ⟨i, rfl⟩, (h i i i).2 ⟨rfl, rfl⟩, by abel⟩
-  · intro s _ t _ hst
-    obtain ⟨i, a, b⟩ := s
-    obtain ⟨j, a', b'⟩ := t
+    exact ⟨⟨i, rfl⟩, ⟨i, rfl⟩, ⟨i, rfl⟩, (h i i i).2 ⟨rfl, rfl⟩, by abel⟩
+  · rintro ⟨i, a, b⟩ _ ⟨j, a', b'⟩ _ hst
     simp only [Prod.mk.injEq] at hst
     obtain ⟨⟨hx, rfl⟩, ⟨-, rfl⟩, -⟩ := hst
     rw [h.injective_left hx]
@@ -133,16 +132,16 @@ lemma IsMulticoloredSumFree.card_triangles_prod (h : IsMulticoloredSumFree x y z
     simp only [Prod.mk.injEq, true_and]
     rw [eq_neg_of_add_eq_zero_right habc]
 
-omit [DecidableEq W] in
-/-- Three sets of total size more than `2 * #W` contain `a`, `b` and `c` with `a + b + c = 0`. -/
-lemma exists_add_add_eq_zero_of_two_mul_card_lt {A B C : Finset W}
-    (h : 2 * Fintype.card W < #A + #B + #C) : ∃ a ∈ A, ∃ b ∈ B, ∃ c ∈ C, a + b + c = 0 := by
-  classical
+/-- If the complements of `A`, `B` and `C` in `W` have fewer than `#W` elements in total, then
+there are `a ∈ A`, `b ∈ B` and `c ∈ C` with `a + b + c = 0`. -/
+lemma exists_add_add_eq_zero_of_card_compl_add_lt {A B C : Finset W}
+    (h : #Aᶜ + #Bᶜ + #Cᶜ < Fintype.card W) : ∃ a ∈ A, ∃ b ∈ B, ∃ c ∈ C, a + b + c = 0 := by
+  rw [card_compl, card_compl, card_compl] at h
   obtain ⟨c, hc⟩ : C.Nonempty := card_pos.1 (by grind [card_le_univ A, card_le_univ B])
-  obtain ⟨a, ha⟩ := inter_nonempty_of_card_lt_card_add_card (subset_univ A)
-    (subset_univ (B.image fun b ↦ -c - b)) (by
-      rw [card_image_of_injective _ fun b b' hb ↦ by simpa using hb, card_univ]
-      grind [card_le_univ C])
+  obtain ⟨a, ha⟩ : (A ∩ B.image fun b ↦ -c - b).Nonempty := by
+    apply inter_nonempty_of_card_lt_card_add_card (subset_univ A) (subset_univ _)
+    rw [card_image_of_injective _ sub_right_injective, card_univ]
+    grind [card_le_univ A, card_le_univ B, card_le_univ C]
   obtain ⟨ha, hab⟩ := mem_inter.1 ha
   obtain ⟨b, hb, rfl⟩ := mem_image.1 hab
   exact ⟨_, ha, b, hb, c, hc, by abel⟩
@@ -166,7 +165,7 @@ lemma sum_card_filter_notMem_le {f : ι → G} (hf : Injective f) (S : Finset (G
     obtain ⟨i, a, ha, rfl⟩ := ht
     simp [ha]
   grw [← card_le_card hsub, card_biUnion hdisj]
-  simp_rw [card_image_of_injective _ (Prod.mk_right_injective _), le_refl]
+  simp [card_image_of_injective _ (Prod.mk_right_injective _)]
 
 /-- Removing fewer than `m * #W` elements from the sets `X × W`, `Y × W` and `Z × W` built from a
 multicolored sum-free family of `m` triples leaves a triangle. -/
@@ -175,19 +174,16 @@ lemma IsMulticoloredSumFree.triangles_nonempty (h : IsMulticoloredSumFree x y z)
     (hcard : #((univ.image x ×ˢ univ) \ X) + #((univ.image y ×ˢ univ) \ Y) +
       #((univ.image z ×ˢ univ) \ Z) < Fintype.card ι * Fintype.card W) :
     (triangles X Y Z).Nonempty := by
-  have hsum := (add_le_add (add_le_add (sum_card_filter_notMem_le h.injective_left X)
-    (sum_card_filter_notMem_le h.injective_middle Y))
-    (sum_card_filter_notMem_le h.injective_right Z)).trans_lt hcard
-  rw [← sum_add_distrib, ← sum_add_distrib] at hsum
-  obtain ⟨i, -, hi⟩ := exists_lt_of_sum_lt (s := univ) (g := fun _ ↦ Fintype.card W)
-    (by simpa using hsum)
-  obtain ⟨a, ha, b, hb, c, hc, habc⟩ := exists_add_add_eq_zero_of_two_mul_card_lt
-    (A := {a | (x i, a) ∈ X}) (B := {b | (y i, b) ∈ Y}) (C := {c | (z i, c) ∈ Z}) (by
-      have := card_filter_add_card_filter_not (s := (univ : Finset W)) fun a ↦ (x i, a) ∈ X
-      have := card_filter_add_card_filter_not (s := (univ : Finset W)) fun b ↦ (y i, b) ∈ Y
-      have := card_filter_add_card_filter_not (s := (univ : Finset W)) fun c ↦ (z i, c) ∈ Z
-      rw [card_univ] at *
-      grind)
+  obtain ⟨i, -, hi⟩ : ∃ i ∈ univ,
+      #{a | (x i, a) ∉ X} + #{b | (y i, b) ∉ Y} + #{c | (z i, c) ∉ Z} < Fintype.card W := by
+    apply exists_lt_of_sum_lt
+    simp_rw [sum_add_distrib]
+    grw [sum_card_filter_notMem_le h.injective_left X,
+      sum_card_filter_notMem_le h.injective_middle Y, sum_card_filter_notMem_le h.injective_right Z]
+    simpa using hcard
+  obtain ⟨a, ha, b, hb, c, hc, habc⟩ := exists_add_add_eq_zero_of_card_compl_add_lt
+    (A := {a | (x i, a) ∈ X}) (B := {b | (y i, b) ∈ Y}) (C := {c | (z i, c) ∈ Z})
+    (by simpa [compl_filter] using hi)
   simp only [mem_filter, mem_univ, true_and] at ha hb hc
   exact ⟨_, mem_triangles.2 ⟨ha, hb, hc, Prod.ext ((h i i i).2 ⟨rfl, rfl⟩) habc⟩⟩
 

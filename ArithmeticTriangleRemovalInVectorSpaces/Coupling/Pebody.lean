@@ -11,9 +11,9 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 /-!
 # Pebody's theorem
 
-Three decreasing mass functions on `[0, N]` with equal masses whose means sum to `N` are
-compatible. This is Theorem 4 of Pebody, *Proof of a conjecture of Kleinberg, Sawin and Speyer*.
-Kleinberg, Sawin and Speyer apply it to the truncated geometric distribution with mean `N / 3`.
+Three decreasing mass functions on `[0, N]` with equal masses whose means sum to `N` are compatible.
+This is Theorem 4 of Pebody, *Proof of a conjecture of Kleinberg, Sawin and Speyer*. Kleinberg,
+Sawin and Speyer apply it to the truncated geometric distribution with mean `N / 3`.
 
 ## Main definitions
 
@@ -72,11 +72,15 @@ lemma compatible_of_isDecreasingOn (h₁ : IsDecreasingOn N π₁) (h₂ : IsDec
 @[expose] noncomputable def geom (N : ℕ) (ρ : ℝ) (k : ℕ) : ℝ :=
   if k ≤ N then ρ ^ k else 0
 
-lemma sum_mul_geom (f : ℕ → ℝ) (ρ : ℝ) :
-    ∑ k ∈ range (N + 1), f k * geom N ρ k = ∑ k ∈ range (N + 1), f k * ρ ^ k := by
-  rw [← Fin.sum_univ_eq_sum_range, ← Fin.sum_univ_eq_sum_range]
-  congr with k
-  simp [geom, k.is_le]
+lemma mass_geom (ρ : ℝ) : mass N (geom N ρ) = ∑ k ∈ range (N + 1), ρ ^ k := by
+  rw [mass]
+  congr! 1 with k hk
+  simp [geom, Nat.le_of_lt_succ (mem_range.1 hk)]
+
+lemma moment_geom (ρ : ℝ) : moment N (geom N ρ) = ∑ k ∈ range (N + 1), k * ρ ^ k := by
+  rw [moment]
+  congr! 1 with k hk
+  simp [geom, Nat.le_of_lt_succ (mem_range.1 hk)]
 
 lemma isDecreasingOn_geom {ρ : ℝ} (hρ₀ : 0 ≤ ρ) (hρ₁ : ρ ≤ 1) : IsDecreasingOn N (geom N ρ) := by
   refine ⟨?_, ?_, by simp [geom]⟩
@@ -101,17 +105,15 @@ lemma exists_sum_mul_pow_eq_zero (hN : 0 < N) :
   have hN' : (0 : ℝ) < N := by exact_mod_cast hN
   obtain ⟨ρ, ⟨hρ₀, hρ₁⟩, hρ⟩ := intermediate_value_Icc zero_le_one
     (by fun_prop : Continuous f).continuousOn
-    (⟨by rw [hf₀]; linarith, by rw [hf₁]; positivity⟩ : (0 : ℝ) ∈ Set.Icc (f 0) (f 1))
+    (⟨by linarith, by nlinarith⟩ : (0 : ℝ) ∈ Set.Icc (f 0) (f 1))
   refine ⟨ρ, lt_of_le_of_ne hρ₀ ?_, lt_of_le_of_ne hρ₁ ?_, hρ⟩
   · rintro rfl
     linarith
   · rintro rfl
-    rw [hf₁] at hρ
-    have : (0 : ℝ) < N * (N + 1) / 2 := by positivity
-    linarith
+    nlinarith
 
-/-- **The distribution of Kleinberg, Sawin and Speyer.** For `N > 0` there is `ρ ∈ (0, 1)` such
-that `geom N ρ` has mean `N / 3` and three copies of it are compatible. -/
+/-- **The distribution of Kleinberg, Sawin and Speyer.** For `N > 0` there is `ρ ∈ (0, 1)` such that
+`geom N ρ` has mean `N / 3` and three copies of it are compatible. -/
 lemma exists_compatible_geom (hN : 0 < N) :
     ∃ ρ : ℝ, 0 < ρ ∧ ρ < 1 ∧
       3 * ∑ k ∈ range (N + 1), k * ρ ^ k = N * ∑ k ∈ range (N + 1), ρ ^ k ∧
@@ -122,10 +124,7 @@ lemma exists_compatible_geom (hN : 0 < N) :
     linarith
   have hd := isDecreasingOn_geom (N := N) hρ₀.le hρ₁.le
   refine ⟨ρ, hρ₀, hρ₁, hmean, compatible_of_isDecreasingOn hd hd hd rfl rfl ?_⟩
-  have hmass := sum_mul_geom (N := N) (fun _ ↦ 1) ρ
-  have hmom := sum_mul_geom (N := N) (fun k ↦ (k : ℝ)) ρ
-  simp only [one_mul] at hmass
-  rw [moment, mass, hmom, hmass]
+  rw [moment_geom, mass_geom]
   linarith
 
 end ArithmeticTriangleRemovalInVectorSpaces

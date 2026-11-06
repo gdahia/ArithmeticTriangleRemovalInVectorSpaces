@@ -47,7 +47,7 @@ lemma card_lowDegreeExponents_le {p : ℕ} (hp : 1 ≤ p) (d : ℕ) {x : ℝ} (h
     _ ≤ ∑ α ∈ lowDegreeExponents p d, x ^ ((∑ t, α t : ℕ) - ((p : ℝ) - 1) * d / 3) := by
       gcongr with α hα
       refine Real.one_le_rpow_of_pos_of_le_one_of_nonpos hx₀ hx₁ ?_
-      have h := (mem_filter.1 hα).2
+      obtain ⟨-, h⟩ := mem_filter.1 hα
       rw [← Nat.cast_le (α := ℝ)] at h
       push_cast [Nat.cast_sub hp] at h ⊢
       linarith

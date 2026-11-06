@@ -9,6 +9,7 @@ public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Expone
 public import ArithmeticTriangleRemovalInVectorSpaces.Triangle.Basic
 import ArithmeticTriangleRemovalInVectorSpaces.DisjointTriangles.Sampling
 import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Pruning vertices of large degree
@@ -29,6 +30,8 @@ and Lovász then gives `(η * m / 2) ^ (1 + c p) ≤ 125 * p ^ 2 * #V ^ (1 - c p
 
 * `ArithmeticTriangleRemovalInVectorSpaces.card_filter_fst_le_of_potential_le`: the degree bound
   at a vertex whose removal does not lower the potential.
+* `ArithmeticTriangleRemovalInVectorSpaces.card_triangles_pos_of_potential_le`: a configuration
+  whose potential is at most that of `(X, Y, Z)` contains a triangle.
 * `ArithmeticTriangleRemovalInVectorSpaces.rpow_le_mul_rpow_mul_card_triangles_rpow`: the bound
   `(η * m / 2) ^ (1 + c p) ≤ 125 * p ^ 2 * #V ^ (1 - c p) * D ^ c p`.
 -/
@@ -47,13 +50,30 @@ lemma le_rpow_one_sub_div_of_mul_rpow_le {A η D d : ℝ} (hA : 0 < A) (hη₀ :
   rcases hd₀.eq_or_lt with rfl | hd
   · positivity
   have hD : 0 < D := hd.trans_le hdD
-  have hdD' : d / D ≤ 1 := (div_le_one hD).2 hdD
-  rw [(by field_simp; ring : D - d = D * (1 + -(d / D))), Real.mul_rpow hD.le (by linarith)] at h
-  grw [rpow_one_add_le_one_add_mul_self (by linarith) hη₀.le hη₁] at h
-  rw [Real.rpow_sub hD, Real.rpow_one, div_div, le_div_iff₀ (by positivity)]
-  have key : A * D ^ η * η * (d / D) ≤ 1 := by nlinarith
+  have hB : (D - d) ^ η ≤ D ^ η * (1 - η * (d / D)) := by
+    rw [(by field_simp : D - d = D * (1 - d / D)),
+      Real.mul_rpow hD.le (sub_nonneg.2 ((div_le_one hD).2 hdD))]
+    gcongr
+    simpa [sub_eq_add_neg] using
+      rpow_one_add_le_one_add_mul_self (neg_le_neg ((div_le_one hD).2 hdD)) hη₀.le hη₁
+  have key : A * D ^ η * η * (d / D) ≤ 1 := by linarith [mul_le_mul_of_nonneg_left hB hA.le]
   rw [mul_div_assoc', div_le_one hD] at key
+  rw [Real.rpow_sub hD, Real.rpow_one, div_div, le_div_iff₀ (by positivity)]
   linarith
+
+/-- If `(1 - η) * (1 + c) = 1` and `D' ≤ K * (D' ^ (1 - η) / B / N) ^ (1 + c) * N ^ 2`, then
+`B ^ (1 + c) ≤ K * N ^ (1 - c)`. -/
+lemma rpow_le_mul_rpow_of_le_mul_div_rpow {K N D' B c η : ℝ} (hN : 0 < N) (hD' : 0 < D')
+    (hB : 0 < B) (hη : (1 - η) * (1 + c) = 1)
+    (h : D' ≤ K * (D' ^ (1 - η) / B / N) ^ (1 + c) * N ^ 2) :
+    B ^ (1 + c) ≤ K * N ^ (1 - c) := by
+  have hN2 : N ^ 2 = N ^ (1 + c) * N ^ (1 - c) := by
+    rw [← Real.rpow_add hN]
+    norm_num
+  rw [Real.div_rpow (by positivity) hN.le, Real.div_rpow (by positivity) hB.le,
+    ← Real.rpow_mul hD'.le, hη, Real.rpow_one, hN2] at h
+  field_simp at h
+  exact h
 
 /-- The arithmetic of the pruning argument: Lemma 5 of Fox and Lovász for the degree bound
 `D' ^ (1 - η) / (A * η)` with `A = m / (2 * D ^ η)` gives
@@ -63,19 +83,11 @@ lemma rpow_le_mul_rpow_mul_rpow_of_le {K N D D' m c : ℝ} (hc : 0 < c) (hN : 0 
     (h : D' ≤ K * (D' ^ (1 - c / (1 + c)) / (m / (2 * D ^ (c / (1 + c))) * (c / (1 + c))) / N) ^
       (1 + c) * N ^ 2) :
     (c / (1 + c) * m / 2) ^ (1 + c) ≤ K * N ^ (1 - c) * D ^ c := by
-  rw [(by field_simp : m / (2 * D ^ (c / (1 + c))) * (c / (1 + c)) =
-    c / (1 + c) * m / 2 / D ^ (c / (1 + c))), Real.div_rpow (by positivity) hN.le,
-    Real.div_rpow (by positivity) (by positivity), Real.div_rpow (by positivity) (by positivity),
-    ← Real.rpow_mul hD'.le, ← Real.rpow_mul hD.le,
-    (by field_simp; ring : (1 - c / (1 + c)) * (1 + c) = 1),
-    (by field_simp : c / (1 + c) * (1 + c) = c), Real.rpow_one,
-    ← (by rw [← Real.rpow_add hN]; norm_num : N ^ (1 + c) * N ^ (1 - c) = N ^ 2)] at h
-  have hP : 0 < (c / (1 + c) * m / 2) ^ (1 + c) := by positivity
-  have hQ : 0 < N ^ (1 + c) := by positivity
-  generalize (c / (1 + c) * m / 2) ^ (1 + c) = P at h hP ⊢
-  generalize N ^ (1 + c) = Q at h hQ
-  field_simp at h
-  nlinarith [Real.rpow_pos_of_pos hD c, Real.rpow_pos_of_pos hN (1 - c)]
+  have h := rpow_le_mul_rpow_of_le_mul_div_rpow hN hD' (by positivity) (by grind) h
+  rwa [(by field_simp : m / (2 * D ^ (c / (1 + c))) * (c / (1 + c)) =
+    c / (1 + c) * m / 2 / D ^ (c / (1 + c))), Real.div_rpow (by positivity) (by positivity),
+    ← Real.rpow_mul hD.le, (by grind : c / (1 + c) * (1 + c) = c),
+    div_le_iff₀ (by positivity)] at h
 
 variable {V ι : Type*} [AddCommGroup V] [DecidableEq V] [Fintype ι] {x y z : ι → V}
 
@@ -85,11 +97,16 @@ noncomputable def potential (x y z : ι → V) (A η : ℝ) : Finset V × Finset
   | (X, Y, Z) => #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + A * #(triangles X Y Z) ^ η
 
 omit [AddCommGroup V] in
+/-- An injective family takes each value at most once. -/
+lemma card_filter_apply_eq_le_one {f : ι → V} (hf : Injective f) (v : V) : #{i | f i = v} ≤ 1 :=
+  card_le_one.2 fun _ _ _ _ ↦ hf (by simp_all)
+
+omit [AddCommGroup V] in
 /-- Removing a vertex from `X` puts at most one more vertex-disjoint triangle outside. -/
 lemma card_filter_not_mem_erase_left_le (hx : Injective x) (X Y Z : Finset V) (v : V) :
     #{i | ¬(x i ∈ X.erase v ∧ y i ∈ Y ∧ z i ∈ Z)} ≤ #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
   classical
-  grw [← (card_le_one.2 fun i hi j hj ↦ hx (by simp_all) : #{i | x i = v} ≤ 1), ← card_union_le]
+  grw [← card_filter_apply_eq_le_one hx v, ← card_union_le]
   apply card_le_card
   intro i
   simp only [mem_filter, mem_univ, true_and, mem_union, mem_erase]
@@ -100,7 +117,7 @@ omit [AddCommGroup V] in
 lemma card_filter_not_mem_erase_middle_le (hy : Injective y) (X Y Z : Finset V) (v : V) :
     #{i | ¬(x i ∈ X ∧ y i ∈ Y.erase v ∧ z i ∈ Z)} ≤ #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
   classical
-  grw [← (card_le_one.2 fun i hi j hj ↦ hy (by simp_all) : #{i | y i = v} ≤ 1), ← card_union_le]
+  grw [← card_filter_apply_eq_le_one hy v, ← card_union_le]
   apply card_le_card
   intro i
   simp only [mem_filter, mem_univ, true_and, mem_union, mem_erase]
@@ -111,13 +128,13 @@ omit [AddCommGroup V] in
 lemma card_filter_not_mem_erase_right_le (hz : Injective z) (X Y Z : Finset V) (v : V) :
     #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z.erase v)} ≤ #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
   classical
-  grw [← (card_le_one.2 fun i hi j hj ↦ hz (by simp_all) : #{i | z i = v} ≤ 1), ← card_union_le]
+  grw [← card_filter_apply_eq_le_one hz v, ← card_union_le]
   apply card_le_card
   intro i
   simp only [mem_filter, mem_univ, true_and, mem_union, mem_erase]
   tauto
 
-variable {A η : ℝ} {X Y Z : Finset V} {v : V}
+variable {A η : ℝ} {X Y Z X' Y' Z' : Finset V} {v : V}
 
 /-- If removing `v` from `X` does not lower the potential, then `v` lies in at most
 `D' ^ (1 - η) / (A * η)` triangles. -/
@@ -127,12 +144,13 @@ lemma card_filter_fst_le_of_potential_le (hx : Injective x) (hA : 0 < A) (hη₀
       #(triangles X Y Z) ^ (1 - η) / (A * η) := by
   refine le_rpow_one_sub_div_of_mul_rpow_le hA hη₀ hη₁ (Nat.cast_nonneg _)
     (by exact_mod_cast card_filter_le _ _) ?_
-  have hr := card_filter_not_mem_erase_left_le (y := y) (z := z) hx X Y Z v
+  have hr : (#{i | ¬(x i ∈ X.erase v ∧ y i ∈ Y ∧ z i ∈ Z)} : ℝ) ≤
+      #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
+    exact_mod_cast card_filter_not_mem_erase_left_le hx X Y Z v
   simp only [potential, ← card_triangles_erase_left X Y Z v] at h ⊢
   push_cast at h ⊢
   rw [add_sub_cancel_right]
-  linarith [(by exact_mod_cast hr : (#{i | ¬(x i ∈ X.erase v ∧ y i ∈ Y ∧ z i ∈ Z)} : ℝ) ≤
-    #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1)]
+  linarith
 
 /-- If removing `v` from `Y` does not lower the potential, then `v` lies in at most
 `D' ^ (1 - η) / (A * η)` triangles. -/
@@ -142,12 +160,13 @@ lemma card_filter_snd_le_of_potential_le (hy : Injective y) (hA : 0 < A) (hη₀
       #(triangles X Y Z) ^ (1 - η) / (A * η) := by
   refine le_rpow_one_sub_div_of_mul_rpow_le hA hη₀ hη₁ (Nat.cast_nonneg _)
     (by exact_mod_cast card_filter_le _ _) ?_
-  have hr := card_filter_not_mem_erase_middle_le (x := x) (z := z) hy X Y Z v
+  have hr : (#{i | ¬(x i ∈ X ∧ y i ∈ Y.erase v ∧ z i ∈ Z)} : ℝ) ≤
+      #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
+    exact_mod_cast card_filter_not_mem_erase_middle_le hy X Y Z v
   simp only [potential, ← card_triangles_erase_middle X Y Z v] at h ⊢
   push_cast at h ⊢
   rw [add_sub_cancel_right]
-  linarith [(by exact_mod_cast hr : (#{i | ¬(x i ∈ X ∧ y i ∈ Y.erase v ∧ z i ∈ Z)} : ℝ) ≤
-    #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1)]
+  linarith
 
 /-- If removing `v` from `Z` does not lower the potential, then `v` lies in at most
 `D' ^ (1 - η) / (A * η)` triangles. -/
@@ -157,12 +176,13 @@ lemma card_filter_thd_le_of_potential_le (hz : Injective z) (hA : 0 < A) (hη₀
       #(triangles X Y Z) ^ (1 - η) / (A * η) := by
   refine le_rpow_one_sub_div_of_mul_rpow_le hA hη₀ hη₁ (Nat.cast_nonneg _)
     (by exact_mod_cast card_filter_le _ _) ?_
-  have hr := card_filter_not_mem_erase_right_le (x := x) (y := y) hz X Y Z v
+  have hr : (#{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z.erase v)} : ℝ) ≤
+      #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1 := by
+    exact_mod_cast card_filter_not_mem_erase_right_le hz X Y Z v
   simp only [potential, ← card_triangles_erase_right X Y Z v] at h ⊢
   push_cast at h ⊢
   rw [add_sub_cancel_right]
-  linarith [(by exact_mod_cast hr : (#{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z.erase v)} : ℝ) ≤
-    #{i | ¬(x i ∈ X ∧ y i ∈ Y ∧ z i ∈ Z)} + 1)]
+  linarith
 
 /-- If `(x i, y i, z i)` lies in `X × Y × Z` for every `i`, then the potential of `(X, Y, Z)` is
 `A * D ^ η`. -/
@@ -177,6 +197,30 @@ lemma potential_eq_card_of_triangles_eq_empty (hsum : ∀ i, x i + y i + z i = 0
     rintro ⟨hx, hy, hz⟩
     simpa [h] using mem_triangles.2 ⟨hx, hy, hz, hsum i⟩
   simp [potential, hout, h, Real.zero_rpow hη]
+
+omit [Fintype ι] in
+/-- If `X × Y × Z` contains the triangles `(x i, y i, z i)` and there is at least one index, then
+`X × Y × Z` contains a triangle. -/
+lemma card_triangles_pos [Nonempty ι] (hxX : ∀ i, x i ∈ X) (hyY : ∀ i, y i ∈ Y)
+    (hzZ : ∀ i, z i ∈ Z) (hsum : ∀ i, x i + y i + z i = 0) : 0 < #(triangles X Y Z) := by
+  obtain ⟨i⟩ := ‹Nonempty ι›
+  exact card_pos.2 ⟨_, mem_triangles.2 ⟨hxX i, hyY i, hzZ i, hsum i⟩⟩
+
+/-- Let `X × Y × Z` contain the triangles `(x i, y i, z i)`, `D` triangles in total, and take
+`A = m / (2 * D ^ η)`. If the potential of `(X', Y', Z')` is at most that of `(X, Y, Z)`, then
+`X' × Y' × Z'` contains a triangle: otherwise its potential is `m`, whereas that of `(X, Y, Z)` is
+`m / 2`. -/
+lemma card_triangles_pos_of_potential_le [Nonempty ι] (hsum : ∀ i, x i + y i + z i = 0)
+    (hxX : ∀ i, x i ∈ X) (hyY : ∀ i, y i ∈ Y) (hzZ : ∀ i, z i ∈ Z) (hη : η ≠ 0)
+    (h : potential x y z (Fintype.card ι / (2 * #(triangles X Y Z) ^ η)) η (X', Y', Z') ≤
+      potential x y z (Fintype.card ι / (2 * #(triangles X Y Z) ^ η)) η (X, Y, Z)) :
+    0 < #(triangles X' Y' Z') := by
+  have hD := card_triangles_pos hxX hyY hzZ hsum
+  rw [card_pos, nonempty_iff_ne_empty]
+  intro hT
+  rw [potential_eq_card_of_triangles_eq_empty hsum hη hT, potential_eq_mul_rpow hxX hyY hzZ] at h
+  field_simp at h
+  linarith [(by positivity : (0 : ℝ) < Fintype.card ι)]
 
 variable {p : ℕ} [Fact p.Prime] [Module (ZMod p) V] [Fintype V]
 
@@ -198,43 +242,31 @@ lemma rpow_le_mul_rpow_mul_card_triangles_rpow
   · simp only [Fintype.card_eq_zero, Nat.cast_zero, mul_zero, zero_div,
       Real.zero_rpow (by linarith : 1 + c p ≠ 0)]
     positivity
-  obtain ⟨i₀⟩ := id hι
-  have hD : 0 < #(triangles X Y Z) :=
-    card_pos.2 ⟨_, mem_triangles.2 ⟨hxX i₀, hyY i₀, hzZ i₀, hsum i₀⟩⟩
+  have hD := card_triangles_pos hxX hyY hzZ hsum
   have hA : 0 < (Fintype.card ι : ℝ) / (2 * #(triangles X Y Z) ^ (c p / (1 + c p))) := by
-    have := Fintype.card_pos (α := ι)
     positivity
   obtain ⟨⟨X', Y', Z'⟩, hS, hmin⟩ := exists_min_image (X.powerset ×ˢ Y.powerset ×ˢ Z.powerset)
     (potential x y z ((Fintype.card ι : ℝ) / (2 * #(triangles X Y Z) ^ (c p / (1 + c p))))
       (c p / (1 + c p))) ⟨(X, Y, Z), by simp⟩
-  simp only [mem_product, mem_powerset] at hS
-  obtain ⟨hX', hY', hZ'⟩ := hS
-  have hD' : 0 < #(triangles X' Y' Z') := by
-    refine card_pos.2 (nonempty_iff_ne_empty.2 ?_)
-    intro h
-    have := hmin (X, Y, Z) (by simp)
-    rw [potential_eq_card_of_triangles_eq_empty hsum (by positivity) h, potential_eq_mul_rpow hxX
-      hyY hzZ] at this
-    field_simp at this
-    linarith [(Nat.cast_pos.2 Fintype.card_pos : (0 : ℝ) < Fintype.card ι)]
-  have hN : (0 : ℝ) < Fintype.card V := Nat.cast_pos.2 Fintype.card_pos
+  obtain ⟨hX', hY', hZ'⟩ : X' ⊆ X ∧ Y' ⊆ Y ∧ Z' ⊆ Z := by simpa using hS
   have hη₁ : c p / (1 + c p) ≤ 1 := (div_le_one (by positivity)).2 (by linarith)
-  refine rpow_le_mul_rpow_mul_rpow_of_le hc hN (Nat.cast_pos.2 hD) (Nat.cast_pos.2 hD')
-    (Nat.cast_pos.2 Fintype.card_pos) ?_
+  refine rpow_le_mul_rpow_mul_rpow_of_le hc (by positivity) (by positivity)
+    (Nat.cast_pos.2 (card_triangles_pos_of_potential_le hsum hxX hyY hzZ (by positivity)
+      (hmin _ (by simp)))) (by positivity) ?_
   refine card_triangles_le_of_degree_le
     (fun a b c ht ↦ hli a b c (triangles_mono hX' hY' hZ' ht))
     (fun a b c ht a' b' c' ht' ↦ hspan a b c (triangles_mono hX' hY' hZ' ht) a' b' c'
       (triangles_mono hX' hY' hZ' ht')) ?_ ?_ ?_
   · intro v
-    rw [div_mul_cancel₀ _ hN.ne']
+    rw [div_mul_cancel₀ _ (by positivity)]
     exact card_filter_fst_le_of_potential_le hx hA (by positivity) hη₁
       (hmin _ (by simp [hY', hZ', (erase_subset v X').trans hX']))
   · intro v
-    rw [div_mul_cancel₀ _ hN.ne']
+    rw [div_mul_cancel₀ _ (by positivity)]
     exact card_filter_snd_le_of_potential_le hy hA (by positivity) hη₁
       (hmin _ (by simp [hX', hZ', (erase_subset v Y').trans hY']))
   · intro v
-    rw [div_mul_cancel₀ _ hN.ne']
+    rw [div_mul_cancel₀ _ (by positivity)]
     exact card_filter_thd_le_of_potential_le hz hA (by positivity) hη₁
       (hmin _ (by simp [hX', hY', (erase_subset v Z').trans hZ']))
 

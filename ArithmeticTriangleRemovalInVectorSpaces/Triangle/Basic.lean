@@ -48,17 +48,14 @@ variable {X Y Z X' Y' Z' : Finset G} {x y z : G}
 lemma mem_triangles : (x, y, z) ∈ triangles X Y Z ↔ x ∈ X ∧ y ∈ Y ∧ z ∈ Z ∧ x + y + z = 0 := by
   simp [triangles, and_assoc]
 
-/-- Membership in `triangles X Y Z` for a triple that is not written as a tuple. -/
-lemma mem_triangles_iff {t : G × G × G} :
-    t ∈ triangles X Y Z ↔ t.1 ∈ X ∧ t.2.1 ∈ Y ∧ t.2.2 ∈ Z ∧ t.1 + t.2.1 + t.2.2 = 0 := by
-  obtain ⟨x, y, z⟩ := t
-  exact mem_triangles
+lemma triangles_eq_empty_iff :
+    triangles X Y Z = ∅ ↔ ∀ x ∈ X, ∀ y ∈ Y, ∀ z ∈ Z, x + y + z ≠ 0 := by
+  simp only [eq_empty_iff_forall_notMem, Prod.forall, mem_triangles]
+  grind
 
 lemma triangles_mono (hX : X' ⊆ X) (hY : Y' ⊆ Y) (hZ : Z' ⊆ Z) :
-    triangles X' Y' Z' ⊆ triangles X Y Z := by
-  rintro ⟨x, y, z⟩
-  simp only [mem_triangles]
-  grind
+    triangles X' Y' Z' ⊆ triangles X Y Z :=
+  filter_subset_filter _ (product_subset_product hX (product_subset_product hY hZ))
 
 /-- A triangle is determined by its first two vertices, so there are at most `#G ^ 2` triangles. -/
 lemma card_triangles_le_card_sq [Fintype G] (X Y Z : Finset G) :
@@ -105,19 +102,9 @@ lemma card_triangles_piFinset (X Y Z : Finset G) (k : ℕ) :
     #(triangles (Fintype.piFinset fun _ : Fin k ↦ X) (Fintype.piFinset fun _ ↦ Y)
       (Fintype.piFinset fun _ ↦ Z)) = #(triangles X Y Z) ^ k := by
   rw [← Fintype.card_piFinset_const]
-  refine card_nbij' (fun (x, y, z) i ↦ (x i, y i, z i))
-    (fun σ ↦ (Prod.fst ∘ σ, Prod.fst ∘ Prod.snd ∘ σ, Prod.snd ∘ Prod.snd ∘ σ)) ?_ ?_ ?_ ?_
-  · rintro ⟨x, y, z⟩ h
-    simp only [mem_coe, mem_triangles, Fintype.mem_piFinset, funext_iff, Pi.add_apply,
-      Pi.zero_apply] at h ⊢
-    grind
-  · intro σ hσ
-    simp only [mem_coe, Fintype.mem_piFinset, mem_triangles_iff, funext_iff, Pi.add_apply,
-      Pi.zero_apply] at hσ ⊢
-    grind
-  · rintro ⟨x, y, z⟩ -
-    rfl
-  · rintro σ -
-    rfl
+  symm
+  apply card_equiv ((Equiv.arrowProdEquivProdArrow _ _ _).trans
+    ((Equiv.refl _).prodCongr (Equiv.arrowProdEquivProdArrow _ _ _)))
+  simp [triangles, funext_iff, forall_and]
 
 end ArithmeticTriangleRemovalInVectorSpaces

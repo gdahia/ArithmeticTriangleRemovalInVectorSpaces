@@ -26,8 +26,10 @@ triangle. The pruning bound therefore holds for all `X`, `Y` and `Z`, with `#V` 
 
 * `ArithmeticTriangleRemovalInVectorSpaces.card_triangles_image_lift`: lifting preserves the number
   of triangles.
-* `ArithmeticTriangleRemovalInVectorSpaces.linearIndependent_lift`: the first two vertices of a
-  lifted triangle are linearly independent.
+* `ArithmeticTriangleRemovalInVectorSpaces.linearIndependent_of_mem_triangles_image_lift`: the
+  first two vertices of a triangle of the lifted sets are linearly independent.
+* `ArithmeticTriangleRemovalInVectorSpaces.eq_of_mem_span_of_mem_triangles_image_lift`: their span
+  contains the first two vertices of no other triangle of the lifted sets.
 * `ArithmeticTriangleRemovalInVectorSpaces.rpow_le_mul_card_rpow_mul_card_triangles_rpow`: the
   pruning bound `(η * m / 2) ^ (1 + c p) ≤ 125 * p ^ 2 * (p ^ 2 * #V) ^ (1 - c p) * D ^ c p` for
   `m` vertex-disjoint triangles in `X × Y × Z`.
@@ -107,8 +109,38 @@ lemma eq_of_lift_mem_span_right {x y y' : V}
   obtain rfl : s = 0 := by simpa using h₂
   simpa using h₁.symm
 
-variable [DecidableEq V] [Fact p.Prime] [Fintype V] {ι : Type*} [Fintype ι] {x y z : ι → V}
-  {X Y Z : Finset V}
+variable [DecidableEq V] {X Y Z : Finset V}
+
+section GeneralPosition
+
+variable {a b c a' b' c' : V × ZMod p × ZMod p}
+
+/-- The first two vertices of a triangle of the lifted sets are linearly independent. -/
+lemma linearIndependent_of_mem_triangles_image_lift
+    (h : (a, b, c) ∈
+      triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1)))) :
+    LinearIndependent (ZMod p) ![a, b] := by
+  simp only [mem_triangles, mem_image] at h
+  obtain ⟨⟨x, -, rfl⟩, ⟨y, -, rfl⟩, -⟩ := h
+  exact linearIndependent_lift x y
+
+/-- The span of the first two vertices of a triangle of the lifted sets contains the first two
+vertices of no other triangle of the lifted sets. -/
+lemma eq_of_mem_span_of_mem_triangles_image_lift
+    (h : (a, b, c) ∈
+      triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1))))
+    (h' : (a', b', c') ∈
+      triangles (X.image (lift p 1 0)) (Y.image (lift p (-1) 1)) (Z.image (lift p 0 (-1))))
+    (ha : a' ∈ span (ZMod p) {a, b}) (hb : b' ∈ span (ZMod p) {a, b}) : a' = a ∧ b' = b := by
+  simp only [mem_triangles, mem_image] at h h'
+  obtain ⟨⟨x, -, rfl⟩, ⟨y, -, rfl⟩, -⟩ := h
+  obtain ⟨⟨x', -, rfl⟩, ⟨y', -, rfl⟩, -⟩ := h'
+  rw [eq_of_lift_mem_span_left ha, eq_of_lift_mem_span_right hb]
+  exact ⟨rfl, rfl⟩
+
+end GeneralPosition
+
+variable [Fact p.Prime] [Fintype V] {ι : Type*} [Fintype ι] {x y z : ι → V}
 
 /-- **Pruning in general position.** If `X × Y × Z` contains `m` vertex-disjoint triangles
 `(x i, y i, z i)`, then
@@ -119,26 +151,16 @@ lemma rpow_le_mul_card_rpow_mul_card_triangles_rpow (hx : Injective x) (hy : Inj
     (hsum : ∀ i, x i + y i + z i = 0) :
     (c p / (1 + c p) * Fintype.card ι / 2) ^ (1 + c p) ≤
       125 * p ^ 2 * (p ^ 2 * Fintype.card V) ^ (1 - c p) * #(triangles X Y Z) ^ c p := by
-  have := rpow_le_mul_rpow_mul_card_triangles_rpow (p := p)
-    (X := X.image (lift p 1 0)) (Y := Y.image (lift p (-1) 1)) (Z := Z.image (lift p 0 (-1)))
-    (x := lift p 1 0 ∘ x) (y := lift p (-1) 1 ∘ y) (z := lift p 0 (-1) ∘ z) ?_ ?_
+  have h := rpow_le_mul_rpow_mul_card_triangles_rpow (p := p)
+    (fun _ _ _ ↦ linearIndependent_of_mem_triangles_image_lift)
+    (fun _ _ _ h _ _ _ h' ↦ eq_of_mem_span_of_mem_triangles_image_lift h h')
     ((lift_injective _ _ _).comp hx) ((lift_injective _ _ _).comp hy)
     ((lift_injective _ _ _).comp hz) (fun i ↦ mem_image_of_mem _ (hxX i))
     (fun i ↦ mem_image_of_mem _ (hyY i)) (fun i ↦ mem_image_of_mem _ (hzZ i))
     (fun i ↦ by simp [lift, Prod.ext_iff, hsum i])
-  · rw [card_triangles_image_lift, Fintype.card_prod, Fintype.card_prod, ZMod.card] at this
-    convert this using 4
-    push_cast
-    ring
-  · intro a b c h
-    simp only [mem_triangles, mem_image] at h
-    obtain ⟨⟨x, -, rfl⟩, ⟨y, -, rfl⟩, -⟩ := h
-    exact linearIndependent_lift x y
-  · intro a b c h a' b' c' h' ha hb
-    simp only [mem_triangles, mem_image] at h h'
-    obtain ⟨⟨x, -, rfl⟩, ⟨y, -, rfl⟩, -⟩ := h
-    obtain ⟨⟨x', -, rfl⟩, ⟨y', -, rfl⟩, -⟩ := h'
-    rw [eq_of_lift_mem_span_left ha, eq_of_lift_mem_span_right hb]
-    exact ⟨rfl, rfl⟩
+  rw [card_triangles_image_lift, Fintype.card_prod, Fintype.card_prod, ZMod.card] at h
+  convert h using 4
+  push_cast
+  ring
 
 end ArithmeticTriangleRemovalInVectorSpaces
