@@ -81,6 +81,22 @@ sources:
       where the first variable vanishes or by the case analysis of Section 5.
     license: "unknown"
     author_endorsement: "not-contacted"
+  - title: "A symmetric formulation of the Croot-Lev-Pach-Ellenberg-Gijswijt capset bound"
+    authors:
+      - "Terence Tao"
+    id: "https://terrytao.wordpress.com/2016/05/18/a-symmetric-formulation-of-the-croot-lev-pach-ellenberg-gijswijt-capset-bound/"
+    type: "web post"
+    location: "Lemmas 1 and 2"
+    relationship: "adapts"
+    note: >-
+      The upper bound on multicolored sum-free families is proved in the slice rank language of
+      this post. Lemma 1, that a diagonal tensor with nonzero diagonal has slice rank equal to the
+      size of its index set, is proved in the form of a lower bound, by finding a vector with
+      many nonzero coordinates in a subspace of large dimension. Lemma 2 is adapted to F_p^n by
+      bounding the slice rank of the indicator of u + v + w = 0 by three times the number of
+      monomials of degree at most (p - 1)n/3.
+    license: "unknown"
+    author_endorsement: "not-contacted"
 
 related_formalizations:
   - id: "https://github.com/leanprover-community/mathlib4"
@@ -154,9 +170,14 @@ fidelity:
     η' = c_p min(1 - c_p, c_p η / 2) / 2. The paper does not make ε₀ explicit.
 
 review:
-  status: "unchecked"
-  reviewers: []
-  notes: "Unreviewed"
+  status: "self-assessed"
+  reviewers:
+    - "Gabriel Dahia"
+  notes: >-
+    Gabriel Dahia checked the main statements in Challenge.lean against the paper for
+    correctness, and reviewed the statements and the style of the parts of the library that prove
+    the upper bounds, Theorems 1, 2 and 3. The construction behind the second part of Theorem 1,
+    including Pebody's coupling, has not been reviewed beyond the Lean check.
 
 alignment:
   namespace: "ArithmeticTriangleRemovalInVectorSpaces"
