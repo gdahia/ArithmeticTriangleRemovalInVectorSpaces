@@ -8,7 +8,7 @@ module
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Basic
 public import ArithmeticTriangleRemovalInVectorSpaces.MulticoloredSumFree.Exponent
 import ArithmeticTriangleRemovalInVectorSpaces.Construction.Family
-import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Pebody
+import ArithmeticTriangleRemovalInVectorSpaces.Coupling.Decreasing
 import Mathlib.Algebra.BigOperators.Field
 import Mathlib.Algebra.Order.Ring.GeomSum
 
