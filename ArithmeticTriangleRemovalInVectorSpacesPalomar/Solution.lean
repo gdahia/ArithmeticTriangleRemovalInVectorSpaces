@@ -56,13 +56,13 @@ theorem div_pow_rpow_C_mul_sq_le_card_triangles' {ι : Type*} [Fintype ι]
 /-- **Asymptotic tightness of the arithmetic triangle removal lemma** (the "Furthermore" part of
 Theorem 1 of Fox and Lovász). For every `η > 0` and every `0 < ε < ε₀ p η`, any `δ` that works
 with `ε` in the removal lemma in `Fin n → ZMod p` for every `n` satisfies `δ ≤ ε ^ (C p - η)`. -/
-theorem le_rpow_C_sub_of_forall_exists_subset' {η ε δ : ℝ} (hη : 0 < η) (hε₀ : 0 < ε)
-    (hε : ε < ε₀ p η)
+theorem le_rpow_C_sub_of_forall_exists_subset' {η ε δ : ℝ} (hη : 0 < η) (hε : 0 < ε)
+    (hε₀ : ε < ε₀ p η)
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
           ∀ x ∈ X', ∀ y ∈ Y', ∀ z ∈ Z', x + y + z ≠ 0) :
     δ ≤ ε ^ (C p - η) :=
-  le_rpow_C_sub_of_forall_exists_subset hη hε₀ hε hδ
+  le_rpow_C_sub_of_forall_exists_subset hη hε hε₀ hδ
 
 end ArithmeticTriangleRemovalInVectorSpaces

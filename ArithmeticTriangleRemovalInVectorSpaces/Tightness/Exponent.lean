@@ -37,9 +37,9 @@ public section
 namespace ArithmeticTriangleRemovalInVectorSpaces
 
 /-- For `t > 1` and `0 < ε < t ^ (-(n₀ + 1))` there is `n > n₀` with `t ^ n ≤ ε⁻¹ < t ^ (n + 1)`. -/
-lemma exists_lt_pow_le_inv_lt {t ε : ℝ} (ht : 1 < t) {n₀ : ℕ} (hε₀ : 0 < ε)
+lemma exists_lt_pow_le_inv_lt {t ε : ℝ} (ht : 1 < t) {n₀ : ℕ} (hε0 : 0 < ε)
     (hε : ε < (t ^ (n₀ + 1))⁻¹) : ∃ n, n₀ < n ∧ t ^ n ≤ ε⁻¹ ∧ ε⁻¹ < t ^ (n + 1) := by
-  have hlt : t ^ (n₀ + 1) < ε⁻¹ := (lt_inv_comm₀ hε₀ (by positivity)).1 hε
+  have hlt : t ^ (n₀ + 1) < ε⁻¹ := (lt_inv_comm₀ hε0 (by positivity)).1 hε
   obtain ⟨n, hn, hn'⟩ := exists_nat_pow_near ((one_le_pow₀ ht.le).trans hlt.le) ht
   exact ⟨n, Nat.succ_lt_succ_iff.1 ((pow_lt_pow_iff_right₀ ht).1 (hlt.trans hn')), hn, hn'⟩
 
@@ -69,30 +69,30 @@ lemma inv_pow_le_mul_rpow {P ε κ : ℝ} {n : ℕ} (hP : 0 < P) (hε : 0 < ε) 
 
 /-- If `δ * N ^ 2 ≤ ε * N + 1` and `N⁻¹ ≤ P * ε ^ κ` with `κ ≥ 1` and `0 < ε ≤ 1`, then
 `δ ≤ (P + P ^ 2) * ε ^ (1 + κ)`. -/
-lemma le_mul_rpow_one_add_of_mul_sq_le {P N ε δ κ : ℝ} (hP : 0 < P) (hN : 0 < N) (hε₀ : 0 < ε)
+lemma le_mul_rpow_one_add_of_mul_sq_le {P N ε δ κ : ℝ} (hP : 0 < P) (hN : 0 < N) (hε0 : 0 < ε)
     (hε₁ : ε ≤ 1) (hκ : 1 ≤ κ) (hNε : N⁻¹ ≤ P * ε ^ κ) (hδ : δ * N ^ 2 ≤ ε * N + 1) :
     δ ≤ (P + P ^ 2) * ε ^ (1 + κ) := by
   have hεκ : ε ^ κ ≤ ε := by
-    simpa using Real.rpow_le_rpow_of_exponent_ge hε₀ hε₁ hκ
+    simpa using Real.rpow_le_rpow_of_exponent_ge hε0 hε₁ hκ
   calc δ ≤ (ε * N + 1) / N ^ 2 := (le_div_iff₀ (by positivity)).2 hδ
     _ = ε * N⁻¹ + N⁻¹ ^ 2 := by field_simp
     _ ≤ ε * (P * ε ^ κ) + (P * ε ^ κ) ^ 2 := by gcongr
     _ ≤ (P + P ^ 2) * (ε * ε ^ κ) := by
-        nlinarith [Real.rpow_pos_of_pos hε₀ κ, mul_le_mul_of_nonneg_left hεκ
+        nlinarith [Real.rpow_pos_of_pos hε0 κ, mul_le_mul_of_nonneg_left hεκ
           (by positivity : 0 ≤ P ^ 2 * ε ^ κ)]
-    _ = (P + P ^ 2) * ε ^ (1 + κ) := by rw [Real.rpow_add hε₀, Real.rpow_one]
+    _ = (P + P ^ 2) * ε ^ (1 + κ) := by rw [Real.rpow_add hε0, Real.rpow_one]
 
 /-- For `A > 0` and `0 < ε ≤ A⁻¹ ^ (2 / η)` with `ε ≤ 1`, lowering the exponent from `1 + κ` to
 `C - η`, where `C - η / 2 ≤ 1 + κ`, absorbs the factor `A`: `A * ε ^ (1 + κ) ≤ ε ^ (C - η)`. -/
-lemma mul_rpow_le_rpow_sub {A ε κ C η : ℝ} (hA : 0 < A) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hη : 0 < η)
+lemma mul_rpow_le_rpow_sub {A ε κ C η : ℝ} (hA : 0 < A) (hε0 : 0 < ε) (hε₁ : ε ≤ 1) (hη : 0 < η)
     (hκ : C - η / 2 ≤ 1 + κ) (hε : ε ≤ A⁻¹ ^ (2 / η)) : A * ε ^ (1 + κ) ≤ ε ^ (C - η) := by
   have hεη : ε ^ (η / 2) ≤ A⁻¹ := by
     grw [hε, ← Real.rpow_mul (by positivity), div_mul_div_cancel₀ (by positivity),
       div_self two_ne_zero, Real.rpow_one]
   calc A * ε ^ (1 + κ) ≤ A * ε ^ (C - η / 2) := by
-        grw [Real.rpow_le_rpow_of_exponent_ge hε₀ hε₁ hκ]
+        grw [Real.rpow_le_rpow_of_exponent_ge hε0 hε₁ hκ]
     _ = A * ε ^ (η / 2) * ε ^ (C - η) := by
-        rw [mul_assoc, ← Real.rpow_add hε₀]
+        rw [mul_assoc, ← Real.rpow_add hε0]
         ring_nf
     _ ≤ ε ^ (C - η) := by
         grw [hεη, mul_inv_cancel₀ hA.ne', one_mul]

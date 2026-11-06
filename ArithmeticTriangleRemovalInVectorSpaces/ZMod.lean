@@ -133,7 +133,7 @@ omit [Fact p.Prime] in
 /-- If the removal lemma holds in `Fin n → ZMod p` with `ε` and `δ`, and some multicolored
 sum-free family has more than `ε * N` members, where `N = p ^ n`, then `δ * N ^ 2 ≤ ε * N + 1`. -/
 lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ} (h : IsMulticoloredSumFree x y z)
-    (hε₀ : 0 ≤ ε) (hε : ε * p ^ n < Fintype.card ι)
+    (hε0 : 0 ≤ ε) (hε : ε * p ^ n < Fintype.card ι)
     (hδ : ∀ X Y Z : Finset (Fin n → ZMod p),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
@@ -152,7 +152,7 @@ lemma IsMulticoloredSumFree.mul_sq_le_mul_add_one {ε δ : ℝ} (h : IsMulticolo
 and `0 < η' < 1 / κ - c p`, for `0 < ε < p ^ (-(n₀ p η' + 1))` and
 `ε ≤ (p + p ^ 2) ^ (-2 / η)`. -/
 lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤ κ)
-    (hκη : (c p)⁻¹ - η / 2 ≤ κ) (hη'₀ : 0 < η') (hη' : η' < κ⁻¹ - c p) (hε₀ : 0 < ε)
+    (hκη : (c p)⁻¹ - η / 2 ≤ κ) (hη'₀ : 0 < η') (hη' : η' < κ⁻¹ - c p) (hε0 : 0 < ε)
     (hε : ε < ((p : ℝ) ^ (n₀ p η' + 1))⁻¹) (hε' : ε ≤ (p + p ^ 2 : ℝ)⁻¹ ^ (2 / η))
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
@@ -165,16 +165,16 @@ lemma le_rpow_C_sub_of_lt {η κ η' ε δ : ℝ} (hη : 0 < η) (hκ₁ : 1 ≤
     grw [Real.rpow_le_self_of_one_le hp.le (inv_le_one_of_one_le₀ hκ₁)]
     exact hε
   obtain ⟨n, hn, hpow, hpow'⟩ :=
-    exists_lt_pow_le_inv_lt (Real.one_lt_rpow hp (by positivity)) hε₀ hεκ
+    exists_lt_pow_le_inv_lt (Real.one_lt_rpow hp (by positivity)) hε0 hεκ
   have hε₁ : ε ≤ 1 := hε.le.trans (inv_le_one_of_one_le₀ (one_le_pow₀ hp.le))
   obtain ⟨m, x, y, z, hxyz, hm⟩ :=
     exists_isMulticoloredSumFree_rpow_le (Fact.out : p.Prime).two_le hη'₀ hn.le
-  have := hxyz.mul_sq_le_mul_add_one hε₀.le (by
+  have := hxyz.mul_sq_le_mul_add_one hε0.le (by
     rw [Fintype.card_fin]
-    exact mul_pow_lt_of_rpow_mul_le hp hε₀ (by grind) (by linarith) hpow hm) (hδ n)
-  grw [le_mul_rpow_one_add_of_mul_sq_le (by positivity) (by positivity) hε₀ hε₁ hκ₁
-    (inv_pow_le_mul_rpow (by positivity) hε₀ (by positivity) hpow') this]
-  exact mul_rpow_le_rpow_sub (by positivity) hε₀ hε₁ hη (by rw [C, one_div]; linarith) hε'
+    exact mul_pow_lt_of_rpow_mul_le hp hε0 (by grind) (by linarith) hpow hm) (hδ n)
+  grw [le_mul_rpow_one_add_of_mul_sq_le (by positivity) (by positivity) hε0 hε₁ hκ₁
+    (inv_pow_le_mul_rpow (by positivity) hε0 (by positivity) hpow') this]
+  exact mul_rpow_le_rpow_sub (by positivity) hε0 hε₁ hη (by rw [C, one_div]; linarith) hε'
 
 lemma ε₀_pos (η : ℝ) : 0 < ε₀ p η := by
   have := (Fact.out : p.Prime).pos
@@ -188,8 +188,8 @@ Here `ε₀ p η = p ^ (-(n₀ p η' + 1))` with `η' = c p * min (1 - c p) (c p
 `n₀ p η' = ⌈(2 ^ (p + 3) * p ^ 10 / η') ^ 2⌉ + p ^ 4 + 1`. The proof combines the construction of
 Section 3 with the multicolored sum-free families of size `p ^ ((1 - c p - η') * n)` of Kleinberg,
 Sawin and Speyer. -/
-theorem le_rpow_C_sub_of_forall_exists_subset {η ε δ : ℝ} (hη : 0 < η) (hε₀ : 0 < ε)
-    (hε : ε < ε₀ p η)
+theorem le_rpow_C_sub_of_forall_exists_subset {η ε δ : ℝ} (hη : 0 < η) (hε : 0 < ε)
+    (hε₀ : ε < ε₀ p η)
     (hδ : ∀ n (X Y Z : Finset (Fin n → ZMod p)),
       #((X ×ˢ Y ×ˢ Z).filter fun (x, y, z) ↦ x + y + z = 0) < δ * (p ^ n) ^ 2 →
         ∃ X' ⊆ X, ∃ Y' ⊆ Y, ∃ Z' ⊆ Z, #(X \ X') + #(Y \ Y') + #(Z \ Z') ≤ ε * p ^ n ∧
@@ -198,10 +198,10 @@ theorem le_rpow_C_sub_of_forall_exists_subset {η ε δ : ℝ} (hη : 0 < η) (h
   have hp : (2 : ℝ) ≤ p := by exact_mod_cast (Fact.out : p.Prime).two_le
   have hc := c_pos (Fact.out : p.Prime).two_le
   have hc₁ := c_lt_one (Fact.out : p.Prime).two_le
-  rw [ε₀] at hε
+  rw [ε₀] at hε₀
   refine le_rpow_C_sub_of_lt hη (le_max_left _ _) (le_max_right _ _)
-    (mul_min_div_two_pos hc hc₁ hη) (mul_min_div_two_lt_inv_max_sub hc hc₁ hη) hε₀ hε
-    (hε.le.trans (inv_pow_le_inv_add_sq_rpow hp hη ?_)) hδ
+    (mul_min_div_two_pos hc hc₁ hη) (mul_min_div_two_lt_inv_max_sub hc hc₁ hη) hε hε₀
+    (hε₀.le.trans (inv_pow_le_inv_add_sq_rpow hp hη ?_)) hδ
   push_cast
   linarith [div_le_sq_div_mul_min_div_two (X := 2 ^ (p + 3) * (p : ℝ) ^ 10) hc hc₁ hη
       (one_le_mul_of_one_le_of_one_le (one_le_pow₀ (by norm_num)) (one_le_pow₀ (by linarith))),
